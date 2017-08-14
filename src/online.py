@@ -3,7 +3,7 @@ import engine
 import net
 from direct.distributed.PyDatagram import PyDatagram
 
-LOBBY_SERVER_ADDRESS = "127.0.0.1"
+LOBBY_SERVER_ADDRESS = "68.119.230.139"
 LOBBY_SERVER_PORT = 1336
 address = (LOBBY_SERVER_ADDRESS, LOBBY_SERVER_PORT)
 
