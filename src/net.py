@@ -114,7 +114,7 @@ class PythonNetContext(NetworkContext):
 		self.clientUsername = "Unnamed"
 		self.lastConnectionAttempt = 0
 		self.connectionAttempts = 0
-	
+
 	def connectToServer(self, arg, username):
 		global netMode
 		netMode = MODE_CLIENT
@@ -129,12 +129,12 @@ class PythonNetContext(NetworkContext):
 		self.hostConnection.ready = True
 		self.clientConnected = False
 		self.clientUsername = username
-	
+
 	def listen(self):
 		global netMode
 		netMode = MODE_SERVER
 		self.mode = MODE_SERVER
-	
+
 	def reset(self):
 		global netMode
 		netMode = MODE_SERVER # Default MODE_SERVER
@@ -143,51 +143,54 @@ class PythonNetContext(NetworkContext):
 		self.activeConnections.clear()
 		self.hostConnection = Connection()
 		self.connectionAttempts = 0
-	
+
 	def bindSocket(self, port):
 		bound = False
 		tries = 0
 		while not bound and tries < 10:
 			try:
-				self.socket.bind(("", port))
+				self.socket.bind(('0.0.0.0', port))
 				bound = True
 			except:
 				time.sleep(0.25)
 			tries += 1
-	
+
 	def clientConnect(self, username):
 		if self.clientConnected:
 			return
-		datagram = CustomDatagram()
-		datagram.addUint8(PACKET_NEWCLIENT)
-		datagram.addString(username)
-		self.sendDatagram(datagram, self.hostConnection.address)
+
+		p = Packet()
+		p.add(Uint8(PACKET_NEWCLIENT))
+		p.add(String(username))
+		p.addTo(data)
+		self.sendDatagram(data, self.hostConnection.address)
 		self.hostConnection.lastSentPacketTime = timeFunction()
-	
+
 	def serverConnect(self, clientAddress):
 		if clientAddress in self.activeConnections:
 			return
+
 		data = CustomDatagram()
 		p = Packet()
 		p.add(Uint8(PACKET_EMPTY))
 		p.addTo(data)
 		self.sendDatagram(data, clientAddress)
-	
+
 	def removeClient(self, client):
 		if client in self.activeConnections:
 			del self.activeConnections[client]
-	
+
 	def addClient(self, client):
 		if not client in self.activeConnections:
 			connection = Connection()
 			connection.address = client
 			connection.lastSentPacketTime = timeFunction()
 			self.activeConnections[client] = connection
-	
+
 	def resetConnectionStatuses(self):
 		for connection in self.activeConnections.values():
 			connection.ready = False
-	
+
 	def writeTick(self):
 		for data in self.writeQueue:
 			# data[0] = action code. 0 for broadcast or broadcastExcept. 1 for send.
@@ -241,7 +244,7 @@ class PythonNetContext(NetworkContext):
 				else:
 					self.connectionAttempts = 0
 					self.disconnectCallback(self.hostConnection.address)
-	
+
 		readQueue = []
 		while True:
 			try:
@@ -289,7 +292,7 @@ class PythonNetContext(NetworkContext):
 				self.hostConnection.lastPacketTime = timeFunction()
 			readQueue.append((message, address))
 		return readQueue
-	
+
 	def broadcastDatagram(self, datagram):
 		"""For the server, broadcasts the given data packet to all connected clients.
 		For clients, sends the datagram to the server."""
@@ -297,25 +300,25 @@ class PythonNetContext(NetworkContext):
 			self.writeQueue.append((0, datagram, None)) # Send to all clients
 		else:
 			self.writeQueue.append((1, datagram, self.hostConnection.address)) # Send to host
-	
+
 	def broadcastDatagramExcept(self, datagram, client):
 		"""For the server, broadcasts the given data packet to all connected clients.
 		For clients, sends the datagram to the server."""
 		self.writeQueue.append((2, datagram, client))
-	
+
 	def sendDatagram(self, datagram, client = None):
 		self.writeQueue.append((1, datagram, client))
-	
+
 	def broadcast(self, packet):
 		d = datagramType()
 		packet.addTo(d)
 		self.broadcastDatagram(d)
-	
+
 	def broadcastExcept(self, packet, client):
 		d = datagramType()
 		packet.addTo(d)
 		self.broadcastDatagramExcept(d, client)
-	
+
 	def send(self, packet, client = None):
 		d = datagramType()
 		packet.addTo(d)
@@ -330,7 +333,7 @@ class PythonNetContext(NetworkContext):
 		self.writeTick()
 		time.sleep(0.25)
 		self.socket.close()
-	
+
 def delete():
 	global initialized, context
 	initialized = False
@@ -357,130 +360,181 @@ def isValidIp(addressString):
 			port = addressParts[1]
 			if not 0 <= int(port) <= 2**16:
 				return False
+
 		parts = ip.split(".")
 		if len(parts) != 4:
 			return False
+
 		for item in parts:
 			if not 0 <= int(item) <= 255:
 				return False
 	except:
 		return False
+
 	return True
 
 class Packet:
+
 	def __init__(self):
 		self.dataObjects = []
+
 	def getSize(self):
 		return len(self.dataObjects)
+
 	def add(self, dataObject):
 		assert isinstance(dataObject, Object) or isinstance(dataObject, Packet)
 		if dataObject != None:
 			self.dataObjects.append(dataObject)
+
 	def addTo(self, datagram):
 		for dataObject in self.dataObjects:
 			dataObject.addTo(datagram)
 
 class CustomDatagram:
+
 	def __init__(self, x = ""):
 		self.data = x
+
 	def addUint8(self, x):
 		self.data += chr(x)
+
 	def getUint8(self):
 		value = ord(self.data[0])
 		self.data = self.data[1:]
 		return value
+
 	def addUint16(self, x):
 		self.data += chr(x % 256) + chr(int(x) / 256)
+
 	def getUint16(self):
 		value = ord(self.data[0]) + ord(self.data[1]) * 256
 		self.data = self.data[2:]
 		return value
+
 	def addString(self, x):
 		self.addUint16(len(x))
 		self.data += x
+
 	def getString(self):
 		length = self.getUint16()
 		value = self.data[:length]
 		self.data = self.data[length:]
 		return value
+
 	def getRemainingSize(self):
 		return len(self.data)
+
 	def getMessage(self):
 		return self.data
 
 def clamp(a, min, max):
 	if min <= a <= max:
 		return a
+
 	if a < min:
 		return min
+
 	return max
 
 class Object:
-		data = None
-		def __init__(self, data):
-			self.data = data
-		def addTo(self, datagram):
-			pass
-		@staticmethod
-		def getFrom(iterator):
-			pass
-class HighResFloat(Object):
+	data = None
+
+	def __init__(self, data):
+		self.data = data
+
 	def addTo(self, datagram):
-		datagram.addFloat32(self.data)
+		pass
+
+	@staticmethod
+	def getFrom(iterator):
+		pass
+
+class HighResFloat(Object):
+
+	def addTo(self, datagram):
+		datagram.addFloat32(float(self.data))
+
 	@staticmethod
 	def getFrom(iterator):
 		return iterator.getFloat32()
+
 class StandardFloat(Object):
+
 	def addTo(self, datagram):
 		datagram.addInt16(clamp(int(self.data * 110.0), -32768, 32767))
+
 	@staticmethod
 	def getFrom(iterator):
 		return float(iterator.getInt16()) / 110.0
+
 class LowResFloat(Object):
+
 	def addTo(self, datagram):
 		datagram.addInt16(clamp(int(self.data * 50.0), -32768, 32767))
+
 	@staticmethod
 	def getFrom(iterator):
 		return float(iterator.getInt16()) / 50.0
+
 class SmallFloat(Object):
+
 	def addTo(self, datagram):
 		datagram.addInt8(clamp(int(self.data * (127.0 / 35.0)), -128, 127))
+
 	@staticmethod
 	def getFrom(iterator):
 		return float(iterator.getInt8()) * (35.0 / 127.0)
+
 class Uint8(Object):
+
 	def addTo(self, datagram):
-		datagram.addUint8(self.data)
+		datagram.addUint8(int(self.data))
+
 	@staticmethod
 	def getFrom(iterator):
 		return iterator.getUint8()
+
 class Uint16(Object):
+
 	def addTo(self, datagram):
-		datagram.addUint16(self.data)
+		datagram.addUint16(int(self.data))
+
 	@staticmethod
 	def getFrom(iterator):
 		return iterator.getUint16()
+
 class Uint32(Object):
+
 	def addTo(self, datagram):
-		datagram.addUint32(self.data)
+		datagram.addUint32(int(self.data))
+
 	@staticmethod
 	def getFrom(iterator):
 		return iterator.getUint32()
+
 class Int16(Object):
+
 	def addTo(self, datagram):
-		datagram.addInt16(self.data)
+		datagram.addInt16(int(self.data))
+
 	@staticmethod
 	def getFrom(iterator):
 		return iterator.getInt16()
+
 class String(Object):
+
 	def addTo(self, datagram):
-		datagram.addString(self.data)
+		datagram.addString(str(self.data))
+
 	@staticmethod
 	def getFrom(iterator):
 		return iterator.getString()
+
 class Boolean(Object):
+
 	def addTo(self, datagram):
-		datagram.addBool(self.data)
+		datagram.addBool(bool(self.data))
+
 	@staticmethod
 	def getFrom(iterator):
 		return iterator.getBool()
