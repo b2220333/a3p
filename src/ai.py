@@ -68,8 +68,7 @@ class World:
 
 		# Setup the physics world
 		self.world = OdeWorld()
-		# Create a space and add a contactgroup to it to add the contact joints
-		self.space = OdeHashSpace()
+		self.space = OdeSimpleSpace()
 		self.space.setAutoCollideWorld(self.world)
 		self.contactGroup = OdeJointGroup()
 		self.space.setAutoCollideJointGroup(self.contactGroup)

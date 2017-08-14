@@ -295,7 +295,7 @@ class NetManager(DirectObject):
 	def update(self, backend):
 		# Only send out an update packet if we need to
 		packetUpdate = False
-		if engine.clock.time - self.lastPacketUpdate >= net.SERVER_TICK:
+		if round(engine.clock.time - self.lastPacketUpdate, 2) >= net.SERVER_TICK:
 			packetUpdate = True
 			self.lastPacketUpdate = engine.clock.time # Reset packet update timer
 
