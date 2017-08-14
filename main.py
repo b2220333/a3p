@@ -1,11 +1,11 @@
 # Evan Todd 2010
 
-GAME_NAME = 'A3P'
-VERSION_CODE = 'v1.0'
-COPYRIGHT = 'Evan Todd 2010'
+GAME_NAME = "A3P"
+VERSION_CODE = "v1.0"
+COPYRIGHT = "Evan Todd 2010"
 
 from pandac.PandaModules import loadPrcFileData
-loadPrcFileData('', 'window-type none')
+loadPrcFileData("", "window-type none") 
 from direct.showbase.ShowBase import ShowBase
 
 from direct.showbase.DirectObject import DirectObject
@@ -16,25 +16,25 @@ import sys
 try:
     __file__
 except:
-    sys.argv = [sys.argv[0], '-w']
+    sys.argv = [sys.argv[0], "-w"]
 
-ShowBase()
+ShowBase() 
 base.makeDefaultPipe()
 
-winSize = ConfigVariableInt('win-size')
-fullscreen = ConfigVariableBool('fullscreen')
-windowTitle = ConfigVariableString('window-title')
+winSize = ConfigVariableInt("win-size")
+fullscreen = ConfigVariableBool("fullscreen")
+windowTitle = ConfigVariableString("window-title")
 windowTitle.setValue(GAME_NAME)
-textFlatten = ConfigVariableBool('text-flatten')
+textFlatten = ConfigVariableBool("text-flatten")
 textFlatten.setValue(False)
-basicShadersOnly = ConfigVariableBool('basic-shaders-only')
+basicShadersOnly = ConfigVariableBool("basic-shaders-only")
 basicShadersOnly.setValue(False)
-defaultNotifyLevel = ConfigVariableString('default-directnotify-level')
-defaultNotifyLevel.setValue('debug')
-audioEngine = ConfigVariableString('audio-library-name')
-audioEngine.setValue('p3fmod_audio')
-notifyLevel = ConfigVariableString('notify-level')
-notifyLevel.setValue('fatal')
+defaultNotifyLevel = ConfigVariableString("default-directnotify-level")
+defaultNotifyLevel.setValue("debug")
+audioEngine = ConfigVariableString("audio-library-name")
+audioEngine.setValue("p3fmod_audio")
+notifyLevel = ConfigVariableString("notify-level")
+notifyLevel.setValue("fatal")
 
 import src.engine as engine
 import src.audio as audio
@@ -45,18 +45,18 @@ import src.ui as ui
 
 def showHelpInfo():
 	# Print help information
-	print GAME_NAME + ' ' + VERSION_CODE + ' - ' + COPYRIGHT
-	print 'Usage (bracketed parameters are optional):'
-	print '-w [width] [height]\tRun in windowed mode'
-	print '-a\t\t\tDisable audio'
-	print '-p portnumber\t\tUse the specified port (for both client and server)'
-	print '-d map\t\t\tRun in dedicated server mode on the specified map'
-	print '-v\t\t\t(Daemon only) Run the game in survival mode'
-	print '-h\t\t\tShow help information'
-	print '-m\t\t\tDeveloper mode'
+	print GAME_NAME + " " + VERSION_CODE + " - " + COPYRIGHT
+	print "Usage (bracketed parameters are optional):"
+	print "-w [width] [height]\tRun in windowed mode"
+	print "-a\t\t\tDisable audio"
+	print "-p portnumber\t\tUse the specified port (for both client and server)"
+	print "-d map\t\t\tRun in dedicated server mode on the specified map"
+	print "-v\t\t\t(Daemon only) Run the game in survival mode"
+	print "-h\t\t\tShow help information"
+	print "-m\t\t\tDeveloper mode"
 	engine.exit()
 
-if '-h' in sys.argv or '/?' in sys.argv or '--help' in sys.argv:
+if "-h" in sys.argv or "/?" in sys.argv or "--help" in sys.argv:
 	showHelpInfo()
 
 engine.loadConfigFile()
@@ -73,18 +73,18 @@ gametype = DEATHMATCH
 customWindowSize = False
 i = 1
 while i < len(sys.argv):
-	if sys.argv[i] == '-w':
+	if sys.argv[i] == "-w":
 		customWindowSize = True
-		if len(sys.argv) > i + 1 and sys.argv[i + 1][0] != '-':
+		if len(sys.argv) > i + 1 and sys.argv[i + 1][0] != "-":
 			winSize.setWord(0, int(sys.argv[i + 1]))
 			winSize.setWord(1, int(sys.argv[i + 2]))
 			i += 2
 		else:
 			winSize.setWord(0, 800)
 			winSize.setWord(1, 600)
-	elif sys.argv[i] == '-d':
+	elif sys.argv[i] == "-d":
 		mode = MODE_DAEMON
-	elif sys.argv[i] == '-v':
+	elif sys.argv[i] == "-v":
 		gametype = SURVIVAL
 	i += 1
 
@@ -101,42 +101,42 @@ if mode != MODE_DAEMON:
 
 disableAudio = False
 defaultPort = 1337
-defaultMap = 'impact'
-defaultHost = '127.0.0.1:1337'
-username = 'Unnamed'
+defaultMap = "impact"
+defaultHost = "127.0.0.1:1337"
+username = "Unnamed"
 tutorialOffset = 0
 skipIntro = False
 
 i = 1
 while i < len(sys.argv):
-	if sys.argv[i] == '-a':
+	if sys.argv[i] == "-a":
 		disableAudio = True
-	elif sys.argv[i] == '-w':
-		if len(sys.argv) > i + 2 and sys.argv[i + 1][0] != '-':
+	elif sys.argv[i] == "-w":
+		if len(sys.argv) > i + 2 and sys.argv[i + 1][0] != "-":
 			# Skip the window size numbers. We already processed them.
 			i += 2
-	elif sys.argv[i] == '-p':
+	elif sys.argv[i] == "-p":
 		try:
 			defaultPort = int(sys.argv[i + 1])
 			i += 1
 		except:
 			showHelpInfo()
-	elif sys.argv[i] == '-d':
+	elif sys.argv[i] == "-d":
 		try:
 			defaultMap = sys.argv[i + 1]
 			i += 1
 		except:
 			showHelpInfo()
-	elif sys.argv[i] == '-u':
+	elif sys.argv[i] == "-u":
 		try:
 			username = sys.argv[i + 1]
 			i += 1
 		except:
 			showHelpInfo()
-	elif sys.argv[i] == '-m':
+	elif sys.argv[i] == "-m":
 		skipIntro = True
 		engine.enablePause = True
-	elif sys.argv[i] == '-v':
+	elif sys.argv[i] == "-v":
 		pass # Already been processed.
 	else:
 		showHelpInfo()
@@ -149,8 +149,8 @@ def goDaemon():
 	# Initialize engine settings
 	engine.init(showFrameRate = False, daemon = True)
 	engine.preloadModels()
-	engine.log.info(GAME_NAME + ' ' + VERSION_CODE + ' - ' + COPYRIGHT)
-
+	engine.log.info(GAME_NAME + " " + VERSION_CODE + " - " + COPYRIGHT)
+	
 	from direct.distributed.PyDatagram import PyDatagram
 	net.init(defaultPort, PyDatagram)
 
@@ -167,24 +167,24 @@ def goDaemon():
 		engine.endUpdate()
 		return task.cont
 
-	taskMgr.add(gameLoop, 'Game loop')
+	taskMgr.add(gameLoop, "Game loop")
 
 def goMenu():
 	global gameBackend, game, mode, gametype, mainMenu, skipIntro, menu
-
+	
 	# Initialize engine settings
 	engine.init(showFrameRate = False, daemon = (mode == MODE_DAEMON))
 	engine.preloadModels()
-	engine.log.info(GAME_NAME + ' ' + VERSION_CODE + ' - ' + COPYRIGHT)
-
+	engine.log.info(GAME_NAME + " " + VERSION_CODE + " - " + COPYRIGHT)
+	
 	from direct.distributed.PyDatagram import PyDatagram
 	net.init(defaultPort, PyDatagram)
-
+	
 	gameBackend = None
 	game = None
-
+	
 	mainMenu = core.MainMenu(skipIntro)
-
+	
 	menu = None
 
 	def gameLoop(task):
@@ -211,7 +211,7 @@ def goMenu():
 		engine.endUpdate()
 		return task.cont
 
-	taskMgr.add(gameLoop, 'Game loop')
+	taskMgr.add(gameLoop, "Game loop")
 
 if mode == MODE_DAEMON:
 	goDaemon()

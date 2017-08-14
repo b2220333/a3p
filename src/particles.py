@@ -44,8 +44,8 @@ class ParticleGroup:
 	# 4 - src-enemy-selector.png
 	# 5 - src-fire.png
 	# 6 - src-fire2.png
-	# 7 -
-	# 8 -
+	# 7 - 
+	# 8 - 
 	frames = []
 	generator = None
 	generatorNode = None
@@ -55,7 +55,7 @@ class ParticleGroup:
 		self.position = None
 		self.lastPositionUpdate = engine.clock.time
 		self.lastPosition = None
-
+	
 	@staticmethod
 	def init():
 		if not engine.isDaemon:
@@ -74,13 +74,13 @@ class ParticleGroup:
 			ParticleGroup.generatorNode.setDepthWrite(False)
 			ParticleGroup.generatorNode.setTransparency(True)
 			ParticleGroup.generatorNode.setTwoSided(False)
-			ParticleGroup.generatorNode.setTexture(loader.loadTexture('images/plate.png'))
-			ParticleGroup.generatorNode.setBin('fixed', 100)
+			ParticleGroup.generatorNode.setTexture(loader.loadTexture("images/plate.png"))
+			ParticleGroup.generatorNode.setBin("fixed", 100)
 			ParticleGroup.generatorNode.setLightOff(True)
 			ParticleGroup.generatorNode.setShaderOff()
-			ParticleGroup.generatorNode.node().setBounds(BoundingSphere((0, 0, 0), 1000))
+			ParticleGroup.generatorNode.node().setBounds(BoundingSphere((0, 0, 0), 1000)) 
 			ParticleGroup.generatorNode.node().setFinal(True)
-
+			
 	@staticmethod
 	def begin():
 		if not engine.isDaemon:
@@ -89,32 +89,32 @@ class ParticleGroup:
 			if not ParticleGroup.begun:
 				ParticleGroup.generator.begin(base.cam, render)
 				ParticleGroup.begun = True
-
+		
 	@staticmethod
 	def end():
 		if ParticleGroup.begun:
 			ParticleGroup.generator.end()
 			ParticleGroup.begun = False
-
+	
 	@staticmethod
 	def clear():
 		ParticleGroup.generator = None
 		if ParticleGroup.generatorNode != None:
 			ParticleGroup.generatorNode.removeNode()
 		ParticleGroup.begun = False
-
+	
 	def setPosition(self, pos):
 		if self.position != None:
 			self.lastPosition = Vec3(self.position)
 		self.position = Vec3(pos)
 		self.lastPositionUpdate = engine.clock.time
-
+		
 	def update(self):
 		pass
-
+	
 	def draw(self):
 		pass
-
+		
 	def delete(self):
 		self.active = False
 
@@ -129,13 +129,13 @@ class SmokeParticleGroup(ParticleGroup):
 		self.initialAngles = []
 		self.lastSpawn = engine.clock.time
 		self.interval = 2.0
-
+	
 	def spawnParticle(self, pos):
 		self.positions.append(pos)
 		self.spawnTimes.append(engine.clock.time)
 		self.initialAngles.append(random() * 360)
 		self.lastSpawn = engine.clock.time
-
+		
 	def update(self):
 		ParticleGroup.update(self)
 		if engine.clock.time - self.lastSpawn >= self.lifeTime:
@@ -174,7 +174,7 @@ class FireParticleGroup(ParticleGroup):
 		self.lastSpawn = engine.clock.time
 		self.interval = 0.5
 		self.isIndependent = False
-
+	
 	def spawnParticle(self, pos):
 		self.positions.append(pos)
 		self.spawnTimes.append(engine.clock.time)
@@ -184,7 +184,7 @@ class FireParticleGroup(ParticleGroup):
 		self.initialSizes.append(0.5 + (random() * 0.8))
 		self.finalAngles.append(angle + ((random() - 0.5) * 180))
 		self.finalHeights.append(2.0 + (random() * 1.5))
-
+		
 	def update(self):
 		ParticleGroup.update(self)
 		if self.isIndependent and engine.clock.time - self.lastSpawn >= self.lifeTime:
@@ -201,7 +201,7 @@ class FireParticleGroup(ParticleGroup):
 							self.spawnParticle(self.position + (vector * f) + (Vec3(uniform(-1.0, 1.0), uniform(-1.0, 1.0), uniform(-1.0, 1.0)) * 0.5))
 					else:
 						self.spawnParticle(self.position + Vec3(uniform(-1.0, 1.0), uniform(-1.0, 1.0), 0) * 0.5)
-
+	
 	def draw(self):
 		if self.active and ParticleGroup.begun:
 			for i in range(len(self.positions)):
@@ -214,11 +214,11 @@ class WaypointParticleGroup(ParticleGroup):
 		ParticleGroup.__init__(self)
 		self.size = 0.5
 		self.color = Vec4(1, 1, 1, 1)
-
+		
 	def draw(self, pos):
 		if self.active and ParticleGroup.begun:
 			ParticleGroup.generator.billboard(pos, ParticleGroup.frames[1], self.size, self.color)
-
+	
 	def drawLink(self, a, b):
 		if self.active and ParticleGroup.begun:
 			ParticleGroup.generator.segment(a, b, ParticleGroup.frames[1], .1, self.color)
@@ -227,16 +227,16 @@ class BulletTracerParticleGroup(ParticleGroup):
 	def __init__(self):
 		ParticleGroup.__init__(self)
 		self.color = Vec4(1, 0.8, 0.6, 1)
-
+	
 	def draw(self, position1, position2):
 		if ParticleGroup.begun:
 			ParticleGroup.generator.segment(Vec3(position1), Vec3(position2), ParticleGroup.frames[1], .06, self.color)
-
+			
 class SparkParticleGroup(ParticleGroup):
 	def __init__(self, position, numParticles = 50, speed = 15.0, lifeTime = 0.2, size = 4.0):
 		ParticleGroup.__init__(self)
 		self.numParticles = numParticles
-
+		
 		self.position = Vec3(position)
 		self.spawnTime = engine.clock.time
 		self.lifeTime = lifeTime + uniform(lifeTime * -0.3, lifeTime * 0.3)
@@ -252,7 +252,7 @@ class SparkParticleGroup(ParticleGroup):
 		ParticleGroup.update(self)
 		if engine.clock.time - self.spawnTime >= self.lifeTime:
 			self.delete()
-
+	
 	def draw(self):
 		if self.active and ParticleGroup.begun:
 			self.color.setW(1 - ((engine.clock.time - self.spawnTime) / self.lifeTime))
@@ -288,23 +288,23 @@ class HitRegisterParticleGroup(ParticleGroup):
 		ParticleGroup.update(self)
 		if engine.clock.time - self.spawnTime >= self.lifeTime:
 			self.delete()
-
+	
 	def draw(self):
 		if self.active and ParticleGroup.begun:
 			blend = (engine.clock.time - self.spawnTime) / self.lifeTime
 			ParticleGroup.generator.particle(self.position, ParticleGroup.frames[2], (self.size * 0.25) + (blend * self.size), Vec4(self.color.getX(), self.color.getY(), self.color.getZ(), 1.25 - blend), self.angle)
-
+	
 class ExplosionParticleGroup(ParticleGroup):
 	def __init__(self, position, numParticles = 50, lifeTime = 1.5, size = 3.0):
 		ParticleGroup.__init__(self)
 		self.numParticles = numParticles
-
+		
 		self.position = Vec3(position)
-
+		
 		self.light = engine.Light(color = Vec4(1.0, 0.7, 0.4, 1), attenuation = Vec3(0, 0, 0.0007))
 		self.light.add()
 		self.light.setPos(self.position)
-
+		
 		self.spawnTime = engine.clock.time
 		self.lifeTime = lifeTime + uniform(lifeTime * -0.3, lifeTime * 0.3)
 		self.lightLifeTime = 1.5
@@ -321,7 +321,7 @@ class ExplosionParticleGroup(ParticleGroup):
 			self.delete()
 		if engine.clock.time - self.spawnTime >= self.lightLifeTime:
 			self.light.remove()
-
+	
 	def draw(self):
 		if self.active and ParticleGroup.begun:
 			blend = (engine.clock.time - self.spawnTime) / self.lifeTime
@@ -329,7 +329,7 @@ class ExplosionParticleGroup(ParticleGroup):
 			self.light.setColor(Vec4(1.0 * (1.0 - blend2), 0.7 * (1.0 - blend2), 0.4 * (1.0 - blend2), 1))
 			for i in range(self.numParticles):
 				ParticleGroup.generator.particle(self.positions[i], ParticleGroup.frames[0], 1.5 + (blend * 5.0), Vec4(1, 1, 1, max(0, 0.5 - (blend * 0.5))), self.initialAngles[i] + (blend * 45))
-
+	
 	def delete(self):
 		ParticleGroup.delete(self)
 		self.light.remove()

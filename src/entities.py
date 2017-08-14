@@ -11,8 +11,8 @@ import net2
 import particles
 
 class EntityGroup(DirectObject):
-	'''An entity group handles all the logistics of Entities and Impostors.
-	The entity group actually steps the ODE world and space in the AI world, and it updates all the controllers as well.'''
+	"""An entity group handles all the logistics of Entities and Impostors.
+	The entity group actually steps the ODE world and space in the AI world, and it updates all the controllers as well."""
 	default = None
 	def __init__(self, netManager):
 		self.entities = dict()
@@ -30,19 +30,19 @@ class EntityGroup(DirectObject):
 		TeamEntity.default = TeamEntity()
 
 	def update(self):
-		'Updates all graphics objects, clears deleted entities, shakes the camera.'
+		"Updates all graphics objects, clears deleted entities, shakes the camera."
 		time = engine.clock.time - self.lastCameraShake
 		decay = max(1 - (time / self.cameraShakeTime), 0)
 		self.cameraShakeX = self.cameraShakeVelX * decay * math.sin(time * 7)
 		self.cameraShakeY = self.cameraShakeVelY * decay * math.sin(time * 12)
-
+		
 		for obj in self.graphicsObjects:
 			obj.update(self)
 
 		self.clearDeletedEntities()
 
 	def getEntity(self, id):
-		'Gets the ObjectEntity associated with the given NodePath (which has a unique 8-bit identifier). Returns None if no ObjectEntity has the given NodePath.'
+		"Gets the ObjectEntity associated with the given NodePath (which has a unique 8-bit identifier). Returns None if no ObjectEntity has the given NodePath."
 		try:
 			i = int(id)
 		except ValueError:
@@ -53,7 +53,7 @@ class EntityGroup(DirectObject):
 			return None
 
 	def getEntityFromEntry(self, entry):
-		'Gets the ObjectEntity specified by the given collision entry, if one exists.'
+		"Gets the ObjectEntity specified by the given collision entry, if one exists."
 		if entry != None:
 			entity = self.getEntity(entry.getIntoNodePath().getParent().getName())
 			if entity == None:
@@ -62,29 +62,29 @@ class EntityGroup(DirectObject):
 				return entity
 		else:
 			return None
-
+	
 	def spawnEntity(self, entity):
-		'Spawning an ObjectEntity involves sending off a network packet so everyone else has the ObjectEntity too.'
+		"Spawning an ObjectEntity involves sending off a network packet so everyone else has the ObjectEntity too."
 		self.generateEntityId(entity)
 		self.manager.spawnEntity(entity)
 		self.addEntity(entity)
-
+	
 	def addTeam(self, team):
 		self.teams.append(team)
 
 	def addEntity(self, entity):
-		'Sets the ObjectEntity active and adds it to the list.'
+		"Sets the ObjectEntity active and adds it to the list."
 		entity.active = True
 		if isinstance(entity, ObjectEntity):
 			entity.node.reparentTo(engine.renderObjects)
 		self.entities[entity.getId()] = entity
-
+	
 	def removeEntity(self, entity):
-		'Removes the ObjectEntity from the entity list. Also schedules the ObjectEntity's resources to be cleared, as soon as possible.'
+		"Removes the ObjectEntity from the entity list. Also schedules the ObjectEntity's resources to be cleared, as soon as possible."
 		entity.active = False
 		if entity.getId() in self.entities:
 			self.deletedEntities.append(entity)
-
+	
 	# offset is used to ensure Fragments and other local-only entities don't interfere
 	# with IDs from server-client synched entities.
 	def generateEntityId(self, entity, offset = 0):
@@ -92,23 +92,23 @@ class EntityGroup(DirectObject):
 		while id in self.entities:
 			id = offset + int(round(random() * 255))
 		entity.setId(id)
-
+	
 	def clearDeletedEntities(self):
 		for entity in self.deletedEntities:
 			if entity.getId() in self.entities:
 				del self.entities[entity.getId()]
 			entity.clear(self)
 		del self.deletedEntities[:]
-
+	
 	def addGraphicsObject(self, obj):
 		if not obj in self.graphicsObjects:
 			self.graphicsObjects.append(obj)
-
+	
 	def removeGraphicsObject(self, obj):
 		obj.delete(self)
 		if obj in self.graphicsObjects:
 			self.graphicsObjects.remove(obj)
-
+	
 	def getNearestPhysicsEntity(self, pos):
 		closest = None
 		closestDist = 1000000
@@ -127,12 +127,12 @@ class EntityGroup(DirectObject):
 			entity.controller.clearCriticalPackets()
 		for object in self.graphicsObjects:
 			object.delete(self)
-
+		
 	def deleteEntity(self, entity, killed = False):
-		'Deleting an ObjectEntity involves sending off a network packet so everyone else also deletes the ObjectEntity.'
+		"Deleting an ObjectEntity involves sending off a network packet so everyone else also deletes the ObjectEntity."
 		self.manager.deleteEntity(entity, killed)
 		self.removeEntity(entity)
-
+	
 	def shakeCamera(self, amount = 6):
 		if random() > 0.5:
 			self.cameraShakeVelX = amount
@@ -147,14 +147,14 @@ class EntityGroup(DirectObject):
 	# The damagingEntity gets credit for any kills resulting from the explosion.
 	# However instead of being invulnerable to the explosion, it receives 50% of the damage a normal entity would receive.
 	def explode(self, position, force, damage, damageRadius, sourceEntity = None, damagingEntity = None):
-		'''Triggers an explosion animation, which involves applying force to surrounding Entities, and damaging Entities where applicable.
+		"""Triggers an explosion animation, which involves applying force to surrounding Entities, and damaging Entities where applicable.
 		sourceEntity is excluded from damage and force, and damagingEntity gets the credit for any damage done.
 		If damagingEntity is None, sourceEntity gets the credit. If both are None, no damage is done.
-		'''
-
+		"""
+		
 		particles.add(particles.SparkParticleGroup(position, numParticles = 500, speed = damageRadius * 2.5, lifeTime = 1.0, size = 6.0))
 		particles.add(particles.ExplosionParticleGroup(position))
-
+		
 		for entity in (entity for entity in self.entities.values() if entity != sourceEntity and isinstance(entity, ObjectEntity)):
 			vector = entity.getPosition() - position
 			distance = vector.length()
@@ -180,7 +180,7 @@ class EntityGroup(DirectObject):
 						entity.damage(sourceEntity, damage2, False)
 
 	def delete(self):
-		'Deletes all entities and particles in this group. IMPORTANT: you must delete the entity group BEFORE deleting the AI world.'
+		"Deletes all entities and particles in this group. IMPORTANT: you must delete the entity group BEFORE deleting the AI world."
 		for obj in self.graphicsObjects:
 			obj.delete(self)
 		del self.graphicsObjects[:]
@@ -189,7 +189,7 @@ class EntityGroup(DirectObject):
 		self.clearDeletedEntities()
 
 class Entity(DirectObject):
-	'''Entity is a generic data object that has a controller.'''
+	"""Entity is a generic data object that has a controller."""
 	def __init__(self, controller, local = net.netMode == net.MODE_SERVER):
 		self.active = True
 		self.id = -1
@@ -204,18 +204,18 @@ class Entity(DirectObject):
 
 	def setId(self, id):
 		self.id = id
-
+	
 	def damage(self, entity, damage, ranged = True):
-		'Useful for Entities that have health.'
+		"Useful for Entities that have health."
 		pass
 
 	def kill(self, aiWorld, entityGroup, localDelete = True):
-		'Killing an ObjectEntity triggers a death animation. Deleting an entity just silently removes it.'
+		"Killing an ObjectEntity triggers a death animation. Deleting an entity just silently removes it."
 		if self.active:
 			self.delete(entityGroup, True, localDelete)
-
+	
 	def delete(self, entityGroup, killed = False, localDelete = True):
-		'''Schedules this ObjectEntity to be cleared and removed from the given EntityGroup.'''
+		"""Schedules this ObjectEntity to be cleared and removed from the given EntityGroup."""
 		if self.active:
 			self.active = False
 			self.killed = killed
@@ -223,96 +223,96 @@ class Entity(DirectObject):
 				entityGroup.deleteEntity(self, killed)
 			else:
 				entityGroup.removeEntity(self)
-
+	
 	def clear(self, entityGroup):
-		'''Clears all resources associated with this Entity.'''
+		"""Clears all resources associated with this Entity."""
 		self.controller.delete(self.killed)
 		self.active = False
-
+	
 	def setLocal(self, local):
 		self.isLocal = local
 
 class ObjectEntity(Entity):
-	'''An ObjectEntity is an object with an ODE body and geometry, and a single NodePath for visual representation.
+	"""An ObjectEntity is an object with an ODE body and geometry, and a single NodePath for visual representation.
 	Anything that has mass and moves is an ObjectEntity, including physics objects, game characters, and shards of debris.
-	ObjectEntities can't do much by themselves. They're manipulated by Controllers.'''
+	ObjectEntities can't do much by themselves. They're manipulated by Controllers."""
 	def __init__(self, filename, controller, local = net.netMode == net.MODE_SERVER):
 		Entity.__init__(self, controller, local)
 		self.node = None
-		self.filename = ''
+		self.filename = ""
 		self.radius = 0
 		if filename != None:
 			self.loadModel(filename)
-
+	
 	def loadModel(self, filename):
 		self.filename = filename
 		self.node = engine.loadModel(filename)
 		self.node.setName(str(int(self.id)))
 		self.radius = self.node.getBounds().getRadius()
-
+	
 	def setId(self, id):
 		Entity.setId(self, id)
 		if self.node != None:
 			self.node.setName(str(int(id)))
-
+	
 	def getPosition(self):
 		return self.body.getPosition()
-
+	
 	def setPosition(self, pos):
 		self.node.setPos(pos)
 		self.body.setPosition(pos)
-
+	
 	def setRotation(self, hpr):
 		self.node.setHpr(hpr)
 		self.body.setQuaternion(self.node.getQuat(render))
-
+	
 	def getRotation(self):
 		return self.node.getHpr()
-
+	
 	def setLinearVelocity(self, vel):
 		self.body.setLinearVel(vel)
-
+	
 	def getLinearVelocity(self):
 		return self.body.getLinearVel()
-
+	
 	def setAngularVelocity(self, vel):
 		self.body.setAngularVel(vel)
-
+	
 	def getAngularVelocity(self):
 		return self.body.getAngularVel()
-
+	
 	def setQuaternion(self, quat):
 		self.body.setQuaternion(quat)
 		self.node.setQuat(quat)
-
+	
 	def getQuaternion(self):
 		return self.body.getQuaternion()
-
+	
 	def addTorque(self, torque):
 		self.body.addTorque(torque.getX(), torque.getY(), torque.getZ())
-
+	
 	def addForce(self, force):
 		self.body.addForce(force)
-
+	
 	def addForceAtPosition(self, direction, position):
 		self.body.addForceAtPos(direction.getX(), direction.getY(), direction.getZ(), position.getX(), position.getY(), position.getZ())
 
 	def commitChanges(self):
-		'Updates the visual orientation and position of this ObjectEntity to reflect that of the ODE body.'
+		"Updates the visual orientation and position of this ObjectEntity to reflect that of the ODE body."
 		self.node.setPosQuat(engine.renderObjects, self.getPosition(), Quat(self.body.getQuaternion()))
-
+	
 	def damage(self, entity, damage, ranged = True):
-		'Useful for Entities that have health.'
+		"Useful for Entities that have health."
 		Entity.damage(self, entity, damage, ranged)
-
+	
 	def kill(self, aiWorld, entityGroup, localDelete = True):
 		Entity.kill(self, aiWorld, entityGroup, localDelete)
-
+	
 	def delete(self, entityGroup, killed = False, localDelete = True):
 		Entity.delete(self, entityGroup, killed, localDelete)
-
+	
 	def clear(self, entityGroup):
-		'''Clears all resources associated with this ObjectEntity.'''
+		"""Clears all resources associated with this ObjectEntity."""
 		Entity.clear(self, entityGroup)
 		self.geometry.destroy()
 		self.body.destroy()
@@ -320,10 +320,10 @@ class ObjectEntity(Entity):
 
 class DropPod(ObjectEntity):
 	def __init__(self, world, space, local = net.netMode == net.MODE_SERVER):
-		ObjectEntity.__init__(self, 'models/pod/pod', controllers.DropPodController(), True)
-		self.collisionNode = CollisionNode('cnode')
+		ObjectEntity.__init__(self, "models/pod/pod", controllers.DropPodController(), True)
+		self.collisionNode = CollisionNode("cnode")
 		self.collisionNodePath = self.node.attachNewNode(self.collisionNode)
-		'''sizex = 3
+		"""sizex = 3
 		sizey = 3
 		sizez = 7
 		point1 = Point3(-sizex / 2.0, -sizey / 2.0, -sizez / 2.0)
@@ -331,7 +331,7 @@ class DropPod(ObjectEntity):
 		self.radius = max(sizez, max(sizex, sizey)) / 2.0
 		self.vradius = sizez / 2.0
 		self.collisionNode.addSolid(CollisionBox(point1, point2))
-		self.geometry = OdeBoxGeom(space, sizex, sizey, sizez)'''
+		self.geometry = OdeBoxGeom(space, sizex, sizey, sizez)"""
 		self.radius = 3.5
 		self.vradius = 3.5
 		self.collisionNode.addSolid(CollisionSphere(0, 0, 0, self.radius))
@@ -346,9 +346,9 @@ class DropPod(ObjectEntity):
 		avel = 5
 		self.setAngularVelocity(Vec3(uniform(-avel, avel), uniform(-avel, avel), uniform(-avel, avel)))
 		space.setSurfaceType(self.geometry, 1)
-		visitorFont = loader.loadFont('menu/visitor2.ttf')
-		self.amountIndicator = TextNode('dropPodAmountIndicator')
-		self.amountIndicator.setText('')
+		visitorFont = loader.loadFont("menu/visitor2.ttf")
+		self.amountIndicator = TextNode("dropPodAmountIndicator")
+		self.amountIndicator.setText("")
 		self.amountIndicator.setFont(visitorFont)
 		self.amountIndicator.setTextColor(1, 1, 1, 1)
 		self.amountIndicator.setAlign(TextNode.ACenter)
@@ -361,18 +361,18 @@ class DropPod(ObjectEntity):
 		self.amountIndicatorNode.setTwoSided(True)
 		self.amountIndicatorNode.setDepthTest(False)
 		self.amountIndicatorNode.setDepthWrite(False)
-		self.amountIndicatorNode.setBin('fixed', 102) # 102 so it's in front of all the MeshDrawer particles.
+		self.amountIndicatorNode.setBin("fixed", 102) # 102 so it's in front of all the MeshDrawer particles.
 		self.amountIndicatorNode.hide(BitMask32.bit(4)) # Don't cast shadows
 		self.amountIndicatorNode.setBillboardPointEye()
-
+		
 	def delete(self, entityGroup, killed = False, localDelete = True):
 		ObjectEntity.delete(self, entityGroup, killed, localDelete)
-
+	
 	def kill(self, aiWorld, entityGroup, localDelete = True):
 		if self.active:
 			position = self.getPosition()
 			entityGroup.explode(position, force = 5000, damage = 80, damageRadius = 25, sourceEntity = self, damagingEntity = None) # Give damage credit to our parent actor
-			explosionSound = audio.SoundPlayer('large-explosion')
+			explosionSound = audio.SoundPlayer("large-explosion")
 			explosionSound.play(position = position)
 			# Add fragments
 			for _ in range(8):
@@ -385,7 +385,7 @@ class DropPod(ObjectEntity):
 
 class Fragment(ObjectEntity):
 	def __init__(self, world, space, pos, velocity):
-		ObjectEntity.__init__(self, 'models/fragment/Fragment', controllers.FragmentController(velocity), True)
+		ObjectEntity.__init__(self, "models/fragment/Fragment", controllers.FragmentController(velocity), True)
 		self.radius = 0.7
 		size = self.radius * 2
 		self.body = OdeBody(world)
@@ -405,7 +405,7 @@ class Fragment(ObjectEntity):
 
 class GlassFragment(Fragment):
 	def __init__(self, world, space, pos, velocity):
-		ObjectEntity.__init__(self, 'models/fragment/GlassFragment', controllers.FragmentController(velocity), True)
+		ObjectEntity.__init__(self, "models/fragment/GlassFragment", controllers.FragmentController(velocity), True)
 		self.node.setTransparency(TransparencyAttrib.MAlpha)
 		self.node.hide(BitMask32.bit(4)) # Don't cast shadows
 		self.radius = 0.3
@@ -426,23 +426,23 @@ class GlassFragment(Fragment):
 
 class Glass(ObjectEntity):
 	def __init__(self, world, space):
-		ObjectEntity.__init__(self, 'models/fragment/GlassFragment', controllers.GlassController())
+		ObjectEntity.__init__(self, "models/fragment/GlassFragment", controllers.GlassController())
 		self.body = OdeBody(world)
-
+		
 	def initGlass(self, world, space, width, height):
-		engine.deleteModel(self.node, 'models/fragment/GlassFragment')
-		maker = CardMaker('glassNode')
+		engine.deleteModel(self.node, "models/fragment/GlassFragment")
+		maker = CardMaker("glassNode")
 		maker.setFrame(-width / 2.0, width / 2.0, -height / 2.0, height / 2.0)
 		maker.setUvRange(Point2(0.0, 0.0), Point2(width, height) * 0.04)
 		self.node = hidden.attachNewNode(maker.generate())
-		self.node.setTexture(loader.loadTexture('models/fragment/glass.png'))
+		self.node.setTexture(loader.loadTexture("models/fragment/glass.png"))
 		self.node.setTwoSided(True)
 		self.node.setTransparency(TransparencyAttrib.MAlpha)
 		self.node.setName(str(int(self.id)))
 		self.node.hide(BitMask32.bit(4)) # Don't cast shadows
 		self.radius = width / 2.0
 		self.vradius = height / 2.0
-		self.collisionNode = CollisionNode('cnode')
+		self.collisionNode = CollisionNode("cnode")
 		point1 = Point3(-width / 2.0, 0, -height / 2.0)
 		point2 = Point3(-width / 2.0, 0, height / 2.0)
 		point3 = Point3(width / 2.0, 0, height / 2.0)
@@ -457,28 +457,28 @@ class Glass(ObjectEntity):
 		self.shattered = False
 		self.glassWidth = width
 		self.glassHeight = height
-
+	
 	def getPosition(self):
 		return self.geometry.getPosition()
-
+	
 	def setPosition(self, pos):
 		self.node.setPos(pos)
 		self.geometry.setPosition(pos)
-
+	
 	def setRotation(self, hpr):
 		self.node.setHpr(hpr)
 		self.geometry.setQuaternion(self.node.getQuat(render))
-
+	
 	def getRotation(self):
 		return self.node.getHpr()
-
+	
 	def damage(self, entity, damage, ranged = True):
 		self.shattered = True
 
 	def kill(self, aiWorld, entityGroup, localDelete = True):
 		# Add fragments
 		pos = self.getPosition()
-		shatterSound = audio.SoundPlayer('glass-shatter')
+		shatterSound = audio.SoundPlayer("glass-shatter")
 		shatterSound.play(position = pos)
 		for _ in range(40):
 			offset = Vec3(uniform(-self.glassWidth / 2.0, self.glassWidth / 2.0), 0, uniform(-self.glassHeight / 2.0, self.glassHeight / 2.0))
@@ -488,7 +488,7 @@ class Glass(ObjectEntity):
 		ObjectEntity.kill(self, aiWorld, entityGroup, localDelete)
 
 class PhysicsEntity(ObjectEntity):
-	'A PhysicsEntity is a large non-character physics object that is included in AI path calculations.'
+	"A PhysicsEntity is a large non-character physics object that is included in AI path calculations."
 	def __init__(self, world, space, data = None, directory = None, file = None):
 		ObjectEntity.__init__(self, None, controllers.PhysicsEntityController())
 		self.geometries = []
@@ -500,21 +500,21 @@ class PhysicsEntity(ObjectEntity):
 	def loadDataFile(self, world, space, data, directory, file):
 		self.directory = directory
 		self.dataFile = file
-		lines = data.split('\n')
+		lines = data.split("\n")
 		i = 0
 		self.body = OdeBody(world)
 		while i < len(lines):
 			tokens = lines[i].split()
-			if tokens[0] == 'model' and self.node == None:
-				self.loadModel(directory + '/' + tokens[1])
-				self.collisionNode = CollisionNode('cnode')
+			if tokens[0] == "model" and self.node == None:
+				self.loadModel(directory + "/" + tokens[1])
+				self.collisionNode = CollisionNode("cnode")
 				self.collisionNodePath = self.node.attachNewNode(self.collisionNode)
-			elif tokens[0] == 'geometry':
+			elif tokens[0] == "geometry":
 				offsetx = 0
 				offsety = 0
 				offsetz = 0
 				geom = None
-				if tokens[1] == 'box':
+				if tokens[1] == "box":
 					sizex = float(tokens[2])
 					sizey = float(tokens[3])
 					sizez = float(tokens[4])
@@ -528,7 +528,7 @@ class PhysicsEntity(ObjectEntity):
 					self.vradius = max(self.vradius, math.fabs(point1.getZ()), math.fabs(point2.getZ()))
 					self.collisionNode.addSolid(CollisionBox(point1, point2))
 					geom = OdeBoxGeom(space, sizex, sizey, sizez)
-				elif tokens[1] == 'sphere':
+				elif tokens[1] == "sphere":
 					radius = float(tokens[2])
 					if len(tokens) == 6:
 						offsetx = float(tokens[3])
@@ -538,7 +538,7 @@ class PhysicsEntity(ObjectEntity):
 					geom = OdeSphereGeom(space, radius)
 					self.radius = max(self.radius, radius + max(math.fabs(offsetx), math.fabs(offsety)))
 					self.vradius = max(self.vradius, radius + math.fabs(offsetz))
-				elif tokens[1] == 'cylinder':
+				elif tokens[1] == "cylinder":
 					radius = float(tokens[2])
 					length = float(tokens[3])
 					if len(tokens) == 7:
@@ -560,19 +560,19 @@ class PhysicsEntity(ObjectEntity):
 					self.geometry = geom
 				else:
 					self.geometries.append(geom)
-			elif tokens[0] == 'mass':
+			elif tokens[0] == "mass":
 				# Process the mass
 				m = OdeMass()
 				density = float(tokens[1])
-				if tokens[2] == 'box':
+				if tokens[2] == "box":
 					m.setBox(density, float(tokens[3]), float(tokens[4]), float(tokens[5]))
-				elif tokens[2] == 'sphere':
+				elif tokens[2] == "sphere":
 					m.setSphere(density, float(tokens[3]))
-				elif tokens[2] == 'cylinder':
+				elif tokens[2] == "cylinder":
 					m.setCylinder(density, 3, float(tokens[3]), float(tokens[4])) # 1 = X axis, 2 = Y axis, 3 = Z axis
 				self.body.setMass(m)
 			i += 1
-
+	
 	def clear(self, entityGroup):
 		ObjectEntity.clear(self, entityGroup)
 		for geom in self.geometries:
@@ -581,8 +581,8 @@ class PhysicsEntity(ObjectEntity):
 
 SPECIAL_DELAY = 18
 class TeamEntity(Entity):
-	'''A team is used to purchase new units. Each team has a controller and a color associated with it.
-	The team also tracks which actors are on the team.'''
+	"""A team is used to purchase new units. Each team has a controller and a color associated with it.
+	The team also tracks which actors are on the team."""
 	costs = {None:0, components.SHOTGUN:250, components.CHAINGUN:150, components.SNIPER:400, components.GRENADE_LAUNCHER:500, components.PISTOL:300, components.MOLOTOV_THROWER:550, controllers.CLOAK_SPECIAL:450, controllers.SHIELD_SPECIAL:300, controllers.AWESOME_SPECIAL:500, controllers.KAMIKAZE_SPECIAL:250, controllers.ROCKET_SPECIAL:600}
 	defaultTeam = None
 	def __init__(self):
@@ -603,7 +603,7 @@ class TeamEntity(Entity):
 		self.dock = None
 		self.isZombies = False
 		self.isSurvivors = False
-		self.username = '[empty]'
+		self.username = "[empty]"
 		self.lastMatchPosition = -1
 	def isAlly(self, team):
 		return team.getId() == self.getId() or team.getId() in self.allies
@@ -638,7 +638,7 @@ class TeamEntity(Entity):
 			return
 		self.purchasedTypes.append((weapon, special))
 	def setUsername(self, username):
-		self.controller.oldUsername = '[empty]'
+		self.controller.oldUsername = "[empty]"
 		self.username = username
 	def getUsername(self):
 		return self.username
@@ -693,8 +693,8 @@ class TeamEntity(Entity):
 			entityGroup.teams.remove(self)
 
 class Actor(ObjectEntity):
-	'''An Actor is an ObjectEntity controlled by either a player or an AI controller.
-	Actors can contain components, such as guns, engines, shields, etc.'''
+	"""An Actor is an ObjectEntity controlled by either a player or an AI controller.
+	Actors can contain components, such as guns, engines, shields, etc."""
 	def __init__(self, world, space, filename, controller, local = net.netMode == net.MODE_SERVER):
 		self.team = None
 		self.teamId = 0
@@ -710,7 +710,7 @@ class Actor(ObjectEntity):
 		self.pinRotation = None
 		self.pinTime = 0
 		ObjectEntity.__init__(self, filename, controller, local)
-
+	
 	def getTeam(self):
 		if self.team == None:
 			team = EntityGroup.default.getEntity(self.teamId)
@@ -721,11 +721,11 @@ class Actor(ObjectEntity):
 				return TeamEntity.default
 		else:
 			return self.team
-
+	
 	def setTeamId(self, id):
 		self.teamId = id
 		self.getTeam() # Trigger the process to try and find our team. If it hasn't spawned yet, we get the default team.
-
+	
 	def setTeam(self, team):
 		self.team = team
 		if self.team.isSurvivors:
@@ -736,10 +736,10 @@ class Actor(ObjectEntity):
 			ratio = float(self.health) / 100.0
 			self.maxHealth = 150
 			self.health = int(ratio * 150.0)
-
+	
 	def setRangedDamageRatio(self, ratio):
 		self.rangedDamageRatio = ratio
-
+	
 	def pin(self, pos):
 		self.pinned = True
 		self.pinPosition = pos
@@ -767,27 +767,27 @@ class Actor(ObjectEntity):
 				if isinstance(self.killer, PlayerDroid) and self.killer.isLocal:
 					entityGroup.shakeCamera()
 		ObjectEntity.kill(self, aiWorld, entityGroup, localDelete)
-
+	
 	def delete(self, entityGroup, killed = False, localDelete = True):
 		for component in self.components:
 			component.delete()
 		self.getTeam().removeActor(self)
 		ObjectEntity.delete(self, entityGroup, killed, localDelete)
-
+	
 	def clear(self, entityGroup):
 		ObjectEntity.clear(self, entityGroup)
 
 class BasicDroid(Actor):
-	'BasicDroid is the base for basically all the units in the game. Basically.'
+	"BasicDroid is the base for basically all the units in the game. Basically."
 	def __init__(self, world, space, controller, local = net.netMode == net.MODE_SERVER):
-		Actor.__init__(self, world, space, 'models/basicdroid/BasicDroid', controller, local)
+		Actor.__init__(self, world, space, "models/basicdroid/BasicDroid", controller, local)
 		self.radius = 1
-		self.collisionNode = CollisionNode('cnode')
+		self.collisionNode = CollisionNode("cnode")
 		self.collisionNodePath = self.node.attachNewNode(self.collisionNode)
 		self.collisionNode.addSolid(CollisionSphere(0, 0, 0, self.radius + 0.05))
 		self.node.hide(BitMask32.bit(4)) # Don't cast shadows
 		self.node.setTransparency(TransparencyAttrib.MAlpha) # For when we're cloaked
-		self.lowResNode = engine.loadModel('models/basicdroid/BasicDroid-lowres')
+		self.lowResNode = engine.loadModel("models/basicdroid/BasicDroid-lowres")
 		self.lowResNode.reparentTo(self.node)
 		self.lowResNode.hide(BitMask32.bit(1))
 		self.lowResNode.showThrough(BitMask32.bit(4)) # Low-res shadow caster
@@ -802,14 +802,14 @@ class BasicDroid(Actor):
 		space.setSurfaceType(self.geometry, 2)
 		self.cloaked = False
 		self.shielded = False
-		self.crosshairNode = engine.loadModel('models/crosshair/crosshair')
+		self.crosshairNode = engine.loadModel("models/crosshair/crosshair")
 		self.crosshairNode.setBillboardPointEye()
 		self.crosshairNode.reparentTo(self.node)
 		self.crosshairNode.setShaderOff()
 		self.crosshairNode.setLightOff(True)
 		self.crosshairNode.hide()
 		self.crosshairNode.setScale(1.5)
-		self.shieldNode = engine.loadModel('models/shield/shield')
+		self.shieldNode = engine.loadModel("models/shield/shield")
 		self.shieldNode.reparentTo(self.node)
 		self.shieldNode.setTwoSided(True)
 		self.shieldNode.setColor(1.0, 0.9, 0.8, 0.6)
@@ -821,19 +821,19 @@ class BasicDroid(Actor):
 		self.weaponIds = []
 		self.specialId = None
 		self.special = None
-
+	
 	def setTeam(self, team):
 		Actor.setTeam(self, team)
-
+	
 	def setWeapons(self, weapons):
 		self.weaponIds = weapons
 		for id in self.weaponIds:
 			if id in components.types:
 				self.components.append(components.types[id](self, len(self.components)))
-
+		
 	def getWeapons(self):
 		return [x for x in self.components if isinstance(x, components.Weapon)]
-
+	
 	def setSpecial(self, special):
 		self.specialId = special
 		if self.special != None:
@@ -848,7 +848,7 @@ class BasicDroid(Actor):
 			if cloaked:
 				alpha = 0.1
 			self.node.setColor(1, 1, 1, alpha)
-
+	
 	def setShielded(self, shielded):
 		self.shielded = shielded
 		if self.active:
@@ -862,44 +862,44 @@ class BasicDroid(Actor):
 	def kill(self, aiWorld, entityGroup, localDelete = True):
 		if self.active:
 			position = self.getPosition()
-
+			
 			entityGroup.explode(position, force = 2000, damage = 0, damageRadius = 25, sourceEntity = self)
-
-			explosionSound = audio.SoundPlayer('large-explosion')
+			
+			explosionSound = audio.SoundPlayer("large-explosion")
 			explosionSound.play(position = position)
 		Actor.kill(self, aiWorld, entityGroup, localDelete)
 
 	def delete(self, entityGroup, killed = False, localDelete = True):
 		Actor.delete(self, entityGroup, killed, localDelete)
-
+	
 	def clear(self, entityGroup):
 		Actor.clear(self, entityGroup)
-		engine.deleteModel(self.shieldNode, 'models/shield/shield')
+		engine.deleteModel(self.shieldNode, "models/shield/shield")
 
 class PlayerDroid(BasicDroid):
 	def __init__(self, world, space, controller, local = net.netMode == net.MODE_SERVER):
 		BasicDroid.__init__(self, world, space, controller, local)
-		self.username = 'Unnamed'
+		self.username = "Unnamed"
 		self.scoreMultiplier = 2.0
-
+	
 	def setTeam(self, team):
 		BasicDroid.setTeam(self, team)
 		self.getTeam().setPlayer(self)
-
+	
 	def setWeapons(self, weapons):
 		self.components.append(components.MeleeClaw(self, 0))
 		BasicDroid.setWeapons(self, weapons)
-
+	
 	def setUsername(self, name):
 		self.username = name
 
 class Grenade(ObjectEntity):
-	'Grenades trigger an explosion animation when damaged. Most of the action happens in the GrenadeController.'
+	"Grenades trigger an explosion animation when damaged. Most of the action happens in the GrenadeController."
 	def __init__(self, world, space):
 		self.team = None
 		self.teamId = 0
-		ObjectEntity.__init__(self, 'models/grenade/Grenade', controllers.GrenadeController())
-		self.collisionNode = CollisionNode('cnode')
+		ObjectEntity.__init__(self, "models/grenade/Grenade", controllers.GrenadeController())
+		self.collisionNode = CollisionNode("cnode")
 		self.collisionNodePath = self.node.attachNewNode(self.collisionNode)
 		self.collisionNode.addSolid(CollisionSphere(0, 0, 0, 0.4))
 		self.body = OdeBody(world)
@@ -915,11 +915,11 @@ class Grenade(ObjectEntity):
 		self.commitChanges()
 		self.grenadeAlive = True
 		self.actor = None
-
+	
 	def setTeamId(self, id):
 		self.teamId = id
 		self.getTeam() # Trigger the process to try and find our team. If it hasn't spawned yet, we get the default team.
-
+	
 	def getTeam(self):
 		if self.team == None:
 			team = entityGroup.getEntity(self.teamId)
@@ -930,32 +930,32 @@ class Grenade(ObjectEntity):
 				return TeamEntity.default
 		else:
 			return self.team
-
+	
 	def setActor(self, actor):
 		self.actor = actor
-
+	
 	def setTeam(self, team):
 		self.team = team
-
+	
 	def damage(self, entity, damage, ranged = True):
-		'Immediately trigger an explosion.'
+		"Immediately trigger an explosion."
 		self.grenadeAlive = False
-
+	
 	def kill(self, aiWorld, entityGroup, localDelete = True):
-		'Immediately trigger an explosion.'
+		"Immediately trigger an explosion."
 		if self.active:
 			pos = self.getPosition()
-			grenadeSound = audio.SoundPlayer('grenade')
+			grenadeSound = audio.SoundPlayer("grenade")
 			grenadeSound.play(position = self.getPosition())
 			ObjectEntity.kill(self, aiWorld, entityGroup, localDelete)
 			entityGroup.explode(pos, force = 4000, damage = 67, damageRadius = 20, sourceEntity = self, damagingEntity = self.actor) # Give damage credit to our parent actor
 
 class Molotov(ObjectEntity):
-	'Molotovs are basically flaming grenades. Most of the action happens in the MolotovController.'
+	"Molotovs are basically flaming grenades. Most of the action happens in the MolotovController."
 	def __init__(self, world, space):
 		self.team = None
-		ObjectEntity.__init__(self, 'models/grenade/Grenade', controllers.MolotovController())
-		self.collisionNode = CollisionNode('cnode')
+		ObjectEntity.__init__(self, "models/grenade/Grenade", controllers.MolotovController())
+		self.collisionNode = CollisionNode("cnode")
 		self.collisionNodePath = self.node.attachNewNode(self.collisionNode)
 		self.collisionNode.addSolid(CollisionSphere(0, 0, 0, 0.4))
 		self.body = OdeBody(world)
@@ -971,10 +971,10 @@ class Molotov(ObjectEntity):
 		self.commitChanges()
 		self.grenadeAlive = True
 		self.actor = None
-
+	
 	def setActor(self, actor):
 		self.actor = actor
-
+	
 	def setTeam(self, team):
 		self.team = team
 
@@ -989,18 +989,18 @@ class GraphicsObject(DirectObject):
 class Spike(GraphicsObject):
 	def __init__(self, pos, direction):
 		GraphicsObject.__init__(self)
-		self.node = engine.loadModel('models/spike/spike')
+		self.node = engine.loadModel("models/spike/spike")
 		self.node.reparentTo(engine.renderLit)
 		self.node.setPos(pos)
 		self.node.lookAt(Point3(pos + direction))
 		self.spawnTime = engine.clock.time
 		self.entity = None
 		self.lifetime = 5.0
-
+		
 	def delete(self, entityGroup):
 		GraphicsObject.delete(self)
 		self.node.removeNode()
-
+	
 	def attachTo(self, entity):
 		if (self.node.getPos() - entity.getPosition()).length() > entity.radius + 0.5:
 			vector = self.node.getPos() - entity.getPosition()
@@ -1010,7 +1010,7 @@ class Spike(GraphicsObject):
 		self.node.wrtReparentTo(entity.node)
 		self.entity = entity
 		self.lifetime = 15.0
-
+		
 	def update(self, entityGroup):
 		GraphicsObject.update(self)
 		if not self.active:
