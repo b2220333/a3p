@@ -153,12 +153,14 @@ class PythonNetContext(NetworkContext):
 				bound = True
 			except:
 				time.sleep(0.25)
+
 			tries += 1
 
 	def clientConnect(self, username):
 		if self.clientConnected:
 			return
 
+		data = CustomDatagram()
 		p = Packet()
 		p.add(Uint8(PACKET_NEWCLIENT))
 		p.add(String(username))

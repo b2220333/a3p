@@ -15,7 +15,7 @@ class GameUI(DirectObject):
 	def __init__(self):
 		self.localTeam = None
 		self.aspectRatio = float(base.win.getProperties().getXSize()) / float(base.win.getProperties().getYSize())
-		
+
 		self.crosshairs = []
 		self.crosshairs.append(None)
 		crosshairFiles = ["images/wide-crosshair.png", "images/narrow-crosshair.png", "images/sniper-crosshair.png"]
@@ -27,18 +27,18 @@ class GameUI(DirectObject):
 			c.hide()
 			self.crosshairs.append(c)
 		self.currentCrosshair = 1
-		
+
 		visitorFont = loader.loadFont("menu/visitor2.ttf")
 		self.specialReadySound = audio.FlatSound("sounds/special-ready.ogg")
 		self.lastSpecialReady = True
-		
+
 		self.damageImage = OnscreenImage(image = "images/tunnel-vision.png", pos = (0, 0, 0), scale = (16.0 / 9.0, 0, 1))
 		self.damageImage.setTransparency(TransparencyAttrib.MAlpha)
 		self.damageImage.hide()
 		self.damageImage.setBin("transparent", 0)
 		self.damageTransparency = 0.0
 		self.lastPlayerHealth = 0
-		
+
 		self.specialIndicators = []
 		img = OnscreenImage(image = "images/special-slot.png", pos = (engine.aspectRatio - 0.54, 0, 0.8), scale = (0.065, 0, 0.065))
 		img.setTransparency(TransparencyAttrib.MAlpha)
@@ -49,30 +49,30 @@ class GameUI(DirectObject):
 		img3 = OnscreenImage(image = "images/special-slot.png", pos = (engine.aspectRatio - 0.24, 0, 0.8), scale = (0.065, 0, 0.065))
 		img3.setTransparency(TransparencyAttrib.MAlpha)
 		self.specialIndicators.append(img3)
-		
+
 		self.teamGroups = []
 		self.playerUsernames = []
 		self.teams = []
 		self.teamScores = []
 		font = loader.loadFont("menu/DejaVuSans.ttf")
-		
+
 		self.verticalOffset = -0.8
 
 		self.healthBar = StatusBar(range = 100, pos = (engine.aspectRatio - 0.02, 0, self.verticalOffset - 0.04), hpr = (0, 0, -90), width = 0.075, height = 0.5)
-		
+
 		self.scoreChangeText = OnscreenText(pos = (0, 0.4), scale = 0.5, fg = (1, 1, 1, 0), font = visitorFont, mayChange = True)
 		self.scoreChangeTextAlpha = 0.0
 		self.scoreChangeTextScale = 0.1
 		self.lastTeamScore = 0
-		
+
 		self.moneyText = OnscreenText(pos = (engine.aspectRatio - 0.53, self.verticalOffset - 0.05), scale = 0.075, align = TextNode.ARight, fg = (1, 1, 1, 1), shadow = (0, 0, 0, 0.5), font = visitorFont, mayChange = True)
 		self.lastMoneyAmount = 0
 		self.lastMoneyChange = 0
-		
+
 		self.specialBar = StatusBar(range = entities.SPECIAL_DELAY, pos = (engine.aspectRatio - 0.02, 0, self.verticalOffset + 0.05), hpr = (0, 0, -90), width = 0.05, height = 0.25)
 		color = Vec3(0.6, 0.6, 0.6)
 		self.specialBar.setColors((color.getX() + 0.4, color.getY() + 0.4, color.getZ() + 0.4, 0.5), (color.getX(), color.getY(), color.getZ(), 0.5))
-		
+
 		self.ammoText = TextNode("ammoText")
 		self.ammoText.setText("")
 		self.ammoText.setFont(visitorFont)
@@ -86,7 +86,7 @@ class GameUI(DirectObject):
 		self.ammoTextNode.setBin("fixed", 101) # 101 so it's in front of all the MeshDrawer particles.
 		self.ammoTextNode.setScale(0.4)
 		self.ammoTextNode.hide(BitMask32.bit(4)) # Don't cast shadows
-		
+
 		self.dockHighlighter = engine.loadModel("models/crosshair/crosshair")
 		self.dockHighlighter.setBillboardPointEye()
 		self.dockHighlighter.setShaderOff()
@@ -94,25 +94,25 @@ class GameUI(DirectObject):
 		self.dockHighlighter.hide()
 		self.dockHighlighter.hide(BitMask32.bit(4)) # Don't cast shadows
 		self.dockHighlighter.setScale(8)
-		
+
 		self.healthBars = []
-		
+
 		self.cursorX = 0
 		self.cursorY = 0
 		self.hidden = False
 		self.overrideUsernameHide = False
-		
+
 		self.chatLog = ChatLog(self.verticalOffset + 0.1)
-	
+
 	def setTeams(self, teams, team):
 		self.localTeam = team
-		
+
 		if self.localTeam.dock != None:
 			self.dockHighlighter.reparentTo(self.localTeam.dock.node)
 			self.dockHighlighter.show()
 		else:
 			self.dockHighlighter.hide()
-		
+
 		self.teams = teams
 		for username in self.playerUsernames:
 			username.removeNode()
@@ -144,7 +144,7 @@ class GameUI(DirectObject):
 		self.chatLog.setTeam(self.localTeam)
 		color = self.localTeam.color
 		self.healthBar.setColors((color.getX() + 0.4, color.getY() + 0.4, color.getZ() + 0.4, 0.5), (color.getX(), color.getY(), color.getZ(), 0.5))
-	
+
 	def hide(self):
 		for img in self.specialIndicators:
 			img.hide()
@@ -162,15 +162,15 @@ class GameUI(DirectObject):
 		self.ammoTextNode.hide()
 		self.damageImage.hide()
 		self.moneyText.hide()
-	
+
 	def hideUsernames(self):
 		for u in self.playerUsernames:
 			u.hide()
-	
+
 	def showUsernames(self):
 		for u in self.playerUsernames:
 			u.show()
-	
+
 	def show(self):
 		if self.crosshairs[self.currentCrosshair] != None:
 			self.crosshairs[self.currentCrosshair].show()
@@ -193,15 +193,15 @@ class GameUI(DirectObject):
 	def update(self, scoreLimit):
 		if self.hidden or self.localTeam == None:
 			return
-			
+
 		self.dockHighlighter.setR(engine.clock.time * 15)
-		
+
 		specialReady = self.localTeam.specialAvailable()
 		if specialReady and not self.lastSpecialReady:
 			self.specialReadySound.play()
 		self.lastSpecialReady = specialReady
 		self.specialBar.setValue(max(0, engine.clock.time - self.localTeam.lastSpecialActivated))
-		
+
 		allyList = []
 		for i in range(len(self.teams)):
 			team = self.teams[i]
@@ -223,11 +223,11 @@ class GameUI(DirectObject):
 
 		while len(self.healthBars) < len(allyList):
 			self.healthBars.append(UnitStatusBar())
-		
+
 		while len(self.healthBars) > len(allyList):
 			self.healthBars[0].removeNode()
 			del self.healthBars[0]
-		
+
 		for i in range(len(allyList)):
 			actor = allyList[i]
 			self.healthBars[i].show()
@@ -244,13 +244,13 @@ class GameUI(DirectObject):
 			self.healthBars[i].setValue(actor.health, actor.maxHealth)
 			self.healthBars[i].setColor(actor.getTeam().color)
 			self.healthBars[i].setScale((camera.getPos() - self.healthBars[i].getPos()).length() * 0.07)
-			
+
 		i = 0
 		for t in self.teams:
 			self.teamScores[i].setValue(t.score, scoreLimit)
 			self.teamScores[i].setUsername(t.username)
 			i += 1
-		
+
 		self.moneyText.setText("$" + str(self.localTeam.money))
 		if self.localTeam.money != self.lastMoneyAmount:
 			self.lastMoneyChange = engine.clock.time
@@ -260,7 +260,7 @@ class GameUI(DirectObject):
 			self.moneyText["scale"] = 0.075 + (1 - (moneyChangeTime / 0.5)) * 0.05
 		else:
 			self.moneyText["scale"] = 0.075
-		
+
 		if self.localTeam.score > self.lastTeamScore:
 			self.scoreChangeTextAlpha = 1.0
 			self.scoreChangeTextScale = 0.04
@@ -325,7 +325,7 @@ class GameUI(DirectObject):
 			self.damageImage.setColor(1, 1, 1, self.damageTransparency)
 		else:
 			self.damageImage.hide()
-		
+
 		self.chatLog.update()
 
 	def delete(self):
@@ -353,7 +353,7 @@ class Message:
 	def __init__(self, text, time):
 		self.text = text
 		self.time = time
-		
+
 class ChatLog(DirectObject):
 	def __init__(self, verticalOffset, displayTime = 15.0, maxChats = 8, chatBoxAlwaysVisible = False, showOwnChats = True):
 		self.localTeam = None
@@ -379,27 +379,27 @@ class ChatLog(DirectObject):
 		self.accept("enter", self.submitChat)
 		self.hidden = False
 		self.username = None
-	
+
 	def setTeam(self, team):
 		self.localTeam = team
-	
+
 	def setUsername(self, username):
 		self.username = username
-	
+
 	def show(self):
 		self.hidden = False
 		for text in self.chatTexts:
 			text.show()
 		if self.alwaysFocused:
 			self.focusChat()
-	
+
 	def hide(self):
 		self.hidden = True
 		self.chatBox.hide()
 		engine.inputEnabled = True
 		for text in self.chatTexts:
 			text.hide()
-	
+
 	def focusChat(self):
 		"Brings focus to the chatbox."
 		if self.chatBox.isHidden() and not self.hidden:
@@ -408,7 +408,7 @@ class ChatLog(DirectObject):
 			self.chatBox.show()
 			self.chatBox["focus"] = 1
 			engine.inputEnabled = False
-	
+
 	def submitChat(self):
 		if not self.chatBox.isHidden() and not self.hidden:
 			# Submit chat message, hide chat box
@@ -431,11 +431,11 @@ class ChatLog(DirectObject):
 				self.chatBox["focus"] = 1
 			self.chatBox.enterText("")
 		engine.inputEnabled = True
-		
+
 	def displayChat(self, username, message):
 		self.messages.insert(0, Message(username + ": " + message, engine.clock.time))
 		self._updateChatLog()
-	
+
 	def update(self):
 		numMessages = len(self.messages)
 		if numMessages > 0 and self.displayTime != -1:
@@ -443,7 +443,7 @@ class ChatLog(DirectObject):
 			if engine.clock.time - message.time > self.displayTime:
 				del self.messages[numMessages - 1:]
 				self._updateChatLog()
-	
+
 	def _updateChatLog(self):
 		self.messages = self.messages[0:len(self.chatTexts)]
 		index = 0
@@ -454,7 +454,7 @@ class ChatLog(DirectObject):
 		while index < len(self.chatTexts):
 			self.chatTexts[index].setText("")
 			index += 1
-	
+
 	def delete(self):
 		self.ignoreAll()
 		del self.messages[:]
@@ -491,17 +491,17 @@ class UnitSelectorScreen(DirectObject):
 		self.unitSlots = []
 		self.purchases = []
 		self.team = None
-		
+
 		self.accept("mouse1", self.click)
 		self.accept("mouse1-up", self.release)
 		self.accept("mouse3", self.rightClick)
-		
+
 		self.container = DirectFrame(parent = aspect2d, frameColor = (0.0, 0.0, 0.0, 0.0), frameSize=(-1.15, 1.15, -0.85, 0.75), pos = (0, 0, 0), sortOrder = -1)
 		self.container.setBin("fixed", 0)
 		self.background = OnscreenImage(image = "menu/background.jpg", pos = (0, 0, -0.05), parent = self.container, scale = (1.15, 1, 0.8))
 		self.background.setTransparency(TransparencyAttrib.MAlpha)
 		self.background.setColor(1, 1, 1, 0.6)
-		
+
 		# UI elements
 		visitorFont = loader.loadFont("menu/visitor2.ttf")
 		self.balanceText = OnscreenText(parent = self.container, pos = Vec3(1.05, -0.55, 0), text = "$0", align = TextNode.ARight, scale = 0.1, fg = (1, 1, 1, 1), shadow = (0, 0, 0, 0.5), font = visitorFont, mayChange = True)
@@ -511,7 +511,7 @@ class UnitSelectorScreen(DirectObject):
 		unitELabel = OnscreenText(parent = self.container, pos = Vec3(0.2, -0.575, 0), text = "Unit E", align = TextNode.ACenter, scale = 0.07, fg = (1, 1, 1, 1), shadow = (0, 0, 0, 0.5), font = visitorFont, mayChange = False)
 		undoButton = DirectButton(parent = self.container, text = "Undo", pos = (0.62, 0, -0.75), relief = DGG.FLAT, text_font = visitorFont, frameSize = (-0.4, 0.4, -.15, .15), frameColor = (0.0, 0.0, 0.0, 0.5), text_fg = (1, 1, 1, 1), text_scale = 0.3, text_pos = (0, -0.04), scale = 0.35, rolloverSound = None, clickSound = None, command = self.undo)
 		startButton = DirectButton(parent = self.container, text = "Start", pos = (0.96, 0, -0.75), relief = DGG.FLAT, text_font = visitorFont, frameSize = (-0.45, 0.45, -.15, .15), frameColor = (0.0, 0.0, 0.0, 0.5), text_fg = (1, 1, 1, 1), text_scale = 0.3, text_pos = (0, -0.04), scale = 0.35, rolloverSound = None, clickSound = None, command = self.startCallback)
-		
+
 		# Info dialog
 		self.infoDialog = DirectFrame(sortOrder = 100, frameColor = (0.03, 0.03, 0.03, 1.0), frameSize=(0, 1.05, -0.3, 0.3), pos = (0, 0, 0))
 		self.infoDialog.hide()
@@ -520,9 +520,9 @@ class UnitSelectorScreen(DirectObject):
 		dejavuFont = loader.loadFont("menu/DejaVuSans.ttf")
 		self.infoText = OnscreenText(pos = Vec3(0.075, 0.12, 0), parent = self.infoDialog, wordwrap = 18, align = TextNode.ALeft, scale = 0.05, fg = (1, 1, 1, 1), font = dejavuFont, mayChange = True)
 		self.infoPromptText = OnscreenText(pos = Vec3(0.97, -0.24, 0), text = "Click to purchase", parent = self.infoDialog, align = TextNode.ARight, scale = 0.05, fg = (1, 1, 1, 1), font = visitorFont, mayChange = False)
-		
+
 		# Buy slots
-		
+
 		# Weapons
 		origin = Vec3(-1.0, 0, 0.6)
 		offset = Vec3()
@@ -531,7 +531,7 @@ class UnitSelectorScreen(DirectObject):
 			slot = UnitIconSlot(code, UnitIconSlot.AcceptsWeapons, origin + offset, "images/buy-slot.png", UnitSelectorScreen.types[code][1], isSpecial = False)
 			self.buySlots.append(slot)
 			offset += Vec3(0, 0, -0.2)
-		
+
 		# Specials
 		origin = Vec3(-0.25, 0, 0.6)
 		offset = Vec3()
@@ -540,14 +540,14 @@ class UnitSelectorScreen(DirectObject):
 			slot = UnitIconSlot(code, UnitIconSlot.AcceptsSpecials, origin + offset, "images/buy-slot.png", UnitSelectorScreen.types[code][1], isSpecial = True)
 			self.buySlots.append(slot)
 			offset += Vec3(0, 0, -0.2)
-		
+
 		# Inventory slots
 		origin = Vec3(0.4, 0, 0.6)
 		for x in range(4):
 			for y in range(4):
 				slot = UnitIconSlot(-1, UnitIconSlot.AcceptsAny, origin + Vec3(x * 0.2, 0, -y * 0.2))
 				self.inventorySlots.append(slot)
-		
+
 		# Player slots
 		slot = UnitIconSlot(-1, UnitIconSlot.AcceptsWeapons, Vec3(-1.0, 0, -0.7), "images/weapon-slot.png")
 		self.playerSlots.append(slot)
@@ -555,22 +555,22 @@ class UnitSelectorScreen(DirectObject):
 		self.playerSlots.append(slot)
 		slot = UnitIconSlot(-1, UnitIconSlot.AcceptsSpecials, Vec3(-0.6, 0, -0.7), "images/special-slot.png", isSpecial = True)
 		self.playerSlots.append(slot)
-		
+
 		# Unit 1 slots
 		slot = UnitIconSlot(-1, UnitIconSlot.AcceptsWeapons, Vec3(-0.35, 0, -0.7), "images/weapon-slot.png")
 		self.unitSlots.append(slot)
 		slot = UnitIconSlot(-1, UnitIconSlot.AcceptsSpecials, Vec3(-0.15, 0, -0.7), "images/special-slot.png", isSpecial = True)
 		self.unitSlots.append(slot)
-		
+
 		# Unit 2 slots
 		slot = UnitIconSlot(-1, UnitIconSlot.AcceptsWeapons, Vec3(0.1, 0, -0.7), "images/weapon-slot.png")
 		self.unitSlots.append(slot)
 		slot = UnitIconSlot(-1, UnitIconSlot.AcceptsSpecials, Vec3(0.3, 0, -0.7), "images/special-slot.png", isSpecial = True)
 		self.unitSlots.append(slot)
-	
-	def setTeam(self, team):	
+
+	def setTeam(self, team):
 		self.team = team
-	
+
 	def rightClick(self):
 		if not self.hidden:
 			pos = self._getMousePos()
@@ -595,7 +595,7 @@ class UnitSelectorScreen(DirectObject):
 							self.purchases.append(icon)
 							icon.drop(slot)
 							break
-	
+
 	def release(self):
 		if self.pressed and self.selectedIcon != None:
 			closestSlot = None
@@ -615,7 +615,7 @@ class UnitSelectorScreen(DirectObject):
 				self.selectedIcon.drop(self.selectedIcon.lastSlot)
 		self.pressed = False
 		self.selectedIcon = None
-	
+
 	def update(self):
 		if not self.hidden:
 			if engine.Mouse.enabled:
@@ -642,7 +642,7 @@ class UnitSelectorScreen(DirectObject):
 			if self.pressed and self.selectedIcon != None:
 				self.selectedIcon.image["pos"] = pos
 			self.balanceText["text"] = "$" + str(self.team.money)
-	
+
 	def _getMousePos(self):
 		pointer = base.win.getPointer(0)
 		x = pointer.getX()
@@ -659,7 +659,7 @@ class UnitSelectorScreen(DirectObject):
 		for slot in self.buySlots + self.inventorySlots + self.playerSlots + self.unitSlots:
 			slot.show()
 		self.container.show()
-	
+
 	def hide(self):
 		self.hidden = True
 		engine.Mouse.hideCursor()
@@ -667,46 +667,46 @@ class UnitSelectorScreen(DirectObject):
 			slot.hide()
 		self.container.hide()
 		self.infoDialog.hide()
-	
+
 	def reset(self):
 		for icon in self.icons:
 			icon.delete()
 		del self.icons[:]
-	
+
 	def clearPurchases(self):
 		del self.purchases[:]
-	
+
 	def undo(self):
 		if len(self.purchases) > 0:
 			icon = self.purchases.pop()
 			self.team.money += entities.TeamEntity.costs[icon.type]
 			self.icons.remove(icon)
 			icon.delete()
-	
+
 	def disableUnits(self):
 		# Permanently deletes the unit selection slots
 		for slot in self.unitSlots:
 			slot.delete()
 		del self.unitSlots[:]
-	
+
 	def getUnitWeapons(self):
 		return [None if x.icon == None else x.icon.type for x in self.unitSlots if not x.isSpecial]
-	
+
 	def getUnitSpecials(self):
 		return [None if x.icon == None else x.icon.type for x in self.unitSlots if x.isSpecial]
-	
+
 	def getPrimaryWeapon(self):
 		icon = self.playerSlots[0].icon
 		return None if icon == None else icon.type
-	
+
 	def getSecondaryWeapon(self):
 		icon = self.playerSlots[1].icon
 		return None if icon == None else icon.type
-	
+
 	def getSpecial(self):
 		icon = self.playerSlots[2].icon
 		return None if icon == None else icon.type
-	
+
 	def delete(self):
 		self.ignoreAll()
 		self.container.destroy()
@@ -806,11 +806,11 @@ class StatusBar(DirectObject):
 		self.background = OnscreenGeom(geom = background, pos = pos, hpr = hpr)
 		background.removeNode()
 		self.background.setTransparency(TransparencyAttrib.MAlpha)
-	
+
 	def setColors(self, fg, bg):
 		self.bar["color"] = fg
 		self.background["color"] = bg
-	
+
 	def hide(self):
 		self.bar.hide()
 		self.background.hide()
@@ -824,7 +824,7 @@ class StatusBar(DirectObject):
 		if range != None:
 			self.range = float(range)
 		self.bar.setScale(1, 1, max(min(float(self.value) / self.range, 1), 0))
-	
+
 	def delete(self):
 		self.bar.removeNode()
 		self.background.removeNode()
@@ -834,23 +834,23 @@ class ScoreBar(StatusBar):
 	def __init__(self, range, pos, hpr, width, height):
 		StatusBar.__init__(self, range, pos, hpr, width, height)
 		self.usernameText = OnscreenText(pos = (pos[0] + 0.0075, pos[2] - 0.0075, 0), align = TextNode.ALeft, scale = 0.05, fg = (1, 1, 1, 1), font = loader.loadFont("menu/visitor2.ttf"), mayChange = True)
-	
+
 	def setUsername(self, name):
 		self.usernameText.setText(name)
-	
+
 	def hide(self):
 		StatusBar.hide(self)
 		self.usernameText.hide()
-	
+
 	def show(self):
 		StatusBar.show(self)
 		self.usernameText.show()
-	
+
 	def delete(self):
 		StatusBar.delete(self)
 		self.usernameText.destroy()
 
-class StatusBar3D(NodePath): 
+class StatusBar3D(NodePath):
 	def __init__(self, fg, bg, range):
 		NodePath.__init__(self, "status-bar")
 		self.reparentTo(render)
@@ -910,7 +910,7 @@ class UnitStatusBar(StatusBar3D):
 		self.textNode.hide(BitMask32.bit(4)) # Don't cast shadows
 		self.textNode.hide()
 		self.identifiers = ["Q", "E"]
-	
+
 	def setTeamIndex(self, index):
 		self.teamIndex = index
 		if self.teamIndex == -1:
@@ -918,7 +918,7 @@ class UnitStatusBar(StatusBar3D):
 		else:
 			self.text.setText(self.identifiers[self.teamIndex])
 			self.textNode.show()
-	
+
 	def setColor(self, color):
 		self.fg.setColor(Vec4(color.getX() + 0.4, color.getY() + 0.4, color.getZ() + 0.4, 0.5))
 		self.bg.setColor(Vec4(color.getX(), color.getY(), color.getZ(), 0.5))
@@ -949,7 +949,7 @@ class EditorUI(DirectObject):
 		self.cursorX = min(max(self.cursorX, -aspectRatio), aspectRatio)
 		self.cursorY = min(max(self.cursorY, -1), 1)
 		self.crosshairs.setPos(self.cursorX, 0, self.cursorY)
-		
+
 	def delete(self):
 		self.crosshairs.removeNode()
 		self.ignoreAll()
@@ -967,7 +967,7 @@ class Menu(DirectObject):
 	def __init__(self):
 		self.active = True
 		visitorFont = loader.loadFont("menu/visitor2.ttf")
-		self.dialog = DirectFrame(frameColor = (0.1, 0.4, 0.6, 0.6), frameSize=(-.45, .45, -.3375, .3375), pos = (0.8, 0, 0))
+		self.dialog = DirectFrame(frameColor = (0.1, 0.4, 0.6, 0.6), frameSize=(-.45, .45, -.3375, .3375), pos = (0, 0, 0))
 		self.postProcessingCheckBox = DirectCheckButton(parent = self.dialog, text = "Post-processing", indicatorValue = engine.enablePostProcessing, pos = (0, 0, 0.225), boxRelief = DGG.FLAT, relief = DGG.FLAT, boxPlacement = "left", text_font = visitorFont, text_fg = (1, 1, 1, 1), text_scale = 2.0, boxImage = ("images/checkbox-disabled.jpg", "images/checkbox-enabled.jpg", None), frameColor = (0, 0, 0, 0), scale = 0.04, rolloverSound = None, clickSound = None, command = self.togglePostProcessing)
 		self.shadersCheckBox = DirectCheckButton(parent = self.dialog, text = "Shaders", indicatorValue = engine.enableShaders, pos = (0, 0, 0.1), boxRelief = DGG.FLAT, relief = DGG.FLAT, boxPlacement = "left", text_font = visitorFont, text_fg = (1, 1, 1, 1), text_scale = 2.0, boxImage = ("images/checkbox-disabled.jpg", "images/checkbox-enabled.jpg", None), frameColor = (0, 0, 0, 0), scale = 0.04, rolloverSound = None, clickSound = None, command = self.toggleShaders)
 		self.distortionEffectsCheckBox = DirectCheckButton(parent = self.dialog, text = "Distortion effects", indicatorValue = engine.enableDistortionEffects, pos = (0, 0, -0.025), boxRelief = DGG.FLAT, relief = DGG.FLAT, boxPlacement = "left", text_font = visitorFont, text_fg = (1, 1, 1, 1), text_scale = 2.0, boxImage = ("images/checkbox-disabled.jpg", "images/checkbox-enabled.jpg", None), frameColor = (0, 0, 0, 0), scale = 0.04, rolloverSound = None, clickSound = None, command = self.toggleDistortionEffects)
@@ -977,7 +977,7 @@ class Menu(DirectObject):
 		self.dialog.hide()
 		self.hidden = True
 		self.accept("escape-up", self.toggle)
-	
+
 	def toggle(self):
 		self.hidden = not self.hidden
 		if self.hidden:
@@ -998,11 +998,11 @@ class Menu(DirectObject):
 	def toggleDistortionEffects(self, value):
 		engine.enableDistortionEffects = value
 		engine.distortionEffectsChanged()
-	
+
 	def toggleShadows(self, value):
 		engine.enableShadows = value
 		engine.shadowsChanged()
-	
+
 	def delete(self):
 		self.active = False
 		self.dialog.destroy()
@@ -1035,11 +1035,11 @@ class HostList(DirectObject):
 		self.transitionTime = 0.15
 		self.accept("wheel_up", self.scrollUp)
 		self.accept("wheel_down", self.scrollDown)
-	
+
 	def scrollUp(self):
 		if self.visible:
 			self.serverList["verticalScroll_value"] = max(0, min(1, self.serverList["verticalScroll_value"] - self.serverList["verticalScroll_scrollSize"]))
-	
+
 	def scrollDown(self):
 		if self.visible:
 			self.serverList["verticalScroll_value"] = max(0, min(1, self.serverList["verticalScroll_value"] + self.serverList["verticalScroll_scrollSize"]))
@@ -1058,10 +1058,10 @@ class HostList(DirectObject):
 			else:
 				self.lastHide = -1
 				self.dialog.hide()
-	
+
 	def clearServerIp(self):
 		self.serverIpEntry.set("")
-	
+
 	def show(self):
 		self.dialog.show()
 		for a in self.hostButtons:
@@ -1071,7 +1071,7 @@ class HostList(DirectObject):
 		self.visible = True
 		self.lastHide = -1
 		self.lastShow = engine.clock.time
-	
+
 	def showHosts(self, hosts):
 		if not self.active:
 			return # In case the lobby calls this callback after the menu has been deleted.
@@ -1086,12 +1086,12 @@ class HostList(DirectObject):
 		for (user, map, host, players, playerSlots) in hosts:
 			self.hostButtons.append(DirectButton(parent = self.serverList.getCanvas(), text = user + " - " + map + " (" + str(players) + "/" + str(playerSlots) + ")", text_align = TextNode.ALeft, pos = (0, 0, offset), relief = DGG.FLAT, text_font = dejavuFont, frameColor = (0.1, 0.4, 0.6, 0.6), frameSize = (-0.95, 0.95, -.075, .075), text_fg = (1, 1, 1, 1), text_scale = 0.05, text_pos = (-0.9, -0.02), scale = 0.8, rolloverSound = None, clickSound = None, command = self.go, extraArgs = [host], suppressMouse = 0))
 			offset -= 0.15
-	
+
 	def hide(self):
 		self.lastShow = -1
 		self.lastHide = engine.clock.time
 		self.visible = False
-	
+
 	def go(self, host = None):
 		if host == None: # Manual IP entry
 			ip = self.serverIpEntry.get()
@@ -1099,7 +1099,7 @@ class HostList(DirectObject):
 			ip = host
 		if net.isValidIp(ip):
 			self.callback(ip)
-		
+
 	def delete(self):
 		net.context.hostListCallback = None
 		self.active = False
@@ -1126,7 +1126,7 @@ class LoginDialog(DirectObject):
 		self.lastShow = -1
 		self.lastHide = -1
 		self.transitionTime = 0.15
-		
+
 	def update(self):
 		if self.lastShow != -1:
 			elapsedTime = engine.clock.time - self.lastShow
@@ -1142,21 +1142,21 @@ class LoginDialog(DirectObject):
 			else:
 				self.lastHide = -1
 				self.dialog.hide()
-	
+
 	def show(self):
 		self.dialog.show()
 		self.visible = True
 		self.lastHide = -1
 		self.lastShow = engine.clock.time
-	
+
 	def hide(self):
 		self.lastShow = -1
 		self.lastHide = engine.clock.time
 		self.visible = False
-	
+
 	def go(self, value = None):
 		self.callback(self.usernameEntry.get())
-		
+
 	def delete(self):
 		self.active = False
 		if self.dialog != None:
@@ -1194,15 +1194,15 @@ class MapList(DirectObject):
 		self.transitionTime = 0.15
 		self.accept("wheel_up", self.scrollUp)
 		self.accept("wheel_down", self.scrollDown)
-	
+
 	def scrollUp(self):
 		if self.visible:
 			self.mapList["verticalScroll_value"] = max(0, min(1, self.mapList["verticalScroll_value"] - self.mapList["verticalScroll_scrollSize"]))
-	
+
 	def scrollDown(self):
 		if self.visible:
 			self.mapList["verticalScroll_value"] = max(0, min(1, self.mapList["verticalScroll_value"] + self.mapList["verticalScroll_scrollSize"]))
-		
+
 	def update(self):
 		if self.lastShow != -1:
 			elapsedTime = engine.clock.time - self.lastShow
@@ -1218,7 +1218,7 @@ class MapList(DirectObject):
 			else:
 				self.lastHide = -1
 				self.dialog.hide()
-	
+
 	def show(self):
 		self.dialog.show()
 		self.visible = True
@@ -1229,7 +1229,7 @@ class MapList(DirectObject):
 		self.visible = False
 		self.lastShow = -1
 		self.lastHide = engine.clock.time
-		
+
 	def delete(self):
 		self.active = False
 		if self.dialog != None:
