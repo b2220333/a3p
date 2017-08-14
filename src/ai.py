@@ -67,15 +67,7 @@ class World:
 
 		# Setup the physics world
 		self.world = OdeWorld()
-		self.space = OdeSimpleSpace()
-		self.space.setAutoCollideWorld(self.world)
-		self.contactGroup = OdeJointGroup()
-		self.space.setAutoCollideJointGroup(self.contactGroup)
-		self.space.setCollisionEvent("physicsCollision")
-
-		self.world.setGravity(0, 0, -35)
-
-		# Surface IDs: 0 - ground 1 - objects 2 - actors
+		self.world.setGravity(0, 0, -40)
 		self.world.initSurfaceTable(3)
 		self.world.setSurfaceEntry(0, 1, 1.0, 0.3, 7, 0.9, 0.00001, 0.0, 0.01)
 		self.world.setSurfaceEntry(1, 1, 1.0, 0.3, 7, 0.9, 0.00001, 0.0, 0.01)
@@ -84,14 +76,18 @@ class World:
 		self.world.setSurfaceEntry(2, 2, 0.2, 0.3, 7, 0.9, 0.00001, 0.0, 0.01)
 		self.world.setSurfaceEntry(0, 0, 1.0, 0.3, 7, 0.9, 0.00001, 0.0, 0.01)
 
+		self.space = OdeSimpleSpace()
+		self.space.setAutoCollideWorld(self.world)
+		self.contactGroup = OdeJointGroup()
+		self.space.setAutoCollideJointGroup(self.contactGroup)
+		self.space.setCollisionEvent("physicsCollision")
+
 	def update(self):
-		"Steps the ODE simulation."
 		self.space.autoCollide()
 		self.world.quickStep(engine.clock.timeStep)
 		self.contactGroup.empty() # Clear the contact joints
 
 	def getNearestDroid(self, entityGroup, pos):
-		"Gets an entity on any opposing team with the smallest straight-line distance from the specified position."
 		distance = -1
 		droid = None
 		for entity in (x for x in entityGroup.entities.values() if isinstance(x, entities.BasicDroid)):
@@ -102,7 +98,6 @@ class World:
 		return droid
 
 	def getNearestEnemy(self, entityGroup, pos, team, includeCloakedUnits = False):
-		"Gets an entity on any opposing team with the smallest straight-line distance from the specified position."
 		distance = -1
 		enemy = None
 		for entity in (x for x in entityGroup.entities.values() if isinstance(x, entities.BasicDroid) and ((not x.cloaked) or includeCloakedUnits) and (not team.isAlly(x.getTeam()))):
@@ -113,7 +108,6 @@ class World:
 		return enemy
 
 	def getNearestDropPod(self, entityGroup, pos):
-		"Gets the nearest drop pod."
 		distance = -1
 		pod = None
 		for entity in (x for x in entityGroup.entities.values() if isinstance(x, entities.DropPod)):

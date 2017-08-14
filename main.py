@@ -28,7 +28,7 @@ basicShadersOnly.setValue(False)
 defaultNotifyLevel = ConfigVariableString("default-directnotify-level")
 defaultNotifyLevel.setValue("debug")
 audioEngine = ConfigVariableString("audio-library-name")
-audioEngine.setValue("p3fmod_audio")
+audioEngine.setValue("p3openal_audio")
 notifyLevel = ConfigVariableString("notify-level")
 notifyLevel.setValue("fatal")
 
