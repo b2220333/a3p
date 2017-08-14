@@ -1,8 +1,7 @@
-GAME_NAME = "A3P"
-VERSION_CODE = "v1.0"
+from panda3d.core import loadPrcFile
 
-from pandac.PandaModules import loadPrcFileData
-loadPrcFileData("", "window-type none")
+if __debug__:
+    loadPrcFile("config/config.prc")
 
 from direct.showbase.ShowBase import ShowBase
 from direct.showbase.DirectObject import DirectObject
@@ -19,18 +18,6 @@ base.makeDefaultPipe()
 
 winSize = ConfigVariableInt("win-size")
 fullscreen = ConfigVariableBool("fullscreen")
-windowTitle = ConfigVariableString("window-title")
-windowTitle.setValue(GAME_NAME)
-textFlatten = ConfigVariableBool("text-flatten")
-textFlatten.setValue(False)
-basicShadersOnly = ConfigVariableBool("basic-shaders-only")
-basicShadersOnly.setValue(False)
-defaultNotifyLevel = ConfigVariableString("default-directnotify-level")
-defaultNotifyLevel.setValue("debug")
-audioEngine = ConfigVariableString("audio-library-name")
-audioEngine.setValue("p3openal_audio")
-notifyLevel = ConfigVariableString("notify-level")
-notifyLevel.setValue("fatal")
 
 import src.engine as engine
 import src.audio as audio
@@ -86,6 +73,7 @@ while i < len(sys.argv):
 if not customWindowSize:
 	winSize.setWord(0, base.pipe.getDisplayWidth())
 	winSize.setWord(1, base.pipe.getDisplayHeight())
+
 fullscreen.setValue(not customWindowSize)
 
 if mode != MODE_DAEMON:
