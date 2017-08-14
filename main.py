@@ -1,15 +1,11 @@
-# Evan Todd 2010
-
 GAME_NAME = "A3P"
 VERSION_CODE = "v1.0"
-COPYRIGHT = "Evan Todd 2010"
 
 from pandac.PandaModules import loadPrcFileData
-loadPrcFileData("", "window-type none") 
+loadPrcFileData("", "window-type none")
+
 from direct.showbase.ShowBase import ShowBase
-
 from direct.showbase.DirectObject import DirectObject
-
 from pandac.PandaModules import *
 import sys
 
@@ -18,7 +14,7 @@ try:
 except:
     sys.argv = [sys.argv[0], "-w"]
 
-ShowBase() 
+ShowBase()
 base.makeDefaultPipe()
 
 winSize = ConfigVariableInt("win-size")
@@ -45,7 +41,6 @@ import src.ui as ui
 
 def showHelpInfo():
 	# Print help information
-	print GAME_NAME + " " + VERSION_CODE + " - " + COPYRIGHT
 	print "Usage (bracketed parameters are optional):"
 	print "-w [width] [height]\tRun in windowed mode"
 	print "-a\t\t\tDisable audio"
@@ -149,8 +144,7 @@ def goDaemon():
 	# Initialize engine settings
 	engine.init(showFrameRate = False, daemon = True)
 	engine.preloadModels()
-	engine.log.info(GAME_NAME + " " + VERSION_CODE + " - " + COPYRIGHT)
-	
+
 	from direct.distributed.PyDatagram import PyDatagram
 	net.init(defaultPort, PyDatagram)
 
@@ -171,20 +165,19 @@ def goDaemon():
 
 def goMenu():
 	global gameBackend, game, mode, gametype, mainMenu, skipIntro, menu
-	
+
 	# Initialize engine settings
 	engine.init(showFrameRate = False, daemon = (mode == MODE_DAEMON))
 	engine.preloadModels()
-	engine.log.info(GAME_NAME + " " + VERSION_CODE + " - " + COPYRIGHT)
-	
+
 	from direct.distributed.PyDatagram import PyDatagram
 	net.init(defaultPort, PyDatagram)
-	
+
 	gameBackend = None
 	game = None
-	
+
 	mainMenu = core.MainMenu(skipIntro)
-	
+
 	menu = None
 
 	def gameLoop(task):
@@ -218,4 +211,4 @@ if mode == MODE_DAEMON:
 elif mode == MODE_NORMAL:
 	goMenu()
 
-run()
+base.run()

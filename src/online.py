@@ -4,10 +4,10 @@ import net
 
 from direct.distributed.PyDatagram import PyDatagram
 
-LOBBY_SERVER_ADDRESS = "et1337.ath.cx"
-LOBBY_SERVER_PORT = 1337
+LOBBY_SERVER_ADDRESS = "127.0.0.1"
+LOBBY_SERVER_PORT = 1336
 address = (LOBBY_SERVER_ADDRESS, LOBBY_SERVER_PORT)
-	
+
 def registerHost(username, map, players, playerSlots):
 	p = net.Packet()
 	p.add(net.Uint8(net.PACKET_REGISTERHOST))

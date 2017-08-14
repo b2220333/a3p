@@ -34,7 +34,7 @@ class GameInfo(DirectObject): # Data structure containing game setup information
 		self.scoreLimit = 0
 		self.enableRespawn = True
 		self.type = DEATHMATCH
-	
+
 class Backend(DirectObject):
 	def __init__(self, username):
 		engine.log.info("Initializing game.")
@@ -95,7 +95,7 @@ class Backend(DirectObject):
 		self.aiWorld = ai.World()
 		self.map = engine.Map()
 		self.matchNumber = 0
-	
+
 	def delete(self):
 		if self.entityGroup != None:
 			self.entityGroup.delete()
@@ -139,7 +139,7 @@ class ServerBackend(Backend):
 		self.accept("lobby-confirm-register", self.lobbyServerRegistrationCallback)
 		self.accept("client-ready", self.clientReadyCallback)
 		self.registrationConfirmed = False
-	
+
 	def getPlayerCounts(self):
 		livePlayers = 0
 		deadPlayers = 0
@@ -158,7 +158,7 @@ class ServerBackend(Backend):
 				else:
 					deadPlayers += 1
 		return livePlayers, deadPlayers
-	
+
 	def loadMap(self, mapFile):
 		Backend.loadMap(self, mapFile)
 		net.context.resetConnectionStatuses()
@@ -168,15 +168,15 @@ class ServerBackend(Backend):
 		for client in net.context.activeConnections:
 			net.context.activeConnections[client].ready = False
 			self.sendSetupPackets(client)
-	
+
 	def setGame(self, game):
 		Backend.setGame(self, game)
 		self.numClients += 1 # Count ourselves as a client since we have a Game attached
 		self.clients.append(("127.0.0.1", 0)) # Reserve a spot here; we are our own client.
-	
+
 	def lobbyServerRegistrationCallback(self):
 		self.registrationConfirmed = True
-	
+
 	def update(self):
 		Backend.update(self)
 		if self.active:
@@ -193,7 +193,7 @@ class ServerBackend(Backend):
 					if team.score + sum([self.entityGroup.getEntity(x).score for x in team.getAllies()]) >= self.scoreLimit:
 						self.endMatch(winningTeam = team)
 						break
-	
+
 	def endMatch(self, winningTeam):
 		self.entityGroup.resetMatch()
 		self.matchNumber += 1
@@ -233,7 +233,7 @@ class ServerBackend(Backend):
 			self.numClients -= 1
 		else:
 			engine.log.info("Client " + net.addressToString(address) + " disconnected.")
-	
+
 	def newConnectionCallback(self, client, username):
 		if not client in self.clients: # We may receive multiple "new client" packets. We need to ignore all but the first.
 			if self.numClients < len(self.entityGroup.teams):
@@ -255,11 +255,11 @@ class ServerBackend(Backend):
 				net.context.send(p, client)
 		else:
 			self.sendSetupPackets(client)
-	
+
 	def sendSetupPackets(self, client):
 		engine.log.info("Constructing initialization packet for client " + net.addressToString(client))
 		net.context.send(self.makeSetupPacket(client), client)
-	
+
 	def makeSetupPacket(self, client):
 		p = net.Packet()
 		p.add(net.Uint8(net.PACKET_SETUP))
@@ -269,11 +269,11 @@ class ServerBackend(Backend):
 		p.add(net.Boolean(self.enableRespawn))
 		p.add(net.Uint8(self.type))
 		return p
-	
+
 	def clientReadyCallback(self, client):
 		engine.log.info("Client " + net.addressToString(client) + " completed loading. Sending spawn packets...")
 		net.context.send(self.makeUberSpawnPacket(), client)
-	
+
 	def makeUberSpawnPacket(self):
 		p = net.Packet()
 		# Teams have to be spawned first, so other entities can link to them.
@@ -282,7 +282,7 @@ class ServerBackend(Backend):
 		for entity in (x for x in self.entityGroup.entities.values() if not isinstance(x, entities.TeamEntity)):
 			p.add(entity.controller.buildSpawnPacket())
 		return p
-	
+
 	def delete(self):
 		engine.log.info("Sending disconnect notifications...")
 		p = net.Packet()
@@ -295,7 +295,7 @@ class PointControlBackend(ServerBackend):
 		ServerBackend.__init__(self, registerHost, username)
 		self.lastPodSpawnCheck = 0
 		self.maps = [x[1] for x in engine.maps if x[0] == "dm"] # List of all valid maps for this gametype
-	
+
 	def update(self):
 		ServerBackend.update(self)
 		if engine.clock.time - self.lastPodSpawnCheck > 0.5:
@@ -304,7 +304,7 @@ class PointControlBackend(ServerBackend):
 			if len([1 for x in self.entityGroup.entities.values() if isinstance(x, entities.DropPod)]) < numPods\
 			and len([1 for team in self.entityGroup.teams if team.getPlayer() != None and team.getPlayer().active]) > 0:
 				self.spawnPod()
-	
+
 	def spawnPod(self):
 		size = self.map.worldSize * 0.8
 		queue = None
@@ -362,7 +362,7 @@ class SurvivalBackend(ServerBackend):
 		self.zombieTeam.resetScore()
 		self.zombieTeam.purchaseUnit(self.zombieLoadouts[self.matchNumber][0], self.zombieLoadouts[self.matchNumber][1])
 		self.scoreLimit = self.zombieCounts[self.matchNumber] * 150
-	
+
 	def update(self):
 		ServerBackend.update(self)
 		if self.numClients > 0:
@@ -396,20 +396,20 @@ class ClientBackend(Backend):
 		net.context.disconnectCallback = self.disconnectCallback
 		self.accept("server-full", engine.exit)
 		self.accept("client-connection-failed", engine.exit)
-	
+
 	def disconnectCallback(self, address):
 		if net.compareAddresses(address, net.context.hostConnection.address): # We only care if the server disconnected
 			engine.log.info("Server disconnected.")
 			self.connected = False
 		else:
 			engine.log.info("Client " + address.getIpString() + " disconnected.")
-		
+
 	def loadMap(self, mapFile):
 		Backend.loadMap(self, mapFile)
 		p = net.Packet()
 		p.add(net.Uint8(net.PACKET_CLIENTREADY))
 		net.context.broadcast(p)
-	
+
 	def endMatchCallback(self, iterator):
 		self.entityGroup.resetMatch()
 		self.matchNumber += 1
@@ -428,7 +428,7 @@ class ClientBackend(Backend):
 			self.game.endMatchCallback(winningTeam)
 		except AssertionError:
 			pass
-	
+
 	def delete(self):
 		if self.connected:
 			engine.log.info("Disconnecting...")
@@ -437,24 +437,24 @@ class ClientBackend(Backend):
 			net.context.broadcast(p)
 			self.connected = False
 		Backend.delete(self)
-	
+
 class Game(DirectObject):
 	def __init__(self, backend):
 		self.backend = backend
-		
+
 		self.matchInProgress = False
-		
+
 		self.unitSelector = None
 		self.gameui = None
 		visitorFont = loader.loadFont("menu/visitor2.ttf")
 		self.promptText = OnscreenText(pos = (0, 0.85), scale = 0.1, fg = (1, 1, 1, 1), shadow = (0, 0, 0, 0.5), font = visitorFont, mayChange = True)
-		self.scoreText = OnscreenText(pos = (0, 0.92), scale = 0.06, fg = (1, 1, 1, 1), shadow = (0, 0, 0, 0.5), font = visitorFont, mayChange = True)			
+		self.scoreText = OnscreenText(pos = (0, 0.92), scale = 0.06, fg = (1, 1, 1, 1), shadow = (0, 0, 0, 0.5), font = visitorFont, mayChange = True)
 		self.winSound = audio.FlatSound("sounds/win.ogg")
 		self.loseSound = audio.FlatSound("sounds/lose.ogg")
 		self.errorSound = audio.FlatSound("sounds/error.ogg")
-		
+
 		self.playerLastActive = -1 # -1 means the player is currently active
-		
+
 		self.localTeam = None
 		self.localTeamID = 0
 
@@ -481,14 +481,14 @@ class Game(DirectObject):
 		if self.unitSelector.getPrimaryWeapon() == None or self.unitSelector.getPrimaryWeapon() == self.unitSelector.getSecondaryWeapon():
 			self.errorSound.play()
 			return
-		
+
 		if not self.matchInProgress:
 			self.backend.map.hidePlatforms()
 			self.spawnedOnce = False
 			self.matchInProgress = True
 			self.winSound.stop()
 			self.loseSound.stop()
-			
+
 		self.gameui.show()
 		self.unitSelector.hide()
 		self.promptText.hide()
@@ -499,11 +499,11 @@ class Game(DirectObject):
 		self.localTeam.clearUnits()
 		for i in range(len(weaponSelections)):
 			self.localTeam.purchaseUnit(weaponSelections[i], specialSelections[i])
-		
+
 		self.localTeam.setPrimaryWeapon(self.unitSelector.getPrimaryWeapon())
 		self.localTeam.setSecondaryWeapon(self.unitSelector.getSecondaryWeapon())
 		self.localTeam.setSpecial(self.unitSelector.getSpecial())
-	
+
 	def gameInfoCallback(self, iterator):
 		engine.log.info("Processing game setup information...")
 		info = GameInfo()
@@ -521,19 +521,19 @@ class Game(DirectObject):
 			self.unitSelector.disableUnits()
 		self.unitSelector.show()
 		net.context.clientConnected = True
-	
+
 	def localStart(self, map):
 		self.backend.loadMap(map)
-	
+
 	def setLocalTeamID(self, id):
 		self.localTeamID = id
 		self.unitSelector.reset()
-	
+
 	def reset(self):
 		self.unitSelector.reset()
 		self.unitSelector.show()
 		self.matchReset()
-		
+
 	def matchReset(self):
 		self.promptText.setText("")
 		self.promptText.show()
@@ -550,7 +550,7 @@ class Game(DirectObject):
 		self.localTeam = None
 		self.spawnedOnce = False
 		self.buyScreenDisplayed = False
-	
+
 	def handleSpacebar(self):
 		if not self.matchInProgress and self.localTeam != None:
 			if self.unitSelector.hidden:
@@ -560,7 +560,7 @@ class Game(DirectObject):
 					player.delete(self.backend.entityGroup)
 				self.localTeam.setPlayer(None)
 				self.showBuyScreen()
-	
+
 	def showBuyScreen(self):
 		self.unitSelector.clearPurchases()
 		if self.backend.gameOver:
@@ -569,22 +569,22 @@ class Game(DirectObject):
 			self.promptText.hide()
 			self.unitSelector.show()
 		self.gameui.hide()
-	
+
 	def endMatchCallback(self, winningTeam):
 		self.endMatch(winningTeam) # For object-oriented inheritance nonsense
-	
+
 	def endMatch(self, winningTeam):
 		self.backend.map.showPlatforms()
 		self.localTeam.platformSpawnPlayer(self.backend.map.platforms[self.localTeam.lastMatchPosition].getPosition() + Vec3(0, 0, 2))
 		self.gameui.showUsernames()
-		
+
 		if self.localTeam.isAlly(winningTeam):
 			self.winSound.play()
 		else:
 			self.loseSound.play()
-		
+
 		self.matchReset()
-		
+
 		self.updateScoreText()
 		self.promptText.show()
 
@@ -593,7 +593,7 @@ class Game(DirectObject):
 		if self.backend.gameOver:
 			gameOverText = "Game over! "
 			gameText = "game"
-			
+
 			# Find the team that won the most matches
 			if isinstance(self.backend, PointControlBackend):
 				winningTeam = None
@@ -603,7 +603,7 @@ class Game(DirectObject):
 						highScore = team.matchScore
 						winningTeam = team
 		self.promptText.setText(gameOverText + winningTeam.username + " wins the " + gameText + "! Spacebar to continue.")
-	
+
 	def updateScoreText(self):
 		text = ""
 		for team in self.backend.entityGroup.teams:
@@ -649,22 +649,22 @@ class Game(DirectObject):
 	def delete(self):
 		if engine.paused:
 			engine.togglePause()
-	
+
 		engine.log.info("Deleting game.")
-		
+
 		if self.unitSelector != None:
 			self.unitSelector.delete()
-		
+
 		if self.gameui != None:
 			self.gameui.delete()
-		
+
 		self.winSound.stop()
 		self.loseSound.stop()
 		if not self.promptText.isEmpty():
 			self.promptText.destroy()
 		if not self.scoreText.isEmpty():
 			self.scoreText.destroy()
-			
+
 		self.ignoreAll()
 
 class Tutorial(Game):
@@ -679,7 +679,7 @@ class Tutorial(Game):
 		self.tutorialScreens = []
 		self.messages = ["Find and capture the drop pods to earn money!", "Use your units to help defeat the enemy.", "Try using your special abilities."]
 		visitorFont = loader.loadFont("menu/visitor2.ttf")
-		self.messageText = OnscreenText(pos = (-engine.aspectRatio + 0.05, 0.9), align = TextNode.ALeft, scale = 0.07, fg = (1, 1, 1, 1), shadow = (0, 0, 0, 0.5), font = visitorFont, mayChange = True)	
+		self.messageText = OnscreenText(pos = (-engine.aspectRatio + 0.05, 0.9), align = TextNode.ALeft, scale = 0.07, fg = (1, 1, 1, 1), shadow = (0, 0, 0, 0.5), font = visitorFont, mayChange = True)
 		for i in range(4):
 			image = OnscreenImage(image = "images/part" + str(i + 1) + ".jpg", pos = (0, 0, 0), scale = (1680.0/1050.0, 1, 1))
 			image.hide()
@@ -691,7 +691,7 @@ class Tutorial(Game):
 		self.enemyAiUnits = [(components.CHAINGUN, None), (components.SNIPER, None), (components.PISTOL, None)]
 		self.enemyTeam = None
 		self.matchStartTime = -1
-	
+
 	def handleSpacebar(self):
 		if self.tutorialIndex == 3:
 			self.backend.connected = False # Exit tutorial
@@ -706,22 +706,22 @@ class Tutorial(Game):
 					self.startMatch()
 			else:
 				Game.handleSpacebar(self)
-	
+
 	def endMatch(self, winningTeam):
 		if self.localTeam.isAlly(winningTeam):
 			self.winSound.play()
 		else:
 			self.loseSound.play()
 		self.matchReset()
-	
+
 	def reset(self):
 		Game.reset(self)
 		self.unitSelector.hide()
-	
+
 	def showBuyScreen(self, override = False):
 		if self.tutorialIndex >= 2 and (self.matchInProgress or override):
 			Game.showBuyScreen(self)
-	
+
 	def startMatch(self):
 		if not self.matchInProgress:
 			self.matchStartTime = engine.clock.time
@@ -745,7 +745,7 @@ class Tutorial(Game):
 			if self.tutorialIndex <= 2:
 				self.messageText.setText(self.messages[self.tutorialIndex])
 				self.messageText.show()
-				
+
 			# Purchase AI units
 			self.enemyTeam = self.backend.entityGroup.teams[1]
 			self.enemyTeam.setLocal(True)
@@ -754,7 +754,7 @@ class Tutorial(Game):
 			self.enemyTeam.resetScore()
 			for u in self.enemyAiUnits:
 				self.enemyTeam.purchaseUnit(u[0], u[1])
-		
+
 		if self.tutorialIndex == 2:
 			Game.startMatch(self)
 		else:
@@ -765,7 +765,7 @@ class Tutorial(Game):
 			self.gameui.show()
 			self.promptText.hide()
 			self.scoreText.hide()
-	
+
 	def endMatchCallback(self, winningTeam):
 		localTeam = self.localTeam
 		Game.endMatchCallback(self, winningTeam)
@@ -781,7 +781,7 @@ class Tutorial(Game):
 		self.unitSelector.hide()
 		self.enemyTeam.resetScore()
 		self.enemyTeam.score = 0
-	
+
 	def update(self):
 		if self.matchStartTime != -1:
 			if engine.clock.time - self.matchStartTime < 2:
@@ -804,7 +804,7 @@ class Tutorial(Game):
 	def hideTutorialScreen(self):
 		render.show()
 		self.tutorialScreens[self.tutorialIndex].hide()
-	
+
 	def delete(self):
 		engine.log.info("Ending tutorial.")
 		Game.delete(self)
@@ -826,32 +826,32 @@ class MainMenu(DirectObject):
 		self.accept("escape", self.escape)
 		self.accept("mouse1", self.click)
 		self.cameraDistance = 20
-	
+
 		self.globe = engine.loadModel("menu/Globe")
 		self.globe.reparentTo(render)
 		self.globe.setTransparency(TransparencyAttrib.MAlpha)
 		self.globe.setColor(Vec4(1, 1, 1, 0.6))
 		self.globe.setTwoSided(True)
 		self.globe.setRenderModeWireframe()
-		
+
 		self.overlay = camera.attachNewNode("overlay")
 		self.overlay.setTransparency(TransparencyAttrib.MAlpha)
 		self.overlay.setColor(Vec4(1, 1, 1, 0))
 		self.overlay.setPos(0, 0, 0)
 		self.overlay.setPos(0, self.cameraDistance, 0)
-		
+
 		self.overlay1 = engine.loadModel("menu/overlay1")
 		self.overlay1.setScale(4)
 		self.overlay1.setTwoSided(True)
 		self.overlay1.setRenderModeWireframe()
 		self.overlay1.reparentTo(self.overlay)
-		
+
 		self.overlay2 = engine.loadModel("menu/overlay2")
 		self.overlay2.setScale(4)
 		self.overlay2.setTwoSided(True)
 		self.overlay2.setRenderModeWireframe()
 		self.overlay2.reparentTo(self.overlay)
-		
+
 		self.overlay3 = engine.loadModel("menu/overlay3")
 		self.overlay3.setScale(4)
 		self.overlay3.setTwoSided(True)
@@ -860,7 +860,7 @@ class MainMenu(DirectObject):
 		self.overlay3.setP(uniform(0, 360))
 		self.overlay3.setH(uniform(0, 360))
 		self.overlay3.reparentTo(self.overlay)
-		
+
 		self.overlay4 = engine.loadModel("menu/overlay3")
 		self.overlay4.setScale(4)
 		self.overlay4.setTwoSided(True)
@@ -869,19 +869,19 @@ class MainMenu(DirectObject):
 		self.overlay4.setR(uniform(0, 360))
 		self.overlay4.setP(uniform(0, 360))
 		self.overlay4.reparentTo(self.overlay)
-		
+
 		self.text = engine.loadModel("menu/text")
 		self.text.setScale(4)
 		self.text.setTwoSided(True)
 		self.text.reparentTo(self.overlay)
-		
+
 		self.selector = engine.loadModel("menu/selector")
 		self.selector.setScale(4)
 		self.selector.setTwoSided(True)
 		self.selector.reparentTo(self.overlay)
-		
+
 		self.selectedItem = 0
-		
+
 		self.skyBox = engine.loadModel("menu/skybox")
 		self.skyBox.setScale(self.cameraDistance + 2)
 		self.skyBox.setRenderModeWireframe()
@@ -889,7 +889,7 @@ class MainMenu(DirectObject):
 		self.skyBox.reparentTo(render)
 		self.skyBox.setTransparency(TransparencyAttrib.MAlpha)
 		self.skyBox.setColor(Vec4(1, 1, 1, 0))
-		
+
 		cmbg = CardMaker("background")
 		size = 50
 		cmbg.setFrame(-size * engine.aspectRatio, size * engine.aspectRatio, -size, size)
@@ -897,52 +897,47 @@ class MainMenu(DirectObject):
 		self.background.setTexture(loader.loadTexture("menu/background.jpg"))
 		self.background.setPos(0, size * 1.25, 0)
 		self.background.setDepthWrite(False)
-		
+
 		self.belt = JunkBelt(5)
-		
+
 		self.angle = uniform(0, 360)
 		self.period = 60
 		self.uiAngle = 0
-		
+
 		self.logo = OnscreenImage(image = "menu/logo.png", pos = (0, 0, 0), scale = ((512.0 / 175.0) * 0.075, 0, 0.075))
 		self.logo.setTransparency(TransparencyAttrib.MAlpha)
 		self.logo.setColor(1, 1, 1, 0)
 		self.logo.setBin("transparent", 0)
-		
+
 		self.loadingScreen = OnscreenImage(image = "menu/loading.jpg", pos = (0, 0, 0), scale = (1680.0 / 988.0, 0, 1))
 		self.loadingScreen.hide()
-		
+
 		self.skipToEndOfTutorial = skipIntro
-		
-		self.introText = None
+
 		global firstBoot
+		firstBoot = False
+
 		self.introTime = 2
 		if firstBoot and not skipIntro:
 			self.introTime = 4
-			visitorFont = loader.loadFont("menu/visitor2.ttf")
-			self.introText = OnscreenText(pos = (0, 0), scale = 0.2, align = TextNode.ACenter, fg = (1, 1, 1, 1), shadow = (0, 0, 0, 0.5), font = visitorFont, mayChange = True, text = "et1337 presents")
+
 		self.showLogin = firstBoot
-		firstBoot = False
-		
+
 		self.hostList = ui.HostList(self.startClient)
 		self.mapList = ui.MapList(self.startServer)
 		self.loginDialog = ui.LoginDialog(self.setUsername)
 		self.loginDialogShown = False
-		
+
 		self.introSound = audio.FlatSound("menu/intro.ogg", volume = 0.15)
 		self.introSound.play()
-		
+
 		self.clientConnectAddress = None
 		self.serverMapName = None
 		self.serverMode = 0 # 0 for normal, 1 for tutorial
 		self.serverGameType = 0 # 0 for deathmatch, 1 for survival
-		
+
 		self.username = "Unnamed"
-		
-		self.chatLog = ui.ChatLog(verticalOffset = -0.9, displayTime = -1, maxChats = 16, chatBoxAlwaysVisible = True, showOwnChats = False)
-		self.chatLog.hide()
-		self.chatConnection = GlobalChatConnection()
-		
+
 		self.startTime = -1
 		self.goTime = -1
 		if base.appRunner != None:
@@ -950,20 +945,20 @@ class MainMenu(DirectObject):
 			if token != "" and token != "Unnamed":
 				self.setUsername(token)
 				self.loginDialogShown = True
-	
+
 	def escape(self):
 		if self.hostList.visible:
 			self.hostList.hide()
 		elif self.mapList.visible:
 			self.mapList.hide()
-	
+
 	def startClient(self, host):
 		self.clickSound.play()
 		self.hostList.hide()
 		self.loadingScreen.show()
 		self.clientConnectAddress = host
 		self.goTime = engine.clock.time
-	
+
 	def startServer(self, map, gametype):
 		if not (self.serverMode == 1 and gametype == 1): # Tutorial works on Point Control maps.
 			self.clickSound.play()
@@ -972,15 +967,13 @@ class MainMenu(DirectObject):
 			self.serverMapName = map
 			self.serverGameType = gametype
 			self.goTime = engine.clock.time
-	
+
 	def setUsername(self, username):
 		self.clickSound.play()
 		self.username = username
 		engine.savedUsername = self.username
 		engine.saveConfigFile()
 		self.loginDialog.hide()
-		self.chatLog.setUsername(self.username)
-		self.chatLog.show()
 
 	def update(self):
 		if not self.active:
@@ -991,10 +984,6 @@ class MainMenu(DirectObject):
 		elapsedTime = engine.clock.time - self.startTime
 		if elapsedTime < self.introTime:
 			blend = elapsedTime / self.introTime
-			if self.introText != None:
-				self.introText["scale"] = 0.05 + (blend * 0.15)
-				self.introText["fg"] = Vec4(1, 1, 1, (1 - blend)**.5)
-				self.introText["shadow"] = Vec4(1, 1, 1, (1 - blend)**.5 * 0.5)
 			self.angle += engine.clock.timeStep * (1 - blend)
 			self.cameraDistance = 20 + (1 - blend)**2 * 200
 		elif elapsedTime < self.introTime + 2:
@@ -1006,25 +995,18 @@ class MainMenu(DirectObject):
 			if not self.backgroundSound.isPlaying():
 				self.backgroundSound.play()
 			self.backgroundSound.setVolume(blend * 0.5)
-			if self.introText != None:
-				self.introText["fg"] = Vec4(1, 1, 1, 0)
 		else:
 			self.cameraDistance = 20
 			self.overlay.setColor(Vec4(1, 1, 1, 1))
 			self.logo.setColor(1, 1, 1, 1)
 			self.skyBox.setColor(Vec4(1, 1, 1, 1))
 			self.backgroundSound.setVolume(0.5)
-		
+
 		if elapsedTime > self.introTime:
 			if not self.loginDialogShown and self.showLogin:
 				self.loginDialog.show()
 				self.loginDialogShown = True
-			elif self.chatLog.hidden and not self.showLogin:
-				self.chatLog.show()
-		
-		self.chatConnection.update()
-		self.chatLog.update()
-		
+
 		self.uiAngle -= engine.clock.timeStep * 2
 		self.text.setR(self.uiAngle)
 
@@ -1044,7 +1026,7 @@ class MainMenu(DirectObject):
 		while self.selectedItem < 0:
 			self.selectedItem += 4
 		self.selector.setR(self.uiAngle + self.selectedItem * 90)
-		
+
 		self.overlay1.setR(self.overlay1.getR() - engine.clock.timeStep * 2)
 		self.overlay2.setR(self.overlay2.getR() + engine.clock.timeStep * 2)
 		self.overlay3.setH(self.overlay3.getH() + engine.clock.timeStep * 10)
@@ -1053,10 +1035,10 @@ class MainMenu(DirectObject):
 		self.angle += engine.clock.timeStep * 0.025
 		camera.setPos(math.cos(self.angle) * self.cameraDistance, math.sin(self.angle) * self.cameraDistance, math.cos(elapsedTime / 45 + 2) * 2)
 		camera.lookAt(Point3(0, 0, 0))
-		
+
 		backend = None
 		game = None
-		
+
 		if self.goTime != -1 and engine.clock.time - self.goTime > 0.25:
 			if self.clientConnectAddress != None:
 				self.delete()
@@ -1082,7 +1064,7 @@ class MainMenu(DirectObject):
 
 		net.context.writeTick()
 		return backend, game
-	
+
 	def click(self):
 		if self.mapList.visible or self.hostList.visible or self.loginDialog.visible or engine.clock.time - self.startTime < self.introTime + 0.5:
 			return
@@ -1097,7 +1079,7 @@ class MainMenu(DirectObject):
 		elif self.selectedItem == 3: # Host
 			self.mapList.show()
 			self.serverMode = 0
-	
+
 	def delete(self):
 		self.loadingScreen.destroy()
 		self.hostList.delete()
@@ -1111,14 +1093,11 @@ class MainMenu(DirectObject):
 		self.skyBox.removeNode()
 		self.ignoreAll()
 		self.logo.destroy()
-		if self.introText != None:
-			self.introText.destroy()
 		self.introSound.stop()
 		self.backgroundSound.stop()
-		self.chatLog.delete()
-		self.chatConnection.delete()
 
 class JunkBelt:
+
 	def __init__(self, radius):
 		self.radius = radius
 		junkFiles = ["menu/junk1", "menu/junk2", "menu/junk3", "menu/junk4", "menu/junk5"]
@@ -1130,6 +1109,7 @@ class JunkBelt:
 			node.setScale(0.01)
 			node.setRenderModeWireframe()
 			self.models.append(node)
+
 		for _ in range(750):
 			instance = render.attachNewNode("junk")
 			angle = uniform(0, 2 * math.pi)
@@ -1149,10 +1129,11 @@ class JunkBelt:
 	def update(self):
 		for i in range(len(self.instances)):
 			self.instances[i].setHpr(self.instances[i].getHpr() + (self.avels[i] * engine.clock.timeStep))
-	
+
 	def delete(self):
 		for instance in self.instances:
 			instance.removeNode()
+
 		for model in self.models:
 			model.removeNode()
 
@@ -1174,49 +1155,3 @@ def _cleanCharHex(c):
 	r = HexCharacters[o / 16]
 	r += HexCharacters[o % 16]
 	return r
-
-import time
-class GlobalChatConnection(DirectObject):
-	def __init__(self, host = "http://a3p.sourceforge.net/chat"):
-		self.accept("chat-outgoing", self.sendChat)
-		self.lastPoll = 0
-		self.lastReceivedId = 0
-		self.host = host
-		self.firstRequest = True
-	
-	def sendChat(self, username, message):
-		self.request(self.host + "/post.php", "user=" + _urlEncode(username) + "&msg=" + _urlEncode(message))
-	
-	def update(self):
-		if engine.clock.time - self.lastPoll > 3.0:
-			self.lastPoll = engine.clock.time
-			self.request(self.host + "/get.php", "i=" + str(self.lastReceivedId), self.chatCallback)
-	
-	def chatCallback(self, data):
-		lines = data.split("\n")
-		self.lastReceivedId = lines[0]
-		for line in lines[1:]:
-			parts = line.split("\t")
-			if len(parts) == 2:
-				messenger.send("chat-incoming", parts)
-
-	def request(self, url, params, callback = None):
-		http = HTTPClient()
-		channel = http.makeChannel(True)
-		channel.beginPostForm(DocumentSpec(url), params)
-		rf = Ramfile()
-		channel.downloadToRam(rf)
-		def downloadTask(channel, rf, downloadCallback, task):
-			if channel.run():
-				return task.cont
-			if not channel.isDownloadComplete():
-				if downloadCallback != None:
-					downloadCallback("")
-			else:
-				if downloadCallback != None:
-					downloadCallback(rf.getData())
-			return task.done
-		taskMgr.add(downloadTask, "urlRequest", appendTask = True, extraArgs = [channel, rf, callback])
-	
-	def delete(self):
-		self.ignoreAll()
