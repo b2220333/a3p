@@ -916,12 +916,15 @@ class Grenade(ObjectEntity):
 		self.grenadeAlive = True
 		self.actor = None
 
-	def setTeamId(self, id):
+	def setTeamId(self, id, entityGroup):
 		self.teamId = id
-		self.getTeam() # Trigger the process to try and find our team. If it hasn't spawned yet, we get the default team.
+		self.getTeam(entityGroup) # Trigger the process to try and find our team. If it hasn't spawned yet, we get the default team.
 
-	def getTeam(self):
+	def getTeam(self, entityGroup=None):
 		if self.team == None:
+			if not entityGroup:
+				return self.team
+
 			team = entityGroup.getEntity(self.teamId)
 			if team != None:
 				self.setTeam(team)
