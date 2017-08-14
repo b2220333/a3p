@@ -20,7 +20,7 @@ class GameUI(DirectObject):
 		self.crosshairs.append(None)
 		crosshairFiles = ["images/wide-crosshair.png", "images/narrow-crosshair.png", "images/sniper-crosshair.png"]
 		for file in crosshairFiles:
-			c = OnscreenImage(image = file, pos = (0, 0, 0), scale = 0.2)
+			c = OnscreenImage(image = file, pos = (0, 0, 0), scale = 0.1)
 			c.setTransparency(TransparencyAttrib.MAlpha)
 			c.setColor(1, 1, 1, 0.5)
 			c.setBin("transparent", 0)

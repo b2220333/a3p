@@ -54,7 +54,6 @@ class World:
 	def __init__(self):
 		global currentWorld
 		currentWorld = self
-		"Initializes the ODE world and space."
 		self.grids = dict()
 		self.navMesh = None
 		self.spawnPoints = []
