@@ -894,7 +894,9 @@ class MainMenu(DirectObject):
 		self.logo.setColor(1, 1, 1, 0)
 		self.logo.setBin("transparent", 0)
 
-		self.loadingScreen = OnscreenImage(image = "menu/loading.jpg", pos = (0, 0, 0), scale = (1680.0 / 988.0, 0, 1))
+		self.loadingScreen = OnscreenImage(parent=aspect2dp, image = "menu/loading.jpg", pos = (0, 0, 0))
+		self.loadingScreen.setScale(render2d, VBase3(1))
+		self.loadingScreen.setSx(2)
 		self.loadingScreen.hide()
 
 		self.skipToEndOfTutorial = skipIntro
