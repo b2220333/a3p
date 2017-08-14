@@ -1,11 +1,27 @@
-from panda3d.core import loadPrcFile
+from panda3d.core import loadPrcFile, loadPrcFileData
+import os
+import zlib
+import StringIO
 
 if __debug__:
     loadPrcFile("config/config.prc")
+else:
+    if not os.path.exists('config.pre'):
+        raise RuntimeError('Failed to file config file!')
+
+    configData = StringIO.StringIO(zlib.decompress(open('config.pre').read()))
+
+    for line in configData.readlines():
+        if not line or line == '\n':
+            continue
+
+        loadPrcFileData('config', line)
+
+    configData.close()
 
 from direct.showbase.ShowBase import ShowBase
 from direct.showbase.DirectObject import DirectObject
-from pandac.PandaModules import *
+from panda3d.core import *
 import sys
 
 try:
@@ -27,7 +43,6 @@ import src.core as core
 import src.ui as ui
 
 def showHelpInfo():
-	# Print help information
 	print "Usage (bracketed parameters are optional):"
 	print "-w [width] [height]\tRun in windowed mode"
 	print "-a\t\t\tDisable audio"

@@ -26,16 +26,20 @@ class GameUI(DirectObject):
 			c.setBin("transparent", 0)
 			c.hide()
 			self.crosshairs.append(c)
+
 		self.currentCrosshair = 1
 
 		visitorFont = loader.loadFont("menu/visitor2.ttf")
 		self.specialReadySound = audio.FlatSound("sounds/special-ready.ogg")
 		self.lastSpecialReady = True
 
-		self.damageImage = OnscreenImage(image = "images/tunnel-vision.png", pos = (0, 0, 0), scale = (16.0 / 9.0, 0, 1))
+		self.damageImage = OnscreenImage(image = "images/tunnel-vision.png", pos = (0, 0, 0),)
 		self.damageImage.setTransparency(TransparencyAttrib.MAlpha)
 		self.damageImage.hide()
 		self.damageImage.setBin("transparent", 0)
+		self.damageImage.setScale(render2d, VBase3(1))
+		self.damageImage.setSx(2)
+
 		self.damageTransparency = 0.0
 		self.lastPlayerHealth = 0
 
@@ -267,7 +271,9 @@ class GameUI(DirectObject):
 			sign = ""
 			if self.localTeam.score > self.lastTeamScore:
 				sign = "+"
+
 			self.scoreChangeText.setText(sign + str(int(self.localTeam.score - self.lastTeamScore)))
+
 		self.lastTeamScore = self.localTeam.score
 
 		if self.scoreChangeTextAlpha > 0.0:

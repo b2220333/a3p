@@ -6,6 +6,9 @@ win-origin -2 -2
 fullscreen #f
 show-frame-rate-meter #t
 
+# Debug:
+want-pstats #f
+
 # Display:
 load-display pandagl
 aux-display pandadx9

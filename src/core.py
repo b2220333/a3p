@@ -9,6 +9,7 @@ import ai
 import entities
 import ui
 import net
+import math
 import controllers
 import components
 import engine
@@ -28,6 +29,7 @@ SURVIVAL = 1
 firstBoot = True
 
 class GameInfo(DirectObject): # Data structure containing game setup information
+
 	def __init__(self):
 		self.mapFile = ""
 		self.teamId = 0
@@ -36,6 +38,7 @@ class GameInfo(DirectObject): # Data structure containing game setup information
 		self.type = DEATHMATCH
 
 class Backend(DirectObject):
+
 	def __init__(self, username):
 		engine.log.info("Initializing game.")
 		self.type = DEATHMATCH
@@ -122,6 +125,7 @@ class Backend(DirectObject):
 		engine.renderEnvironment = engine.renderLit.attachNewNode("renderEnvironment")
 
 class ServerBackend(Backend):
+
 	def __init__(self, registerHost = True, username = "Unnamed"):
 		Backend.__init__(self, username)
 		self.type = DEATHMATCH
@@ -291,6 +295,7 @@ class ServerBackend(Backend):
 		Backend.delete(self)
 
 class PointControlBackend(ServerBackend):
+
 	def __init__(self, registerHost = True, username = "Unnamed"):
 		ServerBackend.__init__(self, registerHost, username)
 		self.lastPodSpawnCheck = 0
@@ -324,6 +329,7 @@ class PointControlBackend(ServerBackend):
 		self.lastPodSpawn = engine.clock.time
 
 class SurvivalBackend(ServerBackend):
+
 	def __init__(self, registerHost = True, username = "Unnamed"):
 		ServerBackend.__init__(self, registerHost, username)
 		self.maps = [x[1] for x in engine.maps if x[0] == "zs"] # List of all valid maps for this gametype
@@ -385,6 +391,7 @@ class SurvivalBackend(ServerBackend):
 					self.endMatch(winningTeam)
 
 class ClientBackend(Backend):
+
 	def __init__(self, serverAddress, username = "Unnamed"):
 		Backend.__init__(self, username)
 		self.type = DEATHMATCH
@@ -439,6 +446,7 @@ class ClientBackend(Backend):
 		Backend.delete(self)
 
 class Game(DirectObject):
+
 	def __init__(self, backend):
 		self.backend = backend
 
@@ -659,6 +667,7 @@ class Game(DirectObject):
 		self.ignoreAll()
 
 class Tutorial(Game):
+
 	def __init__(self, backend, index):
 		engine.log.info("Starting tutorial.")
 		Game.__init__(self, backend)
@@ -797,8 +806,8 @@ class Tutorial(Game):
 		for screen in self.tutorialScreens:
 			screen.removeNode()
 
-import math
 class MainMenu(DirectObject):
+
 	def __init__(self, skipIntro = False):
 		render.show()
 		engine.Mouse.showCursor()
@@ -868,7 +877,7 @@ class MainMenu(DirectObject):
 		self.selectedItem = 0
 
 		self.skyBox = engine.loadModel("menu/skybox")
-		self.skyBox.setScale(self.cameraDistance + 2)
+		self.skyBox.setScale(self.cameraDistance * 5)
 		self.skyBox.setRenderModeWireframe()
 		self.skyBox.setTwoSided(True)
 		self.skyBox.reparentTo(render)
@@ -894,7 +903,7 @@ class MainMenu(DirectObject):
 		self.logo.setColor(1, 1, 1, 0)
 		self.logo.setBin("transparent", 0)
 
-		self.loadingScreen = OnscreenImage(parent=aspect2dp, image = "menu/loading.jpg", pos = (0, 0, 0))
+		self.loadingScreen = OnscreenImage(image = "menu/loading.jpg", pos = (0, 0, 0))
 		self.loadingScreen.setScale(render2d, VBase3(1))
 		self.loadingScreen.setSx(2)
 		self.loadingScreen.hide()

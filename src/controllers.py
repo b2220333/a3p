@@ -22,6 +22,7 @@ def init():
 	specialTypes = {KAMIKAZE_SPECIAL:KamikazeSpecial, SHIELD_SPECIAL:ShieldSpecial, CLOAK_SPECIAL:CloakSpecial, AWESOME_SPECIAL:AwesomeSpecial, ROCKET_SPECIAL:RocketSpecial}
 
 class Controller(DirectObject):
+
 	def __init__(self):
 		self.criticalPackets = []
 		self.entity = None
@@ -110,6 +111,7 @@ class Controller(DirectObject):
 
 class TeamEntityController(Controller):
 	"""TeamEntityControllers increment their team's money and spawn newly purchased units."""
+
 	def __init__(self):
 		Controller.__init__(self)
 		self.respawns = []
@@ -277,6 +279,7 @@ class TeamEntityController(Controller):
 		self.respawns.append((True, primary, secondary, special, engine.clock.time - self.spawnDelay, pos)) # pos is the position to spawn the player at
 
 class ObjectController(Controller):
+
 	def __init__(self):
 		Controller.__init__(self)
 		self.isStatic = False
@@ -399,6 +402,7 @@ class ObjectController(Controller):
 		Controller.delete(self, killed)
 
 class FragmentController(ObjectController):
+
 	def __init__(self, velocity):
 		ObjectController.__init__(self)
 		self.velocity = Vec3(velocity)
@@ -427,6 +431,7 @@ class FragmentController(ObjectController):
 		pass
 
 class GlassController(Controller):
+
 	def __init__(self):
 		Controller.__init__(self)
 
@@ -464,6 +469,7 @@ class GlassController(Controller):
 
 class PhysicsEntityController(ObjectController):
 	"""Controls physics objects."""
+
 	@staticmethod
 	def readSpawnPacket(aiWorld, entityGroup, iterator, entity = None):
 		entity = entities.PhysicsEntity(aiWorld.world, aiWorld.space)
@@ -475,6 +481,7 @@ class PhysicsEntityController(ObjectController):
 		return p
 
 class DropPodController(ObjectController):
+
 	def __init__(self):
 		ObjectController.__init__(self)
 		self.inAirTime = 2.0
@@ -584,7 +591,8 @@ class DropPodController(ObjectController):
 			self.particleGroup.delete()
 
 class GrenadeController(ObjectController):
-	"GrenadeController handles particles, and also trigger the detonation (unless the grenade is triggered by being damaged)."
+	"""GrenadeController handles particles, and also trigger the detonation (unless the grenade is triggered by being damaged)."""
+
 	def __init__(self):
 		ObjectController.__init__(self)
 		self.bounceTime = -1
@@ -666,7 +674,8 @@ class GrenadeController(ObjectController):
 		ObjectController.delete(self, killed)
 
 class MolotovController(ObjectController):
-	"MolotovController handles particles and fire damage."
+	"""MolotovController handles particles and fire damage."""
+
 	def __init__(self):
 		ObjectController.__init__(self)
 		self.lastPosition = None
@@ -740,6 +749,7 @@ class MolotovController(ObjectController):
 		ObjectController.delete(self, killed)
 
 class ActorController(ObjectController):
+
 	def __init__(self):
 		ObjectController.__init__(self)
 		self.healthAddition = 0
@@ -814,6 +824,7 @@ class ActorController(ObjectController):
 		ObjectController.delete(self, killed)
 
 class DroidController(ActorController):
+
 	def __init__(self):
 		ActorController.__init__(self)
 		self.activeWeapon = 0
@@ -1013,7 +1024,8 @@ class DroidController(ActorController):
 			self.entity.special.delete()
 
 class PlayerController(DroidController):
-	"The PlayerController handles all user input when active. Don't have more than one of these at a time."
+	"""The PlayerController handles all user input when active. Don't have more than one of these at a time."""
+
 	def __init__(self):
 		DroidController.__init__(self)
 		self.keyMap = {"left":False, "right":False, "forward":False, "down":False, "jump":False, "switch-weapon":False, "fire":False, "alternate-action":False, "melee":False, "reload":False, "sprint":False}
@@ -1352,6 +1364,7 @@ class PlayerController(DroidController):
 class AIController(DroidController):
 	"""The AIController uses the ai module's pathfinding algorithms to go places.
 	At the moment, only BasicDroid actors are supported."""
+
 	def __init__(self):
 		DroidController.__init__(self)
 		self.nearestEnemy = None
@@ -1516,6 +1529,7 @@ class AIController(DroidController):
 		DroidController.clientUpdate(self, aiWorld, entityGroup, iterator)
 
 class Special(DirectObject):
+
 	def __init__(self, actor):
 		self.actor = actor
 		self.lifeTime = 10
