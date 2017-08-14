@@ -28,7 +28,7 @@ class Controller(DirectObject):
 		self.lastPacketUpdate = engine.clock.time
 		self.criticalUpdate = False
 		self.active = True
-	
+
 	def addCriticalPacket(self, p, packetUpdate):
 		# If we have a critical packet on an update frame, and we add it to the critical packet queue,
 		# it will get sent again on the next update frame.
@@ -37,17 +37,17 @@ class Controller(DirectObject):
 			self.criticalUpdate = True
 		elif not p in self.criticalPackets:
 			self.criticalPackets.append(p)
-	
+
 	def clearCriticalPackets(self):
 		del self.criticalPackets[:]
-	
+
 	def setEntity(self, entity):
-		"""ObjectEntity calls this function on initialization."""
+		'''ObjectEntity calls this function on initialization.'''
 		assert isinstance(entity, entities.Entity)
 		self.entity = entity
-	
+
 	def buildSpawnPacket(self):
-		"""Builds a packet instructing client(s) to spawn the correct ObjectEntity with the correct ID."""
+		'''Builds a packet instructing client(s) to spawn the correct ObjectEntity with the correct ID.'''
 		p = net.Packet()
 		p.add(net.Uint8(net.PACKET_SPAWN))
 		controllerType = 0
@@ -58,26 +58,26 @@ class Controller(DirectObject):
 		p.add(net.Uint8(controllerType))
 		p.add(net.Uint8(self.entity.getId()))
 		return p
-	
+
 	@staticmethod
 	def readSpawnPacket(aiWorld, entityGroup, iterator, entity = None):
-		"Static method called by descendants. Assumes entity has already been initialized by the descendant."
+		'Static method called by descendants. Assumes entity has already been initialized by the descendant.'
 		id = net.Uint8.getFrom(iterator)
 		entity.setLocal(net.netMode == net.MODE_SERVER)
 		entity.setId(id)
 		return entity
 
 	def buildDeletePacket(self, killed = False):
-		"""Builds a packet instructing clients to delete the Entity."""
+		'''Builds a packet instructing clients to delete the Entity.'''
 		p = net.Packet()
 		p.add(net.Uint8(net.PACKET_DELETE))
 		p.add(net.Uint8(self.entity.getId()))
 		p.add(net.Boolean(killed))
 		return p
-	
+
 	def serverUpdate(self, aiWorld, entityGroup, packetUpdate):
-		"""Any and all processing / logic goes on in the server update function. The resulting data is packed up in a datagram and broadcast to the clients.
-		The base ObjectController.serverUpdate function is meant to be called at the beginning of any derived serverUpdate functions."""
+		'''Any and all processing / logic goes on in the server update function. The resulting data is packed up in a datagram and broadcast to the clients.
+		The base ObjectController.serverUpdate function is meant to be called at the beginning of any derived serverUpdate functions.'''
 
 		p = None
 		if self.entity != None and self.entity.active:
@@ -93,13 +93,13 @@ class Controller(DirectObject):
 			p.add(net.Uint8(net.PACKET_CONTROLLER))
 			p.add(net.Uint8(self.entity.getId()))
 		return p
-	
+
 	def needsToSendUpdate(self):
 		return self.criticalUpdate
 
 	def clientUpdate(self, aiWorld, entityGroup, iterator = None):
-		"""The client update function applies the changes calculated by the server update function, even on the server machine.
-		The base ObjectController.clientUpdate function is meant to be called at the beginning of any derived clientUpdate functions."""
+		'''The client update function applies the changes calculated by the server update function, even on the server machine.
+		The base ObjectController.clientUpdate function is meant to be called at the beginning of any derived clientUpdate functions.'''
 		if self.entity != None:
 			if iterator != None:
 				self.lastPacketUpdate = engine.clock.time
@@ -109,20 +109,20 @@ class Controller(DirectObject):
 		self.active = False
 
 class TeamEntityController(Controller):
-	"""TeamEntityControllers increment their team's money and spawn newly purchased units."""
+	'''TeamEntityControllers increment their team's money and spawn newly purchased units.'''
 	def __init__(self):
 		Controller.__init__(self)
 		self.respawns = []
-		self.spawnSound = audio.SoundPlayer("spawn")
+		self.spawnSound = audio.SoundPlayer('spawn')
 		self.lastSpawn = 0
 		self.light = engine.Light(color = Vec4(0.4, 0.7, 1.0, 1), attenuation = Vec3(0, 0, 0.003))
 		self.spawnDelay = 3.0
 		self.tutorialMode = False
-		self.oldUsername = "Unnamed"
+		self.oldUsername = 'Unnamed'
 		self.scoreAdditions = 0
 		self.moneyAdditions = 0
-		self.moneyIncreaseSound = audio.FlatSound("sounds/money.ogg", volume = 0.1)
-	
+		self.moneyIncreaseSound = audio.FlatSound('sounds/money.ogg', volume = 0.1)
+
 	def buildSpawnPacket(self):
 		p = Controller.buildSpawnPacket(self)
 		p.add(net2.HighResVec4(self.entity.color))
@@ -140,7 +140,7 @@ class TeamEntityController(Controller):
 		p.add(net.String(self.entity.username))
 		p.add(net.Int16(self.entity.money))
 		return p
-	
+
 	@staticmethod
 	def readSpawnPacket(aiWorld, entityGroup, iterator, entity = None):
 		entity = entities.TeamEntity()
@@ -165,10 +165,10 @@ class TeamEntityController(Controller):
 	def setEntity(self, entity):
 		assert isinstance(entity, entities.TeamEntity)
 		Controller.setEntity(self, entity)
-	
+
 	def addScore(self, score):
 		self.scoreAdditions += score
-	
+
 	def addMoney(self, money):
 		self.moneyAdditions += money
 
@@ -176,7 +176,7 @@ class TeamEntityController(Controller):
 		Controller.clearCriticalPackets(self)
 		del self.respawns[:]
 		self.scoreAdditions = 0
-	
+
 	def serverUpdate(self, aiWorld, entityGroup, packetUpdate):
 		p = Controller.serverUpdate(self, aiWorld, entityGroup, packetUpdate)
 		if self.scoreAdditions != 0 or self.moneyAdditions != 0:
@@ -245,7 +245,7 @@ class TeamEntityController(Controller):
 			entityGroup.spawnEntity(u)
 			self.respawns.remove(purchase)
 		return p
-	
+
 	def clientUpdate(self, aiWorld, entityGroup, data = None):
 		Controller.clientUpdate(self, aiWorld, entityGroup, data)
 		if data != None:
@@ -264,15 +264,15 @@ class TeamEntityController(Controller):
 			self.light.remove()
 		else:
 			self.light.setAttenuation((0, 0, 0.001 + math.pow(engine.clock.time - self.lastSpawn, 2) * 0.005))
-	
+
 	def respawn(self, weapon, special, teamIndex):
 		if weapon != None and (len([x for x in self.respawns if x[0] == False and x[3] == teamIndex]) == 0 or self.entity.isZombies):
 			self.respawns.append((False, weapon, special, teamIndex, engine.clock.time))
-	
+
 	def respawnPlayer(self, primary, secondary, special):
 		if len([x for x in self.respawns if x[0] == True]) == 0:
 			self.respawns.append((True, primary, secondary, special, engine.clock.time, None)) # None means we are not spawning the player on a platform
-	
+
 	def platformSpawnPlayer(self, primary, secondary, special, pos):
 		self.respawns.append((True, primary, secondary, special, engine.clock.time - self.spawnDelay, pos)) # pos is the position to spawn the player at
 
@@ -286,14 +286,14 @@ class ObjectController(Controller):
 		self.lastSnapshot = net2.EntitySnapshot()
 		self.upperHeightLimit = 70
 		self.lowerHeightLimit = -30
-	
+
 	def setEntity(self, entity):
-		"""ObjectEntity calls this function on initialization."""
+		'''ObjectEntity calls this function on initialization.'''
 		assert isinstance(entity, entities.ObjectEntity)
 		Controller.setEntity(self, entity)
-	
+
 	def buildSpawnPacket(self, isPhysicsEntity = False):
-		"""Builds a packet instructing client(s) to spawn the correct ObjectEntity with the correct ID."""
+		'''Builds a packet instructing client(s) to spawn the correct ObjectEntity with the correct ID.'''
 		p = Controller.buildSpawnPacket(self)
 		self.entity.commitChanges()
 		if isPhysicsEntity:
@@ -303,15 +303,15 @@ class ObjectController(Controller):
 		p.add(net2.StandardVec3(self.entity.getLinearVelocity()))
 		p.add(net2.StandardVec3(self.entity.getRotation()))
 		return p
-	
+
 	@staticmethod
 	def readSpawnPacket(aiWorld, entityGroup, iterator, entity = None, isPhysicsEntity = False):
-		"Static method called by descendants. Assumes entity has already been initialized by the descendant."
+		'Static method called by descendants. Assumes entity has already been initialized by the descendant.'
 		entity = Controller.readSpawnPacket(aiWorld, entityGroup, iterator, entity)
 		if isPhysicsEntity:
 			directory = net.String.getFrom(iterator)
 			dataFile = net.String.getFrom(iterator)
-			entity.loadDataFile(aiWorld.world, aiWorld.space, engine.readPhysicsEntityFile(dataFile + ".txt"), directory, dataFile)
+			entity.loadDataFile(aiWorld.world, aiWorld.space, engine.readPhysicsEntityFile(dataFile + '.txt'), directory, dataFile)
 		pos = net2.HighResVec3.getFrom(iterator)
 		vel = net2.StandardVec3.getFrom(iterator)
 		rot = net2.StandardVec3.getFrom(iterator)
@@ -321,16 +321,16 @@ class ObjectController(Controller):
 		entity.commitChanges()
 		entity.controller.commitLastPosition()
 		return entity
-	
+
 	def commitLastPosition(self):
 		snapshot = net2.EntitySnapshot()
 		snapshot.takeSnapshot(self.entity)
 		self.snapshots = [snapshot]
 		self.lastSentSnapshot = self.snapshots[0]
-	
+
 	def serverUpdate(self, aiWorld, entityGroup, packetUpdate):
-		"""Any and all processing / logic goes on in the server update function. The resulting data is packed up in a datagram and broadcast to the clients.
-		The base ObjectController.serverUpdate function is meant to be called at the beginning of any derived serverUpdate functions."""
+		'''Any and all processing / logic goes on in the server update function. The resulting data is packed up in a datagram and broadcast to the clients.
+		The base ObjectController.serverUpdate function is meant to be called at the beginning of any derived serverUpdate functions.'''
 
 		p = Controller.serverUpdate(self, aiWorld, entityGroup, packetUpdate)
 		if self.entity != None and self.entity.active:
@@ -351,7 +351,7 @@ class ObjectController(Controller):
 				self.entity.killer = None
 				self.entity.kill(aiWorld, entityGroup)
 		return p
-	
+
 	def needsToSendUpdate(self):
 		if self.newPositionData or Controller.needsToSendUpdate(self):
 			self.lastSentSnapshot = self.lastSnapshot
@@ -360,8 +360,8 @@ class ObjectController(Controller):
 			return False
 
 	def clientUpdate(self, aiWorld, entityGroup, iterator = None):
-		"""The client update function applies the changes calculated by the server update function, even on the server machine.
-		The base ObjectController.clientUpdate function is meant to be called at the beginning of any derived clientUpdate functions."""
+		'''The client update function applies the changes calculated by the server update function, even on the server machine.
+		The base ObjectController.clientUpdate function is meant to be called at the beginning of any derived clientUpdate functions.'''
 		Controller.clientUpdate(self, aiWorld, entityGroup, iterator)
 		if self.entity != None:
 			currentTime = engine.clock.time - 0.1
@@ -394,7 +394,7 @@ class ObjectController(Controller):
 				if self.snapshots[b].time > self.snapshots[a].time:
 					self.snapshots[a].lerp(self.snapshots[b], min(1.0, (currentTime - self.snapshots[a].time) / (self.snapshots[b].time - self.snapshots[a].time))).commitTo(self.entity)
 				self.entity.commitChanges()
-	
+
 	def delete(self, killed = False):
 		Controller.delete(self, killed)
 
@@ -405,35 +405,35 @@ class FragmentController(ObjectController):
 		self.spawnTime = engine.clock.time
 		self.lifeTime = 3 + uniform(0, 2)
 		self.justSpawned = True
-	
+
 	def setEntity(self, entity):
 		assert isinstance(entity, entities.Fragment)
 		ObjectController.setEntity(self, entity)
-	
+
 	def serverUpdate(self, aiWorld, entityGroup, packetUpdate):
 		# Fragments are always processed on client
 		self.entity.commitChanges()
-	
+
 		if engine.clock.time > self.spawnTime + self.lifeTime or self.entity.getPosition().getZ() < -30:
 			self.entity.delete(entityGroup, localDelete = False)
 			return None
-		
+
 		if self.justSpawned:
 			self.entity.setLinearVelocity(self.velocity)
 			self.justSpawned = False
 		return None
-	
+
 	def clientUpdate(self, aiWorld, entityGroup, data = None):
 		pass
 
 class GlassController(Controller):
 	def __init__(self):
 		Controller.__init__(self)
-	
+
 	def setEntity(self, entity):
 		assert isinstance(entity, entities.Glass)
 		Controller.setEntity(self, entity)
-	
+
 	def buildSpawnPacket(self):
 		p = Controller.buildSpawnPacket(self)
 		p.add(net2.StandardVec3(self.entity.getPosition()))
@@ -441,7 +441,7 @@ class GlassController(Controller):
 		p.add(net.StandardFloat(self.entity.glassWidth))
 		p.add(net.StandardFloat(self.entity.glassHeight))
 		return p
-	
+
 	@staticmethod
 	def readSpawnPacket(aiWorld, entityGroup, iterator, entity = None):
 		entity = entities.Glass(aiWorld.world, aiWorld.space)
@@ -452,24 +452,24 @@ class GlassController(Controller):
 		entity.setPosition(pos)
 		entity.setRotation(Vec3(hpr.getX(), hpr.getY(), hpr.getZ()))
 		return entity
-	
+
 	def serverUpdate(self, aiWorld, entityGroup, packetUpdate):
 		# Glass panes don't generally move. They just shatter.
 		return None
-	
+
 	def clientUpdate(self, aiWorld, entityGroup, data = None):
 		if self.entity.shattered:
 			self.entity.kill(aiWorld, entityGroup, localDelete = False)
 			return
 
 class PhysicsEntityController(ObjectController):
-	"""Controls physics objects."""
+	'''Controls physics objects.'''
 	@staticmethod
 	def readSpawnPacket(aiWorld, entityGroup, iterator, entity = None):
 		entity = entities.PhysicsEntity(aiWorld.world, aiWorld.space)
 		entity = ObjectController.readSpawnPacket(aiWorld, entityGroup, iterator, entity, isPhysicsEntity = True)
 		return entity
-	
+
 	def buildSpawnPacket(self):
 		p = ObjectController.buildSpawnPacket(self, isPhysicsEntity = True)
 		return p
@@ -479,7 +479,7 @@ class DropPodController(ObjectController):
 		ObjectController.__init__(self)
 		self.inAirTime = 2.0
 		self.landed = False
-		self.landingSound = audio.SoundPlayer("pod-landing")
+		self.landingSound = audio.SoundPlayer('pod-landing')
 		self.particleGroup = None
 		self.finalPosition = None
 		self.startPosition = None
@@ -488,9 +488,9 @@ class DropPodController(ObjectController):
 		self.payoutDelay = 1.5
 		self.captureDistance = 20
 		self.money = 300
-		self.warningSound = audio.SoundPlayer("kamikaze-special")
+		self.warningSound = audio.SoundPlayer('kamikaze-special')
 		self.warningTime = -1
-		self.entrySound = audio.FlatSound("sounds/pod-entry.ogg", volume = 0.5)
+		self.entrySound = audio.FlatSound('sounds/pod-entry.ogg', volume = 0.5)
 		self.entrySoundPlayed = False
 		self.upperHeightLimit = 1000
 
@@ -502,30 +502,30 @@ class DropPodController(ObjectController):
 		self.startPosition = pivot + (dir * 500)
 		self.entity.setPosition(self.startPosition)
 		self.entity.node.lookAt(Point3(self.finalPosition))
-	
+
 	def setEntity(self, entity):
-		"""Entity calls this function on initialization."""
+		'''Entity calls this function on initialization.'''
 		assert isinstance(entity, entities.DropPod)
 		ObjectController.setEntity(self, entity)
-	
+
 	def buildSpawnPacket(self, isPhysicsEntity = False):
-		"""Builds a packet instructing client(s) to spawn the correct Entity with the correct ID."""
+		'''Builds a packet instructing client(s) to spawn the correct Entity with the correct ID.'''
 		p = ObjectController.buildSpawnPacket(self)
 		p.add(net2.HighResVec3(self.finalPosition))
 		p.add(net.StandardFloat(engine.clock.time - self.entity.spawnTime))
 		p.add(net.Uint16(self.money))
 		return p
-	
+
 	@staticmethod
 	def readSpawnPacket(aiWorld, entityGroup, iterator, entity = None, isPhysicsEntity = False):
-		"Static method called by descendants. Assumes entity has already been initialized by the descendant."
+		'Static method called by descendants. Assumes entity has already been initialized by the descendant.'
 		entity = entities.DropPod(aiWorld.world, aiWorld.space, False)
 		entity = ObjectController.readSpawnPacket(aiWorld, entityGroup, iterator, entity)
 		entity.controller.setFinalPosition(net2.HighResVec3.getFrom(iterator))
 		entity.spawnTime = engine.clock.time - net.StandardFloat.getFrom(iterator)
 		entity.controller.money = net.Uint16.getFrom(iterator)
 		return entity
-	
+
 	def serverUpdate(self, aiWorld, entityGroup, packetUpdate):
 		if not self.landed:
 			aliveTime = engine.clock.time - self.entity.spawnTime
@@ -548,7 +548,7 @@ class DropPodController(ObjectController):
 			self.entity.killer = None
 			self.entity.kill(aiWorld, entityGroup)
 		return p
-	
+
 	def clientUpdate(self, aiWorld, entityGroup, data = None):
 		ObjectController.clientUpdate(self, aiWorld, entityGroup, data)
 		if data != None:
@@ -557,7 +557,7 @@ class DropPodController(ObjectController):
 				if team != None:
 					team.controller.addMoney(self.payoutAmount)
 			self.money = net.Uint16.getFrom(data)
-		self.entity.amountIndicator.setText("$" + str(self.money))
+		self.entity.amountIndicator.setText('$' + str(self.money))
 		if base.camera != None:
 			self.entity.amountIndicatorNode.setScale((self.entity.getPosition() - base.camera.getPos()).length() * 0.04)
 		if not self.landed:
@@ -577,45 +577,45 @@ class DropPodController(ObjectController):
 			if self.money <= 0 and self.warningTime == -1:
 				self.warningTime = engine.clock.time
 				self.warningSound.play(entity = self.entity)
-	
+
 	def delete(self, killed = False):
 		ObjectController.delete(self, killed)
 		if self.particleGroup != None:
 			self.particleGroup.delete()
 
 class GrenadeController(ObjectController):
-	"GrenadeController handles particles, and also trigger the detonation (unless the grenade is triggered by being damaged)."
+	'GrenadeController handles particles, and also trigger the detonation (unless the grenade is triggered by being damaged).'
 	def __init__(self):
 		ObjectController.__init__(self)
 		self.bounceTime = -1
-		self.bounceSound = audio.SoundPlayer("grenade-bounce")
+		self.bounceSound = audio.SoundPlayer('grenade-bounce')
 		self.lastPosition = None
 		self.particleGroup = None
 		self.light = engine.Light(color = Vec4(1.0, 0.7, 0.4, 1), attenuation = Vec3(0, 0, 0.01))
 		self.light.add()
-	
+
 	def buildSpawnPacket(self):
 		p = ObjectController.buildSpawnPacket(self)
 		p.add(net.Uint8(self.entity.getTeam().getId()))
 		return p
-	
+
 	@staticmethod
 	def readSpawnPacket(aiWorld, entityGroup, iterator, entity = None):
 		entity = entities.Grenade(aiWorld.world, aiWorld.space)
 		entity = ObjectController.readSpawnPacket(aiWorld, entityGroup, iterator, entity)
 		entity.setTeamId(net.Uint8.getFrom(iterator))
 		return entity
-		
+
 	def setEntity(self, entity):
 		assert isinstance(entity, entities.Grenade)
 		ObjectController.setEntity(self, entity)
-	
+
 	def trigger(self):
-		"Starts the (short) fuse to explode the grenade."
+		'Starts the (short) fuse to explode the grenade.'
 		if self.bounceTime == -1 and engine.clock.time > self.entity.spawnTime + 0.5:
 			self.bounceTime = engine.clock.time
 			self.bounceSound.play(position = self.entity.getPosition())
-	
+
 	def clientUpdate(self, aiWorld, entityGroup, data = None):
 		ObjectController.clientUpdate(self, aiWorld, entityGroup, data)
 		pos = self.entity.getPosition()
@@ -645,28 +645,28 @@ class GrenadeController(ObjectController):
 						self.entity.commitChanges()
 						self.trigger()
 						break
-		
+
 		self.lastPosition = self.entity.getPosition()
-	
+
 		p = ObjectController.serverUpdate(self, aiWorld, entityGroup, packetUpdate)
-		
+
 		enemy = aiWorld.getNearestEnemy(entityGroup, self.entity.getPosition(), self.entity.getTeam())
 		if enemy != None and Vec3(enemy.getPosition() - self.entity.getPosition()).length() < enemy.radius + self.entity.radius:
 			self.entity.kill(aiWorld, entityGroup)
-		
+
 		if self.bounceTime == -1:
 			if aiWorld.testCollisions(self.entity.collisionNodePath).getNumEntries() > 0:
 				self.trigger()
 		if (self.bounceTime != -1 and engine.clock.time > self.bounceTime + 0.6) or (engine.clock.time > self.entity.spawnTime + 5) or not self.entity.grenadeAlive:
 			self.entity.kill(aiWorld, entityGroup)
 		return p
-	
+
 	def delete(self, killed = False):
 		self.light.remove()
 		ObjectController.delete(self, killed)
 
 class MolotovController(ObjectController):
-	"MolotovController handles particles and fire damage."
+	'MolotovController handles particles and fire damage.'
 	def __init__(self):
 		ObjectController.__init__(self)
 		self.lastPosition = None
@@ -675,13 +675,13 @@ class MolotovController(ObjectController):
 		self.light.add()
 		self.finalPos = None
 		self.lifeTime = 6.0
-	
+
 	def buildSpawnPacket(self):
 		p = ObjectController.buildSpawnPacket(self)
 		p.add(net.Uint8(self.entity.actor.getId()))
 		p.add(net.Uint8(self.entity.getTeam().getId()))
 		return p
-	
+
 	@staticmethod
 	def readSpawnPacket(aiWorld, entityGroup, iterator, entity = None):
 		entity = entities.Molotov(aiWorld.world, aiWorld.space)
@@ -689,12 +689,12 @@ class MolotovController(ObjectController):
 		entity.setActor(entityGroup.getEntity(net.Uint8.getFrom(iterator)))
 		entity.setTeamId(net.Uint8.getFrom(iterator))
 		return entity
-		
+
 	def setEntity(self, entity):
 		assert isinstance(entity, entities.Molotov)
 		ObjectController.setEntity(self, entity)
 
-	def serverUpdate(self, aiWorld, entityGroup, packetUpdate):	
+	def serverUpdate(self, aiWorld, entityGroup, packetUpdate):
 		pos = self.entity.getPosition()
 		if self.lastPosition == None:
 			self.lastPosition = pos
@@ -713,16 +713,16 @@ class MolotovController(ObjectController):
 						self.entity.setPosition(collision - (vector * self.entity.radius))
 						self.entity.commitChanges()
 						break
-		
+
 		self.lastPosition = self.entity.getPosition()
-	
+
 		p = ObjectController.serverUpdate(self, aiWorld, entityGroup, packetUpdate)
-		
+
 		if engine.clock.time - self.entity.spawnTime > self.lifeTime:
 			self.entity.delete(entityGroup)
 
 		return p
-	
+
 	def clientUpdate(self, aiWorld, entityGroup, data = None):
 		ObjectController.clientUpdate(self, aiWorld, entityGroup, data)
 		pos = self.entity.getPosition()
@@ -734,7 +734,7 @@ class MolotovController(ObjectController):
 		self.particleGroup.setPosition(pos)
 		for enemy in (x for x in entityGroup.entities.values() if isinstance(x, entities.Actor) and not x.getTeam().isAlly(self.entity.getTeam()) and (x.getPosition() - self.entity.getPosition()).length() < 8.0):
 			enemy.controller.setOnFire(self.entity.actor)
-	
+
 	def delete(self, killed = False):
 		self.light.remove()
 		ObjectController.delete(self, killed)
@@ -745,19 +745,19 @@ class ActorController(ObjectController):
 		self.healthAddition = 0
 		self.lastHealthAddition = 0
 		self.componentsNeedUpdate = False
-	
+
 	def setEntity(self, entity):
 		assert isinstance(entity, entities.Actor)
 		ObjectController.setEntity(self, entity)
-	
+
 	def needsToSendUpdate(self):
 		return ObjectController.needsToSendUpdate(self) or self.componentsNeedUpdate or self.lastHealthAddition != 0
-	
+
 	def buildSpawnPacket(self):
 		p = ObjectController.buildSpawnPacket(self)
 		p.add(net.Uint8(self.entity.getTeam().getId()))
 		return p
-	
+
 	@staticmethod
 	def readSpawnPacket(aiWorld, entityGroup, iterator, entity = None):
 		entity = ObjectController.readSpawnPacket(aiWorld, entityGroup, iterator, entity)
@@ -791,7 +791,7 @@ class ActorController(ObjectController):
 
 	def actorDamaged(self, entity, damage, ranged):
 		self.healthAddition -= int(damage)
-	
+
 	def clientUpdate(self, aiWorld, entityGroup, data = None):
 		ObjectController.clientUpdate(self, aiWorld, entityGroup, data)
 		if data != None:
@@ -803,13 +803,13 @@ class ActorController(ObjectController):
 				id = net.Uint8.getFrom(data)
 			for id in (x for x in range(len(self.entity.components)) if not x in updatedComponents):
 				self.entity.components[id].clientUpdate(aiWorld, entityGroup)
-			
+
 			self.onFire = net.Boolean.getFrom(data)
 			self.entity.health = net.Int16.getFrom(data)
 		else:
 			for component in self.entity.components:
 				component.clientUpdate(aiWorld, entityGroup)
-	
+
 	def delete(self, killed = False):
 		ObjectController.delete(self, killed)
 
@@ -822,7 +822,7 @@ class DroidController(ActorController):
 		self.torque = 300
 		self.maxSpeed = 1
 		self.lastDamage = 0
-		self.alarmSound = audio.SoundPlayer("alarm")
+		self.alarmSound = audio.SoundPlayer('alarm')
 		self.lastSentTargetPos = Vec3()
 		self.targetedEnemy = None
 		self.lastTargetedEnemy = None
@@ -833,7 +833,7 @@ class DroidController(ActorController):
 		self.fireEntity = None
 		self.fireParticles = None
 		self.clipCheckCount = 0
-	
+
 	def buildSpawnPacket(self):
 		p = ActorController.buildSpawnPacket(self)
 		p.add(net.Uint8(len(self.entity.weaponIds)))
@@ -845,7 +845,7 @@ class DroidController(ActorController):
 		p.add(net.Uint8(255 if self.entity.specialId == None else self.entity.specialId))
 		p.add(net.Uint8(self.activeWeapon))
 		return p
-	
+
 	@staticmethod
 	def readSpawnPacket(aiWorld, entityGroup, iterator, entity = None):
 		entity = ActorController.readSpawnPacket(aiWorld, entityGroup, iterator, entity)
@@ -864,19 +864,19 @@ class DroidController(ActorController):
 		entity.controller.activeWeapon = net.Uint8.getFrom(iterator)
 		entity.components[entity.controller.activeWeapon].show()
 		return entity
-	
+
 	def reload(self):
 		weapon = self.entity.components[self.activeWeapon]
 		if isinstance(weapon, components.Gun):
 			weapon.reload()
-	
+
 	def isReloading(self):
 		weapon = self.entity.components[self.activeWeapon]
 		return isinstance(weapon, components.Gun) and weapon.reloadActive
-	
+
 	def enableSpecial(self):
 		self.entity.special.enable()
-	
+
 	def setOnFire(self, entity):
 		self.onFire = True
 		self.fireTimer = engine.clock.time
@@ -885,14 +885,14 @@ class DroidController(ActorController):
 	def setEntity(self, entity):
 		assert isinstance(entity, entities.BasicDroid)
 		ActorController.setEntity(self, entity)
-	
+
 	def needsToSendUpdate(self):
 		if (self.targetPos - self.lastSentTargetPos).length() > 0.2 or ActorController.needsToSendUpdate(self):
 			self.lastSentTargetPos = Vec3(self.targetPos)
 			return True
 		else:
 			return False
-	
+
 	def serverUpdate(self, aiWorld, entityGroup, packetUpdate):
 		if self.entity.pinned:
 			if engine.clock.time - self.entity.pinTime > 5.0:
@@ -903,10 +903,10 @@ class DroidController(ActorController):
 				self.entity.setPosition(self.entity.pinPosition)
 				self.entity.setRotation(self.entity.pinRotation)
 				self.entity.setLinearVelocity(Vec3(0, 0, 0))
-	
+
 		if self.entity.special != None:
 			specialPacket = self.entity.special.serverUpdate(aiWorld, entityGroup, packetUpdate)
-			
+
 		pos = self.entity.getPosition()
 		if self.lastPosition == None:
 			self.lastPosition = pos
@@ -932,9 +932,9 @@ class DroidController(ActorController):
 				self.clipCheckCount += 1
 			else:
 				self.clipCheckCount = 0 # We didn't clip this time, so reset the count.
-		
+
 		self.lastPosition = self.entity.getPosition()
-		
+
 		if self.onFire:
 			if engine.clock.time - self.fireTimer > 2.0:
 				self.onFire = False
@@ -945,9 +945,9 @@ class DroidController(ActorController):
 				self.entity.damage(self.fireEntity, 8, ranged = False)
 
 		p = ActorController.serverUpdate(self, aiWorld, entityGroup, packetUpdate)
-		
+
 		p.add(net.Boolean(self.onFire))
-			
+
 		if self.activeWeapon != self.lastActiveWeapon:
 			p.add(net.Boolean(True))
 			p.add(net.Uint8(self.activeWeapon))
@@ -958,13 +958,13 @@ class DroidController(ActorController):
 		if self.entity.special != None:
 			p.add(specialPacket)
 		return p
-	
+
 	def actorDamaged(self, entity, damage, ranged):
 		ActorController.actorDamaged(self, entity, damage, ranged)
 		self.lastDamage = engine.clock.time
 		if self.entity.pinned:
 			self.lastPosition = self.entity.getPosition()
-	
+
 	def clientUpdate(self, aiWorld, entityGroup, iterator = None):
 		ActorController.clientUpdate(self, aiWorld, entityGroup, iterator)
 		if iterator != None:
@@ -976,19 +976,19 @@ class DroidController(ActorController):
 				self.entity.components[self.activeWeapon].show()
 				self.lastActiveWeapon = self.activeWeapon
 			self.targetPos = net2.LowResVec3.getFrom(iterator)
-		
+
 		if self.entity.health <= self.entity.maxHealth * 0.15:
 			if not self.alarmSound.isPlaying():
 				self.alarmSound.play(entity = self.entity)
 		else:
 			self.alarmSound.stop()
-		
+
 		if self.onFire:
 			if self.fireParticles == None:
 				self.fireParticles = particles.FireParticleGroup(self.entity.getPosition())
 				particles.add(self.fireParticles)
 			self.fireParticles.setPosition(self.entity.getPosition())
-			
+
 		if self.entity.components[self.activeWeapon].reloadActive:
 			self.entity.crosshairNode.show()
 			self.entity.crosshairNode.setR(engine.clock.time * 30)
@@ -1003,7 +1003,7 @@ class DroidController(ActorController):
 			self.entity.initialSpawnShieldEnabled = False
 		if self.entity.special != None:
 			self.entity.special.clientUpdateStart(aiWorld, entityGroup, iterator)
-	
+
 	def delete(self, killed = False):
 		ActorController.delete(self, killed)
 		self.alarmSound.delete()
@@ -1013,10 +1013,10 @@ class DroidController(ActorController):
 			self.entity.special.delete()
 
 class PlayerController(DroidController):
-	"The PlayerController handles all user input when active. Don't have more than one of these at a time."
+	'The PlayerController handles all user input when active. Don't have more than one of these at a time.'
 	def __init__(self):
 		DroidController.__init__(self)
-		self.keyMap = {"left":False, "right":False, "forward":False, "down":False, "jump":False, "switch-weapon":False, "fire":False, "alternate-action":False, "melee":False, "reload":False, "sprint":False}
+		self.keyMap = {'left':False, 'right':False, 'forward':False, 'down':False, 'jump':False, 'switch-weapon':False, 'fire':False, 'alternate-action':False, 'melee':False, 'reload':False, 'sprint':False}
 		self.activeWeapon = 1
 		self.angleX = 0
 		self.angleY = math.radians(-90)
@@ -1043,73 +1043,73 @@ class PlayerController(DroidController):
 		self.lastSentSprinting = False
 		self.targetDistance = 0
 		self.lastTargetCheck = 0
-	
+
 	def needsToSendUpdate(self):
 		if DroidController.needsToSendUpdate(self) or self.lastSentSprinting != self.sprinting:
 			self.lastSentSprinting = self.sprinting
 			return True
 		else:
 			return False
-	
+
 	def buildSpawnPacket(self):
 		p = DroidController.buildSpawnPacket(self)
 		p.add(net.String(self.entity.username))
-		engine.log.debug("Building spawn packet for local player " + self.entity.username + " - ID: " + str(self.entity.getId()))
+		engine.log.debug('Building spawn packet for local player ' + self.entity.username + ' - ID: ' + str(self.entity.getId()))
 		return p
-	
+
 	@staticmethod
 	def readSpawnPacket(aiWorld, entityGroup, iterator, entity = None):
 		entity = entities.PlayerDroid(aiWorld.world, aiWorld.space, PlayerController(), local = False)
 		entity = DroidController.readSpawnPacket(aiWorld, entityGroup, iterator, entity)
 		entity.getTeam().setPlayer(entity)
 		entity.setUsername(net.String.getFrom(iterator))
-		engine.log.debug("Spawning remote player " + entity.username + " - ID: " + str(entity.getId()))
+		engine.log.debug('Spawning remote player ' + entity.username + ' - ID: ' + str(entity.getId()))
 		return entity
-	
+
 	def setEntity(self, entity):
 		assert isinstance(entity, entities.PlayerDroid)
 		DroidController.setEntity(self, entity)
 		if entity.isLocal:
 			self.mouse = engine.Mouse()
-			self.pickRayNode = CollisionNode("pickRayNode")
+			self.pickRayNode = CollisionNode('pickRayNode')
 			self.pickRayNP = camera.attachNewNode(self.pickRayNode)
 			self.pickRay = CollisionRay()
 			self.pickRayNode.setIntoCollideMask(BitMask32(0))
 			self.pickRayNode.setFromCollideMask(BitMask32(1))
 			self.pickRayNode.addSolid(self.pickRay)
-			self.accept("a", self.setKey, ["left", True])
-			self.accept("d", self.setKey, ["right", True])
-			self.accept("w", self.setKey, ["forward", True])
-			self.accept("s", self.setKey, ["down", True])
-			self.accept("a-up", self.setKey, ["left", False])
-			self.accept("d-up", self.setKey, ["right", False])
-			self.accept("w-up", self.setKey, ["forward", False])
-			self.accept("s-up", self.setKey, ["down", False])
-			self.accept("space", self.setKey, ["jump", True])
-			self.accept("space-up", self.setKey, ["jump", False])
-			self.accept("tab", self.setKey, ["switch-weapon", True])
-			self.accept("tab-up", self.setKey, ["switch-weapon", False])
-			self.accept("mouse1", self.setKey, ["fire", True])
-			self.accept("mouse1-up", self.setKey, ["fire", False])
-			self.accept("mouse2", self.setKey, ["alternate-action", True])
-			self.accept("mouse2-up", self.setKey, ["alternate-action", False])
-			self.accept("mouse3", self.toggleZoom)
-			self.accept("shift", self.sprint)
-			self.accept("shift-up", self.setKey, ["sprint", False])
-			self.accept("f", self.setKey, ["melee", True])
-			self.accept("f-up", self.setKey, ["melee", False])
-			self.accept("r", self.setKey, ["reload", True])
-			self.accept("r-up", self.setKey, ["reload", False])
-			self.accept("q", self.issueCommand, [0])
-			self.accept("e", self.issueCommand, [1])
-			self.commandSound = audio.FlatSound("sounds/command.ogg", 0.5)
-			self.sprintSound = audio.FlatSound("sounds/sprint.ogg", 0.5)
-		
+			self.accept('a', self.setKey, ['left', True])
+			self.accept('d', self.setKey, ['right', True])
+			self.accept('w', self.setKey, ['forward', True])
+			self.accept('s', self.setKey, ['down', True])
+			self.accept('a-up', self.setKey, ['left', False])
+			self.accept('d-up', self.setKey, ['right', False])
+			self.accept('w-up', self.setKey, ['forward', False])
+			self.accept('s-up', self.setKey, ['down', False])
+			self.accept('space', self.setKey, ['jump', True])
+			self.accept('space-up', self.setKey, ['jump', False])
+			self.accept('tab', self.setKey, ['switch-weapon', True])
+			self.accept('tab-up', self.setKey, ['switch-weapon', False])
+			self.accept('mouse1', self.setKey, ['fire', True])
+			self.accept('mouse1-up', self.setKey, ['fire', False])
+			self.accept('mouse2', self.setKey, ['alternate-action', True])
+			self.accept('mouse2-up', self.setKey, ['alternate-action', False])
+			self.accept('mouse3', self.toggleZoom)
+			self.accept('shift', self.sprint)
+			self.accept('shift-up', self.setKey, ['sprint', False])
+			self.accept('f', self.setKey, ['melee', True])
+			self.accept('f-up', self.setKey, ['melee', False])
+			self.accept('r', self.setKey, ['reload', True])
+			self.accept('r-up', self.setKey, ['reload', False])
+			self.accept('q', self.issueCommand, [0])
+			self.accept('e', self.issueCommand, [1])
+			self.commandSound = audio.FlatSound('sounds/command.ogg', 0.5)
+			self.sprintSound = audio.FlatSound('sounds/sprint.ogg', 0.5)
+
 	def sprint(self):
 		if engine.inputEnabled:
-			self.setKey("sprint", True)
+			self.setKey('sprint', True)
 			self.sprintSound.play()
-	
+
 	def toggleZoom(self):
 		if self.zoomTime == -1 and not self.isPlatformMode:
 			if self.zoomed:
@@ -1130,10 +1130,10 @@ class PlayerController(DroidController):
 				self.mouse.setSpeed(self.entity.components[self.activeWeapon].zoomedMouseSpeed)
 				self.currentCrosshair = self.entity.components[self.activeWeapon].zoomedCrosshair
 				self.zoomed = not self.zoomed
-	
+
 	def setPlatformMode(self, mode):
 		self.isPlatformMode = mode
-	
+
 	def issueCommand(self, id):
 		if engine.inputEnabled:
 			actors = [x for x in self.entity.getTeam().actors if x.teamIndex == id]
@@ -1151,28 +1151,28 @@ class PlayerController(DroidController):
 
 	def setKey(self, key, value):
 		self.keyMap[key] = value and engine.inputEnabled
-	
+
 	def melee(self):
 		self.entity.components[0].show()
 		self.entity.components[0].fire()
-		
+
 	def serverUpdate(self, aiWorld, entityGroup, packetUpdate):
-		if self.keyMap["melee"]:
+		if self.keyMap['melee']:
 			if self.zoomed:
 				self.toggleZoom()
 			self.melee()
-			self.keyMap["melee"] = False
-		if self.keyMap["reload"]:
+			self.keyMap['melee'] = False
+		if self.keyMap['reload']:
 			if self.zoomed:
 				self.toggleZoom()
 			self.reload()
-			self.keyMap["reload"] = False
-		if self.keyMap["jump"]:
+			self.keyMap['reload'] = False
+		if self.keyMap['jump']:
 			if engine.clock.time - self.lastJump > 0.25 and aiWorld.testCollisions(self.entity.collisionNodePath).getNumEntries() > 0:
 				self.lastJump = engine.clock.time
 				self.entity.setLinearVelocity(self.entity.getLinearVelocity() + Vec3(0, 0, 16))
-		if self.keyMap["switch-weapon"]:
-			self.keyMap["switch-weapon"] = False
+		if self.keyMap['switch-weapon']:
+			self.keyMap['switch-weapon'] = False
 			if self.activeWeapon == 1:
 				self.activeWeapon = 2
 			else:
@@ -1181,14 +1181,14 @@ class PlayerController(DroidController):
 			if self.zoomed:
 				self.toggleZoom()
 			self.currentCrosshair = self.entity.components[self.activeWeapon].defaultCrosshair
-		if self.keyMap["alternate-action"]:
-			self.keyMap["alternate-action"] = False
+		if self.keyMap['alternate-action']:
+			self.keyMap['alternate-action'] = False
 			if self.entity.special != None:
 				self.entity.special.enable()
-			
+
 		if self.currentCrosshair == -1:
 			self.currentCrosshair = self.entity.components[self.activeWeapon].defaultCrosshair
-		
+
 		if self.zoomTime != -1:
 			blend = min(1.0, (engine.clock.time - self.zoomTime) / self.totalZoomTime)
 			self.fov = self.currentFov + ((self.desiredFov - self.currentFov) * blend)
@@ -1203,33 +1203,33 @@ class PlayerController(DroidController):
 		self.angleY = self.mouse.getY()
 
 		angleX = self.angleX
-		
+
 		if self.isPlatformMode:
 			angleX = 0
-		
+
 		move = True
-		if self.keyMap["left"] and self.keyMap["forward"]:
+		if self.keyMap['left'] and self.keyMap['forward']:
 			angleX += (.75 * math.pi)
-		elif self.keyMap["left"] and self.keyMap["down"]:
+		elif self.keyMap['left'] and self.keyMap['down']:
 			angleX += (.25 * math.pi)
-		elif self.keyMap["right"] and self.keyMap["forward"]:
+		elif self.keyMap['right'] and self.keyMap['forward']:
 			angleX -= (.75 * math.pi)
-		elif self.keyMap["right"] and self.keyMap["down"]:
+		elif self.keyMap['right'] and self.keyMap['down']:
 			angleX -= (.25 * math.pi)
-		elif self.keyMap["left"]:
+		elif self.keyMap['left']:
 			angleX += (math.pi / 2)
-		elif self.keyMap["right"]:
+		elif self.keyMap['right']:
 			angleX -= (math.pi / 2)
-		elif self.keyMap["forward"]:
+		elif self.keyMap['forward']:
 			angleX += math.pi
-		elif not self.keyMap["down"]:
+		elif not self.keyMap['down']:
 			move = False
 		angularVel = self.entity.getAngularVelocity()
-		
+
 		maxSpeed = self.maxSpeed
 		torque = self.torque
-		self.sprinting = self.keyMap["sprint"]
-		if self.keyMap["sprint"]:
+		self.sprinting = self.keyMap['sprint']
+		if self.keyMap['sprint']:
 			maxSpeed *= 1.5
 			torque *= 1.5
 		if move:
@@ -1248,7 +1248,7 @@ class PlayerController(DroidController):
 			cameraPos = render.getRelativeVector(camera, self.cameraOffset)
 			camera.setPos(self.entity.getPosition() + cameraPos)
 			self.pickRay.setFromLens(base.camNode, 0, 0)
-		
+
 		target = None
 		if engine.clock.time - self.lastTargetCheck > 0.05:
 			self.lastTargetCheck = engine.clock.time
@@ -1266,7 +1266,7 @@ class PlayerController(DroidController):
 		else:
 			self.targetPos = target
 			self.targetDistance = (target - camera.getPos()).length()
-		
+
 		origin = camera.getPos()
 		dir = render.getRelativeVector(camera, Vec3(0, 1, 0))
 		closestDot = 0.95
@@ -1278,10 +1278,10 @@ class PlayerController(DroidController):
 			if dot > closestDot:
 				closestDot = dot
 				self.targetedEnemy = enemy
-			
+
 		self.entity.components[self.activeWeapon].zoomed = self.zoomed
 
-		if self.keyMap["fire"]:
+		if self.keyMap['fire']:
 			if target != None:
 				direction = target - self.entity.getPosition()
 			else:
@@ -1291,12 +1291,12 @@ class PlayerController(DroidController):
 			self.entity.components[self.activeWeapon].fire()
 			if self.entity.components[self.activeWeapon].reloadActive and self.zoomed:
 				self.toggleZoom() # Zoom out if the weapon reloaded automatically
-		
+
 		p = DroidController.serverUpdate(self, aiWorld, entityGroup, packetUpdate)
-		
+
 		if not self.isPlatformMode: # Update camera position if it's been updated by DroidController.serverUpdate. That way the screen doesn't jitter.
 			camera.setPos(self.entity.getPosition() + cameraPos)
-			
+
 		p.add(net.Boolean(self.sprinting))
 		cmds = len(self.commands)
 		p.add(net.Uint8(cmds))
@@ -1308,12 +1308,12 @@ class PlayerController(DroidController):
 			if c[1] != -1: # Setting the bot's target
 				p.add(net.Uint8(c[1])) # The ID of the target entity
 		del self.commands[:]
-		
+
 		return p
-	
+
 	def clientUpdate(self, aiWorld, entityGroup, iterator = None):
 		DroidController.clientUpdate(self, aiWorld, entityGroup, iterator)
-		
+
 		if iterator != None:
 			self.sprinting = net.Boolean.getFrom(iterator)
 			cmds = net.Uint8.getFrom(iterator)
@@ -1333,7 +1333,7 @@ class PlayerController(DroidController):
 							controller.setTarget(None)
 						else:
 							controller.setTarget(target)
-		
+
 		particles.UnitHighlightParticleGroup.draw(self.entity.getPosition(), self.entity.getTeam().color, self.entity.radius + 0.4)
 
 		weapon = self.entity.components[self.activeWeapon]
@@ -1343,15 +1343,15 @@ class PlayerController(DroidController):
 			weapon.hide()
 		elif not weapon.selected and not self.sprinting:
 			weapon.show()
-	
+
 	def delete(self, killed = False):
 		if self.entity.isLocal and base.camLens != None: # If we're a local player and we're not running in a daemon.
 			base.camLens.setFov(self.defaultFov)
 		DroidController.delete(self, killed)
 
 class AIController(DroidController):
-	"""The AIController uses the ai module's pathfinding algorithms to go places.
-	At the moment, only BasicDroid actors are supported."""
+	'''The AIController uses the ai module's pathfinding algorithms to go places.
+	At the moment, only BasicDroid actors are supported.'''
 	def __init__(self):
 		DroidController.__init__(self)
 		self.nearestEnemy = None
@@ -1368,19 +1368,19 @@ class AIController(DroidController):
 		self.enemyLastVisible = False
 		self.lastDodgeDirectionChange = 0
 		self.reverseDodgeDirection = False
-	
+
 	def buildSpawnPacket(self):
 		p = DroidController.buildSpawnPacket(self)
 		p.add(net.Uint8(self.entity.teamIndex))
 		return p
-	
+
 	@staticmethod
 	def readSpawnPacket(aiWorld, entityGroup, iterator, entity = None):
 		entity = entities.BasicDroid(aiWorld.world, aiWorld.space, AIController(), local = False)
 		entity = DroidController.readSpawnPacket(aiWorld, entityGroup, iterator, entity)
 		entity.teamIndex = net.Uint8.getFrom(iterator)
 		return entity
-	
+
 	def actorDamaged(self, entity, damage, ranged):
 		DroidController.actorDamaged(self, entity, damage, ranged)
 		if not isinstance(entity, entities.BasicDroid) or entity.cloaked:
@@ -1392,7 +1392,7 @@ class AIController(DroidController):
 
 	def setTarget(self, target):
 		self.targetedEnemy = target
-	
+
 	def pathCallback(self, path):
 		self.path = path
 
@@ -1400,7 +1400,7 @@ class AIController(DroidController):
 		# PATH FIND UPDATE
 		if engine.clock.time - self.lastPathFind > 1.0:
 			self.lastPathFind = engine.clock.time
-			
+
 			player = self.entity.getTeam().getPlayer()
 			if player == None and (self.targetedEnemy == None or not self.targetedEnemy.active):
 				self.targetedEnemy = aiWorld.getNearestDropPod(entityGroup, self.entity.getPosition())
@@ -1410,7 +1410,7 @@ class AIController(DroidController):
 				self.nearestEnemy = self.targetedEnemy
 			elif self.nearestEnemy == None or not self.nearestEnemy.active or (self.nearestEnemy.getPosition() - self.entity.getPosition()).length() > 15:
 				self.nearestEnemy = aiWorld.getNearestEnemy(entityGroup, self.entity.getPosition(), self.entity.getTeam())
-			
+
 			aiNode = aiWorld.navMesh.getNode(self.entity.getPosition(), self.entity.radius, self.lastAiNode)
 			targetAiNode = None
 			target = None
@@ -1428,7 +1428,7 @@ class AIController(DroidController):
 					self.path.end = target.getPosition() + Vec3(uniform(-12, 12), uniform(-12, 12), 0)
 			self.lastAiNode = aiNode
 			self.lastTargetAiNode = targetAiNode
-		
+
 		# PATH FIND TO NEXT NODE
 		if engine.clock.time - self.lastMovementUpdate > 0.2:
 			self.lastMovementUpdate = engine.clock.time
@@ -1460,7 +1460,7 @@ class AIController(DroidController):
 							self.reverseDodgeDirection = random() > 0.5
 						if self.reverseDodgeDirection:
 							self.direction *= -1
-		
+
 		# PHYSICS/MOVEMENT UPDATE
 		angularVel = self.entity.getAngularVelocity()
 		if self.moving:
@@ -1470,7 +1470,7 @@ class AIController(DroidController):
 				self.entity.setAngularVelocity(angularVel * self.maxSpeed)
 		else:
 			self.entity.addTorque(Vec3(engine.impulseToForce(-angularVel.getX() * 6), engine.impulseToForce(-angularVel.getY() * 6), engine.impulseToForce(-angularVel.getZ() * 6)))
-			
+
 		# WEAPON UPDATE
 		weapon = self.entity.components[self.activeWeapon]
 		if weapon.burstTimer == -1 and engine.clock.time - weapon.burstDelayTimer >= weapon.burstDelay:
@@ -1507,11 +1507,11 @@ class AIController(DroidController):
 			cross = vector.cross(up)
 			self.targetPos += up * coefficient
 			self.targetPos += cross * coefficient
-	
+
 		p = DroidController.serverUpdate(self, aiWorld, entityGroup, packetUpdate)
 
 		return p
-	
+
 	def clientUpdate(self, aiWorld, entityGroup, iterator = None):
 		DroidController.clientUpdate(self, aiWorld, entityGroup, iterator)
 
@@ -1525,7 +1525,7 @@ class Special(DirectObject):
 		self.enabledChanged = False
 		self.criticalPackets = []
 		self.passive = True # Passive specials (like shields) need to cancel out the order to set the bot's target enemy.
-	
+
 	def addCriticalPacket(self, p, packetUpdate):
 		# If we have a critical packet on an update frame, and we add it to the critical packet queue,
 		# it will get sent again on the next update frame.
@@ -1538,7 +1538,7 @@ class Special(DirectObject):
 			self.actor.getTeam().enableSpecial()
 			self.timer = engine.clock.time
 			self.newEnabled = True
-	
+
 	def serverUpdate(self, aiWorld, entityGroup, packetUpdate):
 		if self.timer > 0 and engine.clock.time - self.timer >= self.lifeTime:
 			self.newEnabled = False
@@ -1557,13 +1557,13 @@ class Special(DirectObject):
 			p.add(net.HighResFloat(self.timer))
 			self.addCriticalPacket(p, packetUpdate)
 		return p
-	
+
 	def clientUpdateStart(self, aiWorld, entityGroup, iterator = None):
 		if iterator != None:
 			criticalPackets = net.Uint8.getFrom(iterator)
 			for _ in range(criticalPackets):
 				self.clientUpdate(aiWorld, entityGroup, iterator)
-	
+
 	def clientUpdate(self, aiWorld, entityGroup, iterator = None):
 		if iterator != None:
 			self.enabled = net.Boolean.getFrom(iterator)
@@ -1579,7 +1579,7 @@ KAMIKAZE_SPECIAL = 128
 class KamikazeSpecial(Special):
 	def __init__(self, actor):
 		Special.__init__(self, actor)
-		self.specialSound = audio.SoundPlayer("kamikaze-special")
+		self.specialSound = audio.SoundPlayer('kamikaze-special')
 		self.lifeTime = 3
 		self.triggered = False
 
@@ -1600,12 +1600,12 @@ class KamikazeSpecial(Special):
 					entity.addForce(engine.impulseToForce(vector.getX(), vector.getY(), vector.getZ()))
 		elif self.triggered:
 			entityGroup.shakeCamera()
-			explosionSound = audio.SoundPlayer("large-explosion")
+			explosionSound = audio.SoundPlayer('large-explosion')
 			pos = self.actor.getPosition()
 			explosionSound.play(position = pos)
 			entityGroup.explode(pos, force = 6000, damage = 300, damageRadius = 125, sourceEntity = self.actor)
 			self.actor.delete(entityGroup, killed = False, localDelete = False)
-	
+
 	def delete(self):
 		self.specialSound.delete()
 
@@ -1613,7 +1613,7 @@ SHIELD_SPECIAL = 129
 class ShieldSpecial(Special):
 	def __init__(self, actor):
 		Special.__init__(self, actor)
-		self.shieldSound = audio.SoundPlayer("shield")
+		self.shieldSound = audio.SoundPlayer('shield')
 		self.lastEnabled = False
 
 	def clientUpdate(self, aiWorld, entityGroup, iterator = None):
@@ -1642,9 +1642,9 @@ CLOAK_SPECIAL = 130
 class CloakSpecial(Special):
 	def __init__(self, actor):
 		Special.__init__(self, actor)
-		self.cloakSound = audio.SoundPlayer("shield")
+		self.cloakSound = audio.SoundPlayer('shield')
 		self.lastEnabled = False
-	
+
 	def clientUpdate(self, aiWorld, entityGroup, iterator = None):
 		Special.clientUpdate(self, aiWorld, entityGroup, iterator)
 		if not self.actor.active:
@@ -1657,7 +1657,7 @@ class CloakSpecial(Special):
 		if self.actor.getTeam().getPlayer() != None:
 			self.actor.getTeam().getPlayer().setCloaked(self.enabled or isinstance(self.actor.getTeam().getPlayer().special, CloakSpecial))
 		self.actor.setCloaked(True)
-	
+
 	def delete(self):
 		Special.delete(self)
 		for actor in (x for x in self.actor.getTeam().actors if x != self.actor):
@@ -1706,7 +1706,7 @@ class RocketSpecial(Special):
 		self.target = None
 		self.start = None
 		self.particleGroup = None
-		self.rocketSound = audio.SoundPlayer("rocket")
+		self.rocketSound = audio.SoundPlayer('rocket')
 		self.passive = False
 	def serverUpdate(self, aiWorld, entityGroup, packetUpdate):
 		p = Special.serverUpdate(self, aiWorld, entityGroup, packetUpdate)
@@ -1741,7 +1741,7 @@ class RocketSpecial(Special):
 				particles.add(self.particleGroup)
 			self.particleGroup.setPosition(pos)
 		elif self.target != None:
-			grenadeSound = audio.SoundPlayer("grenade")
+			grenadeSound = audio.SoundPlayer('grenade')
 			grenadeSound.play(position = self.actor.getPosition())
 			entityGroup.shakeCamera()
 			entityGroup.explode(self.actor.getPosition(), force = 4000, damage = 250, damageRadius = 40, sourceEntity = self.actor)
@@ -1749,33 +1749,33 @@ class RocketSpecial(Special):
 
 import ai
 class SpectatorController(Controller):
-	"The SpectatorController lets the camera wander around and watch the game."
+	'The SpectatorController lets the camera wander around and watch the game.'
 	def __init__(self):
 		Controller.__init__(self)
 		self.mouse = engine.Mouse()
-		self.accept("a", self.setKey, ["left",1])
-		self.accept("d", self.setKey, ["right",1])
-		self.accept("w", self.setKey, ["forward",1])
-		self.accept("s", self.setKey, ["back",1])
-		self.accept("a-up", self.setKey, ["left",0])
-		self.accept("d-up", self.setKey, ["right",0])
-		self.accept("w-up", self.setKey, ["forward",0])
-		self.accept("s-up", self.setKey, ["back",0])
-		self.accept("space", self.setKey, ["raise",1])
-		self.accept("space-up", self.setKey, ["raise",0])
-		self.accept("control", self.setKey, ["lower",1])
-		self.accept("control-up", self.setKey, ["lower",0])
-		self.keyMap = {"left":0, "right":0, "forward":0, "back":0, "raise":0, "lower":0}
-	
+		self.accept('a', self.setKey, ['left',1])
+		self.accept('d', self.setKey, ['right',1])
+		self.accept('w', self.setKey, ['forward',1])
+		self.accept('s', self.setKey, ['back',1])
+		self.accept('a-up', self.setKey, ['left',0])
+		self.accept('d-up', self.setKey, ['right',0])
+		self.accept('w-up', self.setKey, ['forward',0])
+		self.accept('s-up', self.setKey, ['back',0])
+		self.accept('space', self.setKey, ['raise',1])
+		self.accept('space-up', self.setKey, ['raise',0])
+		self.accept('control', self.setKey, ['lower',1])
+		self.accept('control-up', self.setKey, ['lower',0])
+		self.keyMap = {'left':0, 'right':0, 'forward':0, 'back':0, 'raise':0, 'lower':0}
+
 	def setKey(self, key, value):
 		self.keyMap[key] = value
 
 	def serverUpdate(self, aiWorld, entityGroup, data):
 		p = Controller.serverUpdate(self, aiWorld, entityGroup, data)
-		"Updates the camera position, cursor position, and picking ray."
-		
+		'Updates the camera position, cursor position, and picking ray.'
+
 		self.mouse.update()
-		
+
 		angleX = -math.radians(camera.getH())
 		angleY = math.radians(camera.getP())
 
@@ -1784,71 +1784,71 @@ class SpectatorController(Controller):
 
 		speed = engine.clock.timeStep * 40 if engine.clock.timeStep > 0 else 1
 		velocity = Vec3(0, 0, 0)
-		if self.keyMap["forward"] == 1:
+		if self.keyMap['forward'] == 1:
 			velocity += Vec3(speed * math.sin(angleX), speed * math.cos(angleX), speed * math.sin(angleY))
-		if self.keyMap["back"] == 1:
+		if self.keyMap['back'] == 1:
 			velocity += Vec3(-speed * math.sin(angleX), -speed * math.cos(angleX), -speed * math.sin(angleY))
-		if self.keyMap["left"] == 1:
+		if self.keyMap['left'] == 1:
 			velocity += Vec3(speed * -math.sin(angleX + (math.pi / 2)), speed * -math.cos(angleX + (math.pi / 2)), 0)
-		if self.keyMap["right"] == 1:
+		if self.keyMap['right'] == 1:
 			velocity += Vec3(speed * math.sin(angleX + (math.pi / 2)), speed * math.cos(angleX + (math.pi / 2)), 0)
-		if self.keyMap["raise"] == 1:
+		if self.keyMap['raise'] == 1:
 			velocity += Vec3(0, 0, speed)
-		if self.keyMap["lower"] == 1:
+		if self.keyMap['lower'] == 1:
 			velocity += Vec3(0, 0, -speed)
 
 		camera.setPos(camera.getPos() + velocity)
 		camera.setHpr(-math.degrees(angleX), math.degrees(angleY), 0)
 
 		return None
-		
+
 	def delete(self):
 		Controller.delete(self)
 
 import ai
 class EditController(Controller):
-	"The EditController handles all user input for the level editor."
+	'The EditController handles all user input for the level editor.'
 	def __init__(self, aiWorld, entityGroup, map, ui, enableEdit = True):
 		Controller.__init__(self)
 		self.ui = ui
 		self.enableEdit = enableEdit
 		self.map = map
-		self.pickRayNode = CollisionNode("pickRayNode")
+		self.pickRayNode = CollisionNode('pickRayNode')
 		self.pickRayNP = camera.attachNewNode(self.pickRayNode)
 		self.pickRay = CollisionRay()
 		self.pickRayNode.setIntoCollideMask(BitMask32(0))
 		self.pickRayNode.setFromCollideMask(BitMask32(1))
 		self.pickRayNode.addSolid(self.pickRay)
 		self.cameraOffset = Vec3(40, 0, 0)
-		self.accept("a", self.setKey, ["left",1])
-		self.accept("d", self.setKey, ["right",1])
-		self.accept("w", self.setKey, ["forward",1])
-		self.accept("s", self.setKey, ["back",1])
-		self.accept("a-up", self.setKey, ["left",0])
-		self.accept("d-up", self.setKey, ["right",0])
-		self.accept("w-up", self.setKey, ["forward",0])
-		self.accept("s-up", self.setKey, ["back",0])
-		self.accept("1", self.selectTool, [1])
-		self.accept("2", self.selectTool, [2])
-		self.accept("3", self.selectTool, [3])
-		self.accept("4", self.selectTool, [4])
-		self.accept("5", self.selectTool, [5])
-		self.accept("6", self.selectTool, [6])
-		self.accept("7", self.selectTool, [7])
-		self.accept("8", self.selectTool, [8])
-		self.accept("9", self.selectTool, [9])
-		self.accept("space", self.setKey, ["raise",1])
-		self.accept("space-up", self.setKey, ["raise",0])
-		self.accept("control", self.setKey, ["lower",1])
-		self.accept("control-up", self.setKey, ["lower",0])
-		self.accept("mouse1", self.select, [aiWorld, entityGroup])
-		self.accept("mouse1-up", self.mouseUp)
-		self.accept("mouse3", self.setKey, ["rotate",1])
-		self.accept("mouse3-up", self.setKey, ["rotate",0])
-		self.accept("enter", self.save, [aiWorld, entityGroup])
-		self.accept("z", self.undo, [aiWorld, entityGroup])
-		self.accept("escape", engine.exit)
-		self.keyMap = {"left":0, "right":0, "forward":0, "back":0, "raise":0, "lower":0, "rotate":0}
+		self.accept('a', self.setKey, ['left',1])
+		self.accept('d', self.setKey, ['right',1])
+		self.accept('w', self.setKey, ['forward',1])
+		self.accept('s', self.setKey, ['back',1])
+		self.accept('a-up', self.setKey, ['left',0])
+		self.accept('d-up', self.setKey, ['right',0])
+		self.accept('w-up', self.setKey, ['forward',0])
+		self.accept('s-up', self.setKey, ['back',0])
+		self.accept('1', self.selectTool, [1])
+		self.accept('2', self.selectTool, [2])
+		self.accept('3', self.selectTool, [3])
+		self.accept('4', self.selectTool, [4])
+		self.accept('5', self.selectTool, [5])
+		self.accept('6', self.selectTool, [6])
+		self.accept('7', self.selectTool, [7])
+		self.accept('8', self.selectTool, [8])
+		self.accept('9', self.selectTool, [9])
+		self.accept('space', self.setKey, ['raise',1])
+		self.accept('space-up', self.setKey, ['raise',0])
+		self.accept('control', self.setKey, ['lower',1])
+		self.accept('control-up', self.setKey, ['lower',0])
+		self.accept('mouse1', self.select, [aiWorld, entityGroup])
+		self.accept('mouse1-up', self.mouseUp)
+		self.accept('mouse3', self.setKey, ['rotate',1])
+		self.accept('mouse3-up', self.setKey, ['rotate',0])
+		self.accept('enter', self.save, [aiWorld, entityGroup])
+		self.accept('z', self.undo, [aiWorld, entityGroup])
+		self.accept('escape', engine.exit)
+		self.keyMap = {'left':0, 'right':0, 'forward':0, 'back':0, 'raise':0, 'lower':0, 'rotate':0}
 		self.angleX = math.radians(45)
 		self.angleY = math.radians(-15)
 		self.pos = Vec3(0, 0, 0)
@@ -1859,7 +1859,7 @@ class EditController(Controller):
 		self.mouseDown = False
 		self.spawnedObjects = []
 		self.clickTime = 0
-	
+
 	def save(self, aiWorld, entityGroup):
 		try:
 			self.map.save(aiWorld, entityGroup)
@@ -1868,7 +1868,7 @@ class EditController(Controller):
 			exceptionData = traceback.format_exc()
 			print exceptionData
 			engine.log.info(exceptionData)
-	
+
 	def undo(self, aiWorld, entityGroup):
 		if len(self.spawnedObjects) > 0:
 			obj = self.spawnedObjects.pop()
@@ -1881,20 +1881,20 @@ class EditController(Controller):
 			else:
 				obj.delete(entityGroup)
 				entityGroup.clearDeletedEntities()
-	
+
 	def selectTool(self, tool):
-		"Changes the selected edit tool."
+		'Changes the selected edit tool.'
 		self.selectedTool = tool
 		self.savedPoint = None
 
 	def setKey(self, key, value):
 		self.keyMap[key] = value
-	
+
 	def mouseUp(self):
 		self.mouseDown = False
-	
+
 	def select(self, aiWorld, entityGroup):
-		"Click event handler. Performs one of several actions based on the selected edit tool."
+		'Click event handler. Performs one of several actions based on the selected edit tool.'
 		if not self.enableEdit:
 			return
 		entry = aiWorld.getRayFirstCollision(self.pickRayNP)
@@ -1906,9 +1906,9 @@ class EditController(Controller):
 		if self.selectedTool == 1:
 			# Make a physics entity
 			filename = self.ui.currentPhysicsEntityFile
-			if vfs.exists("maps/" + filename + ".txt"):
-				directory = "maps/" + filename.rpartition("/")[0]
-				data = vfs.readFile("maps/" + filename + ".txt", 1)
+			if vfs.exists('maps/' + filename + '.txt'):
+				directory = 'maps/' + filename.rpartition('/')[0]
+				data = vfs.readFile('maps/' + filename + '.txt', 1)
 				obj = entities.PhysicsEntity(aiWorld.world, aiWorld.space, data, directory, filename)
 				obj.setPosition(target + Vec3(0, 0, obj.vradius))
 				normal = entry.getSurfaceNormal(render)
@@ -1978,7 +1978,7 @@ class EditController(Controller):
 
 	def serverUpdate(self, aiWorld, entityGroup, data):
 		p = Controller.serverUpdate(self, aiWorld, entityGroup, data)
-		"Updates the camera position, cursor position, and picking ray."
+		'Updates the camera position, cursor position, and picking ray.'
 		aspectRatio = float(base.win.getProperties().getXSize()) / float(base.win.getProperties().getYSize())
 		self.pickRay.setFromLens(base.camNode, self.ui.cursorX / aspectRatio, self.ui.cursorY)
 		if self.mouseDown and len(self.spawnedObjects) > 0 and engine.clock.time - self.clickTime > 0.25:
@@ -1992,33 +1992,33 @@ class EditController(Controller):
 			p = node.getP()
 			node.lookAt(target)
 			obj.setRotation(Vec3(node.getH(), p, r))
-		
-		if self.keyMap["rotate"] == 1 or not self.enableEdit:
+
+		if self.keyMap['rotate'] == 1 or not self.enableEdit:
 			self.angleX += self.ui.mouse.getDX()
 			self.angleY += self.ui.mouse.getDY()
-		
+
 		speed = engine.clock.timeStep * 40 if engine.clock.timeStep > 0 else 1
 		velocity = Vec3(0, 0, 0)
-		if self.keyMap["forward"] == 1:
+		if self.keyMap['forward'] == 1:
 			velocity += Vec3(speed * math.sin(self.angleX), speed * math.cos(self.angleX), speed * math.sin(self.angleY))
-		if self.keyMap["back"] == 1:
+		if self.keyMap['back'] == 1:
 			velocity += Vec3(-speed * math.sin(self.angleX), -speed * math.cos(self.angleX), -speed * math.sin(self.angleY))
-		if self.keyMap["left"] == 1:
+		if self.keyMap['left'] == 1:
 			velocity += Vec3(speed * -math.sin(self.angleX + (math.pi / 2)), speed * -math.cos(self.angleX + (math.pi / 2)), 0)
-		if self.keyMap["right"] == 1:
+		if self.keyMap['right'] == 1:
 			velocity += Vec3(speed * math.sin(self.angleX + (math.pi / 2)), speed * math.cos(self.angleX + (math.pi / 2)), 0)
-		if self.keyMap["raise"] == 1:
+		if self.keyMap['raise'] == 1:
 			velocity += Vec3(0, 0, speed)
-		if self.keyMap["lower"] == 1:
+		if self.keyMap['lower'] == 1:
 			velocity += Vec3(0, 0, -speed)
 		self.pos += velocity
-		
-		aimOffset = Vec3(math.sin(self.angleX), math.cos(self.angleX), math.sin(self.angleY))	
+
+		aimOffset = Vec3(math.sin(self.angleX), math.cos(self.angleX), math.sin(self.angleY))
 		pos = self.pos
 		camera.setPos(pos)
 		camera.setHpr(-math.degrees(self.angleX), math.degrees(self.angleY), 0)
 		return p
-		
+
 	def delete(self):
 		self.pickRayNP.removeNode()
 		Controller.delete(self)

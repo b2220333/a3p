@@ -54,7 +54,7 @@ MODE_CLIENT = 1
 
 SERVER_TICK = 0.03 # Transfer update packets 20 times per second
 
-if sys.platform == "win32":
+if sys.platform == 'win32':
 	timeFunction = time.clock
 else:
 	timeFunction = time.time
@@ -88,7 +88,7 @@ class NetworkContext:
 
 class Connection:
 	def __init__(self):
-		self.address = ("", 0)
+		self.address = ('', 0)
 		self.lastPacketTime = timeFunction()
 		self.lastSentPacketTime = 0
 		self.ready = False
@@ -111,7 +111,7 @@ class PythonNetContext(NetworkContext):
 		self.hostListCallback = None
 		self.disconnectCallback = None
 		self.connectionTimeout = 10.0 if netMode == MODE_SERVER else 15.0
-		self.clientUsername = "Unnamed"
+		self.clientUsername = 'Unnamed'
 		self.lastConnectionAttempt = 0
 		self.connectionAttempts = 0
 
@@ -119,7 +119,7 @@ class PythonNetContext(NetworkContext):
 		global netMode
 		netMode = MODE_CLIENT
 		self.mode = MODE_CLIENT
-		args = arg.split(":")
+		args = arg.split(':')
 		ip = args[0]
 		port = 1337
 		if len(args) > 1:
@@ -270,8 +270,8 @@ class PythonNetContext(NetworkContext):
 					map = String.getFrom(iterator)
 					activePlayers = Uint8.getFrom(iterator)
 					playerSlots = Uint8.getFrom(iterator)
-					hosts.append((user, map, ip + ":" + str(port), activePlayers, playerSlots))
-				#engine.log.debug("Received " + str(numHosts) + " hosts from lobby server.")
+					hosts.append((user, map, ip + ':' + str(port), activePlayers, playerSlots))
+				#engine.log.debug('Received ' + str(numHosts) + ' hosts from lobby server.')
 				if self.hostListCallback != None:
 					self.hostListCallback(hosts)
 			if self.mode == MODE_SERVER:
@@ -280,7 +280,7 @@ class PythonNetContext(NetworkContext):
 					port = Uint16.getFrom(iterator)
 					clientAddress = (ip, port)
 					self.connectionAttempts = 0
-					#engine.log.info("Received notification from lobby server of new client " + ip + ":" + str(port))
+					#engine.log.info('Received notification from lobby server of new client ' + ip + ':' + str(port))
 					self.serverConnect(clientAddress)
 				elif code == PACKET_DISCONNECT:
 					if address in self.activeConnections:
@@ -294,16 +294,16 @@ class PythonNetContext(NetworkContext):
 		return readQueue
 
 	def broadcastDatagram(self, datagram):
-		"""For the server, broadcasts the given data packet to all connected clients.
-		For clients, sends the datagram to the server."""
+		'''For the server, broadcasts the given data packet to all connected clients.
+		For clients, sends the datagram to the server.'''
 		if netMode == MODE_SERVER:
 			self.writeQueue.append((0, datagram, None)) # Send to all clients
 		else:
 			self.writeQueue.append((1, datagram, self.hostConnection.address)) # Send to host
 
 	def broadcastDatagramExcept(self, datagram, client):
-		"""For the server, broadcasts the given data packet to all connected clients.
-		For clients, sends the datagram to the server."""
+		'''For the server, broadcasts the given data packet to all connected clients.
+		For clients, sends the datagram to the server.'''
 		self.writeQueue.append((2, datagram, client))
 
 	def sendDatagram(self, datagram, client = None):
@@ -340,11 +340,11 @@ def delete():
 	context.delete()
 
 def stringToAddress(string):
-	address = string.split(":")
+	address = string.split(':')
 	return (address[0], int(address[1]))
 
 def addressToString(address):
-	return address[0] + ":" + str(address[1])
+	return address[0] + ':' + str(address[1])
 
 def compareAddresses(a, b):
 	return a[0] == b[0] and a[1] == b[1]
@@ -354,14 +354,14 @@ def copyAddress(a):
 
 def isValidIp(addressString):
 	try:
-		addressParts = addressString.split(":")
+		addressParts = addressString.split(':')
 		ip = addressParts[0]
 		if len(addressParts) > 1:
 			port = addressParts[1]
 			if not 0 <= int(port) <= 2**16:
 				return False
 
-		parts = ip.split(".")
+		parts = ip.split('.')
 		if len(parts) != 4:
 			return False
 
@@ -392,7 +392,7 @@ class Packet:
 
 class CustomDatagram:
 
-	def __init__(self, x = ""):
+	def __init__(self, x = ''):
 		self.data = x
 
 	def addUint8(self, x):

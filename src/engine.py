@@ -37,7 +37,7 @@ enableDistortionEffects = True
 enableShaders = True
 enablePostProcessing = True
 enableShadows = True
-savedUsername = "Unnamed"
+savedUsername = 'Unnamed'
 reflectionEffectsNeeded = False # True if we're in a level with water
 windowWidth = 800
 windowHeight = 600
@@ -51,7 +51,7 @@ mf = None
 physicsEntityFileCache = dict()
 paused = False
 enablePause = False
-modelFileSuffix = ""
+modelFileSuffix = ''
 
 map = None
 inputEnabled = True
@@ -66,7 +66,7 @@ def exit():
 
 class Logger:
 	def __init__(self):
-		self.notify = DirectNotify().newCategory("core")
+		self.notify = DirectNotify().newCategory('core')
 	def error(self, msg):
 		self.notify.warning(msg)
 	def warning(self, msg):
@@ -94,7 +94,7 @@ def loadConfigFile():
 	global isFullscreen
 	global aspectRatio
 	try:
-		configFile = open(os.path.join(os.path.expanduser("~"), "a3p-config"), "r")
+		configFile = open(os.path.join(os.path.expanduser('~'), 'a3p-config'), 'r')
 	except IOError:
 		return
 	lines = configFile.read().split('\n')
@@ -103,16 +103,16 @@ def loadConfigFile():
 		parts = line.split()
 		if len(parts) == 0:
 			continue
-		if parts[0] == "enable-distortion-effects":
-			enableDistortionEffects = parts[1] == "#t"
-		elif parts[0] == "enable-shaders":
-			enableShaders = parts[1] == "#t"
-		elif parts[0] == "enable-post-processing":
-			enablePostProcessing = parts[1] == "#t"
-		elif parts[0] == "enable-shadows":
-			enableShadows = parts[1] == "#t"
-		elif parts[0] == "username":
-			savedUsername = " ".join(parts[1:])
+		if parts[0] == 'enable-distortion-effects':
+			enableDistortionEffects = parts[1] == '#t'
+		elif parts[0] == 'enable-shaders':
+			enableShaders = parts[1] == '#t'
+		elif parts[0] == 'enable-post-processing':
+			enablePostProcessing = parts[1] == '#t'
+		elif parts[0] == 'enable-shadows':
+			enableShadows = parts[1] == '#t'
+		elif parts[0] == 'username':
+			savedUsername = ' '.join(parts[1:])
 	if windowHeight > 0:
 		aspectRatio = float(windowWidth) / float(windowHeight)
 
@@ -126,17 +126,17 @@ def saveConfigFile():
 	global windowHeight
 	global aspectRatio
 	aspectRatio = float(windowWidth) / float(windowHeight)
-	configFile = open(os.path.join(os.path.expanduser("~"), "a3p-config"), "w")
+	configFile = open(os.path.join(os.path.expanduser('~'), 'a3p-config'), 'w')
 	def boolToStr(a):
 		if a:
-			return "#t"
+			return '#t'
 		else:
-			return "#f"
-	configFile.write("enable-distortion-effects " + boolToStr(enableDistortionEffects) + "\n")
-	configFile.write("enable-shaders " + boolToStr(enableShaders) + "\n")
-	configFile.write("enable-post-processing " + boolToStr(enablePostProcessing) + "\n")
-	configFile.write("enable-shadows " + boolToStr(enableShadows) + "\n")
-	configFile.write("username " + savedUsername)
+			return '#f'
+	configFile.write('enable-distortion-effects ' + boolToStr(enableDistortionEffects) + '\n')
+	configFile.write('enable-shaders ' + boolToStr(enableShaders) + '\n')
+	configFile.write('enable-post-processing ' + boolToStr(enablePostProcessing) + '\n')
+	configFile.write('enable-shadows ' + boolToStr(enableShadows) + '\n')
+	configFile.write('username ' + savedUsername)
 	configFile.close()
 
 def cacheModel(filename):
@@ -168,7 +168,7 @@ def deleteModel(node, filename):
 	node.removeNode()
 
 def init(showFrameRate = False, daemon = False):
-	"Initializes various global components, like audio, lighting, and the clock. Should be called once at the beginning of the program."
+	'Initializes various global components, like audio, lighting, and the clock. Should be called once at the beginning of the program.'
 	global renderLit
 	global clock
 	global renderObjects
@@ -185,30 +185,30 @@ def init(showFrameRate = False, daemon = False):
 	global isDaemon
 	global mf
 	global maps
-	
+
 	mf = None
-	
-	if not vfs.isDirectory("maps"):
+
+	if not vfs.isDirectory('maps'):
 		mf = Multifile()
-		mf.openRead(ExecutionEnvironment.getEnvironmentVariable("PKG_ROOT") + "/pkg.mf")
-	
+		mf.openRead(ExecutionEnvironment.getEnvironmentVariable('PKG_ROOT') + '/pkg.mf')
+
 	isDaemon = daemon
-	
+
 	if not daemon:
 		base.setBackgroundColor(2.0/255.0, 28.0/255.0, 53.0/255.0)
-	
+
 	log = Logger()
-	
+
 	sys.excepthook = exceptHook
-		
+
 	clock = Clock()
 	base.disableMouse() # Disable default mouse camera control
 	if not daemon:
 		base.camNode.setCameraMask(BitMask32.bit(1))
 		base.camLens.setFov(defaultFov)
-	renderLit = render.attachNewNode("renderLit")
-	renderObjects = renderLit.attachNewNode("renderObjects")
-	renderEnvironment = renderLit.attachNewNode("renderEnvironment")
+	renderLit = render.attachNewNode('renderLit')
+	renderObjects = renderLit.attachNewNode('renderObjects')
+	renderEnvironment = renderLit.attachNewNode('renderEnvironment')
 	controllers.init()
 	ai.init()
 	audio.init(dropOffFactor = 1.4, distanceFactor = 14, dopplerFactor = 0.0)
@@ -216,7 +216,7 @@ def init(showFrameRate = False, daemon = False):
 	if enableShaders and not daemon:
 		numMaxDynamicLights = 2
 	for i in range(numMaxDynamicLights):
-		light = PointLight("Light" + str(i))
+		light = PointLight('Light' + str(i))
 		light.setColor(Vec4(0, 0, 0, 1))
 		light.setAttenuation(Vec3(0, 0, 1))
 		lightNode = renderLit.attachNewNode(light)
@@ -232,7 +232,7 @@ def init(showFrameRate = False, daemon = False):
 		props = FrameBufferProperties()
 		props.setRgbColor(1)
 		reflectionBuffer = base.graphicsEngine.makeOutput(
-		base.pipe, "reflection-buffer", -2,
+		base.pipe, 'reflection-buffer', -2,
 		props, winprops,
 		GraphicsPipe.BFSizeTrackHost | GraphicsPipe.BFRefuseWindow,
 		base.win.getGsg(), base.win)
@@ -244,31 +244,31 @@ def init(showFrameRate = False, daemon = False):
 		reflectionCamera.reparentTo(render)
 		reflectionCamera.node().setActive(False)
 	particles.init()
-	maps = [x.split("\t") for x in readFile("maps/maps.txt").split("\n")]
-	
+	maps = [x.split('\t') for x in readFile('maps/maps.txt').split('\n')]
+
 def preloadModels():
 	global modelFileSuffix
-	if os.path.exists("models/basicdroid/BasicDroid.bam"):
-		modelFileSuffix = ".bam"
-	cacheModel("models/basicdroid/BasicDroid")
-	cacheModel("models/basicdroid/chaingun")
-	cacheModel("models/basicdroid/BasicDroid-lowres")
-	cacheModel("models/basicdroid/sniper")
-	cacheModel("models/basicdroid/shotgun")
-	cacheModel("models/basicdroid/pistol")
-	cacheModel("models/shield/shield")
-	cacheModel("models/grenade/Grenade")
-	cacheModel("models/fragment/Fragment")
-	cacheModel("models/basicdroid/claw")
-	cacheModel("models/basicdroid/claw-Retract")
-	cacheModel("models/basicdroid/claw-Impale")
-	cacheModel("models/fragment/GlassFragment")
-	cacheModel("models/spawnpoint/SpawnPoint")
-	cacheModel("models/spike/spike")
-	cacheModel("models/pod/pod")
-	cacheModel("maps/Block")
-	cacheModel("maps/block1")
-	cacheModel("models/crosshair/crosshair")
+	if os.path.exists('models/basicdroid/BasicDroid.bam'):
+		modelFileSuffix = '.bam'
+	cacheModel('models/basicdroid/BasicDroid')
+	cacheModel('models/basicdroid/chaingun')
+	cacheModel('models/basicdroid/BasicDroid-lowres')
+	cacheModel('models/basicdroid/sniper')
+	cacheModel('models/basicdroid/shotgun')
+	cacheModel('models/basicdroid/pistol')
+	cacheModel('models/shield/shield')
+	cacheModel('models/grenade/Grenade')
+	cacheModel('models/fragment/Fragment')
+	cacheModel('models/basicdroid/claw')
+	cacheModel('models/basicdroid/claw-Retract')
+	cacheModel('models/basicdroid/claw-Impale')
+	cacheModel('models/fragment/GlassFragment')
+	cacheModel('models/spawnpoint/SpawnPoint')
+	cacheModel('models/spike/spike')
+	cacheModel('models/pod/pod')
+	cacheModel('maps/Block')
+	cacheModel('maps/block1')
+	cacheModel('models/crosshair/crosshair')
 
 def postProcessingChanged():
 	global filters
@@ -308,7 +308,7 @@ def exceptHook(type, value, trace):
 	exceptionData = traceback.format_exc()
 	log.info(exceptionData)
 	print exceptionData
-	
+
 def clearLights():
 	global lights
 	for light in lights:
@@ -316,7 +316,7 @@ def clearLights():
 	del lights[:]
 
 def update():
-	"Updates global components. Basically the clock. Should be called once every frame, regardless of the game state."
+	'Updates global components. Basically the clock. Should be called once every frame, regardless of the game state.'
 	if not paused:
 		clock.update()
 	else:
@@ -328,31 +328,31 @@ def endUpdate():
 	particles.ParticleGroup.end()
 
 class Clock:
-	"""Global clock; used just about everywhere.
+	'''Global clock; used just about everywhere.
 	Starts at 0, units are in seconds.
 	You can also change how fast it increments (slow down or speed up time).
-	A new clock should be initialized every time a new Game is created."""
+	A new clock should be initialized every time a new Game is created.'''
 	def __init__(self):
-		if sys.platform == "win32":
+		if sys.platform == 'win32':
 			self.timerFunction = time.clock
 		else:
 			self.timerFunction = time.time
 		self._time = self.timerFunction()
 		self.timeStep = 0
 		self.lastFrameTime = self.time
-		
+
 	def update(self):
-		"Call once every frame."
+		'Call once every frame.'
 		self.lastFrameTime = self.time
 		self._time = self.timerFunction()
 		self.timeStep = min(0.1, max(0.005, self.time - self.lastFrameTime))
-	
+
 	@property
 	def time(self):
 		return self._time
 
 def readFile(file):
-	data = ""
+	data = ''
 	if vfs.exists(file):
 		data = vfs.readFile(file, 1)
 	elif mf != None: # We're reading from a multifile
@@ -365,18 +365,18 @@ def readPhysicsEntityFile(file):
 	if file in physicsEntityFileCache:
 		data = physicsEntityFileCache[file]
 	else:
-		data = readFile("maps/" + file)
+		data = readFile('maps/' + file)
 	physicsEntityFileCache[file] = data
 	return data
 
 class Map(DirectObject):
-	"""A Map loads all environment resources from a map file.
-	Maps also keep track of the custom lights, skybox textures, sounds, etc, and can save this data back to a map file."""
+	'''A Map loads all environment resources from a map file.
+	Maps also keep track of the custom lights, skybox textures, sounds, etc, and can save this data back to a map file.'''
 	def __init__(self):
 		global map
 		map = self
 		self.skyBox = None
-		self.skyBoxFilename = ""
+		self.skyBoxFilename = ''
 		self.sceneries = dict()
 		self.staticGeometries = dict()
 		self.worldSize = 0
@@ -385,12 +385,12 @@ class Map(DirectObject):
 		self.waterPlane = None
 		self.waterPlaneNode = None
 		self.waterPlaneNodePath = None
-		self.mapDirectory = "maps"
+		self.mapDirectory = 'maps'
 		self.isSurvival = False
 		self.ambientSound = None
 		self.platforms = []
-		self.name = ""
-	
+		self.name = ''
+
 	def addSoundGroup(self, soundGroup):
 		self.soundGroups[soundGroup.name] = soundGroup;
 
@@ -403,7 +403,7 @@ class Map(DirectObject):
 		geom.geometry.destroy()
 		if geom.node in self.staticGeometries:
 			del self.staticGeometries[geom.node]
-	
+
 	def showPlatforms(self):
 		for p in self.platforms:
 			p.show()
@@ -416,31 +416,31 @@ class Map(DirectObject):
 		for light in self.lights:
 			if isinstance(light.getNode(0), Spotlight) and light.node().isShadowCaster():
 				light.node().setShadowCaster(False)
-	
+
 	def enableShadows(self):
 		for light in self.lights:
-			if light.getTag("shadow") == "true":
+			if light.getTag('shadow') == 'true':
 				light.node().setShadowCaster(True, shadowMapWidth, shadowMapHeight)
 
 	def load(self, name, aiWorld, entityGroup):
-		"Loads the specified map file, creating all resources, and filling out the AI world and entity group."
+		'Loads the specified map file, creating all resources, and filling out the AI world and entity group.'
 		global cubeMap
 		global reflectionEffectsNeeded
 
 		self.name = name
-		self.filename = "maps/" + self.name + ".txt"
-		mapDirectory = "maps"
-		
+		self.filename = 'maps/' + self.name + '.txt'
+		mapDirectory = 'maps'
+
 		data = readFile(self.filename)
 
 		lines = data.split('\n')
 		for line in lines:
 			tokens = line.split()
-			if len(tokens) == 0 or line[0] == "#":
+			if len(tokens) == 0 or line[0] == '#':
 				continue
-			if tokens[0] == "world":
+			if tokens[0] == 'world':
 				self.worldSize = float(tokens[1])
-			elif tokens[0] == "teams":
+			elif tokens[0] == 'teams':
 				numTeams = sum([int(token) for token in tokens[1:]])
 				if net.netMode == net.MODE_SERVER:
 					if len(tokens) > 2: # 2v2
@@ -465,9 +465,9 @@ class Map(DirectObject):
 						while i < len(entityGroup.teams):
 							entityGroup.teams[1].addAlly(entityGroup.teams[i].getId())
 							i += 2
-			elif tokens[0] == "navmesh":
+			elif tokens[0] == 'navmesh':
 				aiWorld.navMesh = ai.NavMesh(mapDirectory, tokens[1])
-			elif tokens[0] == "survival":
+			elif tokens[0] == 'survival':
 				self.isSurvival = True
 				numTeams = 4
 				if net.netMode == net.MODE_SERVER:
@@ -482,7 +482,7 @@ class Map(DirectObject):
 					for team in entityGroup.teams:
 						for team2 in entityGroup.teams:
 							team.addAlly(team2.getId())
-			elif tokens[0] == "glass":
+			elif tokens[0] == 'glass':
 				if net.netMode == net.MODE_SERVER:
 					# Glass pane
 					glass = entities.Glass(aiWorld.world, aiWorld.space)
@@ -491,47 +491,47 @@ class Map(DirectObject):
 					glass.setPosition(glass.getPosition())
 					glass.setRotation(Vec3(float(tokens[6]), float(tokens[7]), float(tokens[8])))
 					entityGroup.spawnEntity(glass)
-			elif tokens[0] == "water":
+			elif tokens[0] == 'water':
 				# Enable reflection rendering
 				reflectionEffectsNeeded = True
 				distortionEffectsChanged()
 
-				maker = CardMaker("waterNode")
+				maker = CardMaker('waterNode')
 				maker.setFrame(-self.worldSize, self.worldSize, -self.worldSize, self.worldSize)
 				self.waterNode = render.attachNewNode(maker.generate())
 				self.waterNode.setHpr(0, -90, 0)
 				self.waterNode.setPos(0, 0, float(tokens[1])) # Second token is water height
-				self.waterNode.setShader(loader.loadShader("images/water.sha"))
+				self.waterNode.setShader(loader.loadShader('images/water.sha'))
 				self.waterNode.setTransparency(TransparencyAttrib.MAlpha)
-				self.waterNode.setShaderInput("watermap", loader.loadTexture("images/water-normal.jpg"))
-				self.waterNode.setShaderInput("time", clock.time)
+				self.waterNode.setShaderInput('watermap', loader.loadTexture('images/water-normal.jpg'))
+				self.waterNode.setShaderInput('time', clock.time)
 				self.waterNode.hide(BitMask32.bit(4))
 				self.waterPlane = Plane(Vec3(0, 0, 1), Point3(0, 0, float(tokens[1])))
-				self.waterPlaneNode = PlaneNode("waterPlaneNode")
+				self.waterPlaneNode = PlaneNode('waterPlaneNode')
 				self.waterPlaneNode.setPlane(self.waterPlane)
 				self.waterPlaneNodePath = render.attachNewNode(self.waterPlaneNode)
 				self.waterPlaneNodePath.hide()
 				clipPlaneAttrib = ClipPlaneAttrib.make()
 				clipPlaneAttrib = clipPlaneAttrib.addOnPlane(self.waterPlaneNodePath)
 				if reflectionCamera != None:
-					self.waterNode.setShaderInput("reflectionscreen", reflectionRenderTexture)
+					self.waterNode.setShaderInput('reflectionscreen', reflectionRenderTexture)
 					reflectionCamera.node().setInitialState(RenderState.make(CullFaceAttrib.makeReverse(), clipPlaneAttrib))
-			elif tokens[0] == "geometry":
+			elif tokens[0] == 'geometry':
 				# Setup static geometry
 				geom = StaticGeometry(aiWorld.space, mapDirectory, tokens[1])
 				geom.setPosition(Vec3(float(tokens[2]), float(tokens[3]), float(tokens[4])))
 				geom.commitChanges()
 				self.addStaticGeometry(geom)
-			elif tokens[0] == "geometry-scenery":
+			elif tokens[0] == 'geometry-scenery':
 				# Setup static geometry
 				geom = StaticGeometry(aiWorld.space, mapDirectory, tokens[1])
 				geom.setPosition(Vec3(float(tokens[2]), float(tokens[3]), float(tokens[4])))
 				geom.commitChanges()
 				geom.node.show()
 				self.addStaticGeometry(geom)
-			elif tokens[0] == "skybox":
+			elif tokens[0] == 'skybox':
 				if not isDaemon:
-					self.skyBox = loadModel("models/skyboxes/" + tokens[1])
+					self.skyBox = loadModel('models/skyboxes/' + tokens[1])
 					self.skyBox.setScale(self.worldSize)
 					self.skyBoxCustomModel = True
 					self.skyBoxFilename = tokens[1]
@@ -543,45 +543,45 @@ class Map(DirectObject):
 					self.skyBox.setTwoSided(True)
 					self.skyBox.setShaderOff()
 					self.skyBox.reparentTo(render)
-			elif tokens[0] == "sound":
+			elif tokens[0] == 'sound':
 				if not isDaemon:
-					self.ambientSound = audio.FlatSound(mapDirectory + "/" + tokens[1], float(tokens[2]))
+					self.ambientSound = audio.FlatSound(mapDirectory + '/' + tokens[1], float(tokens[2]))
 					self.ambientSound.setLoop(True)
 					self.ambientSound.play()
-			elif tokens[0] == "light":
-				if tokens[1] == "objects":
+			elif tokens[0] == 'light':
+				if tokens[1] == 'objects':
 					parentNode = renderObjects
-				elif tokens[1] == "environment":
+				elif tokens[1] == 'environment':
 					parentNode = renderEnvironment
 				else:
 					parentNode = renderLit
-				if tokens[2] == "directional":
+				if tokens[2] == 'directional':
 					light = Spotlight(tokens[3])
 					lens = PerspectiveLens()
 					lens.setFov(45)
-					light.setExponent(0) 
+					light.setExponent(0)
 					light.setLens(lens)
 					light.setColor(Vec4(float(tokens[4]), float(tokens[5]), float(tokens[6]), 1))
 					lightNode = parentNode.attachNewNode(light)
-					lightNode.setTag("type", "directional") # We can look this up later when we go to save, to differentiate between spotlights and directionals
+					lightNode.setTag('type', 'directional') # We can look this up later when we go to save, to differentiate between spotlights and directionals
 					lightNode.setHpr(float(tokens[7]), float(tokens[8]), float(tokens[9]))
 					lightNode.setPos(render.getRelativeVector(lightNode, Vec3(0, 1, 0)) * -self.worldSize * 2.25)
-					if len(tokens) >= 11 and tokens[10] == "shadow" and hasattr(light, "setShadowCaster"):
-						lightNode.setTag("shadow", "true")
+					if len(tokens) >= 11 and tokens[10] == 'shadow' and hasattr(light, 'setShadowCaster'):
+						lightNode.setTag('shadow', 'true')
 						if enableShadows:
 							light.setShadowCaster(True, shadowMapWidth, shadowMapHeight)
 							light.setCameraMask(BitMask32.bit(4))
 					else:
-						lightNode.setTag("shadow", "false")
+						lightNode.setTag('shadow', 'false')
 					parentNode.setLight(lightNode)
 					self.lights.append(lightNode)
-				elif tokens[2] == "ambient":
+				elif tokens[2] == 'ambient':
 					light = AmbientLight(tokens[3])
 					light.setColor(Vec4(float(tokens[4]), float(tokens[5]), float(tokens[6]), 1))
 					lightNode = parentNode.attachNewNode(light)
 					parentNode.setLight(lightNode)
 					self.lights.append(lightNode)
-				elif tokens[2] == "point":
+				elif tokens[2] == 'point':
 					light = PointLight(tokens[3])
 					light.setColor(Vec4(float(tokens[7]), float(tokens[8]), float(tokens[9]), 1))
 					light.setAttenuation(Vec3(float(tokens[10]), float(tokens[11]), float(tokens[12])))
@@ -589,7 +589,7 @@ class Map(DirectObject):
 					lightNode.setPos(float(tokens[4]), float(tokens[5]), float(tokens[6]))
 					parentNode.setLight(lightNode)
 					self.lights.append(lightNode)
-				elif tokens[2] == "spot":
+				elif tokens[2] == 'spot':
 					light = Spotlight(tokens[3])
 					lens = PerspectiveLens()
 					lens.setFov(float(tokens[16]))
@@ -600,13 +600,13 @@ class Map(DirectObject):
 					lightNode = parentNode.attachNewNode(light)
 					lightNode.setPos(float(tokens[4]), float(tokens[5]), float(tokens[6]))
 					lightNode.setHpr(float(tokens[7]), float(tokens[8]), float(tokens[9]))
-					if hasattr(light, "setShadowCaster") and len(tokens) >= 19 and tokens[18] == "shadow":
+					if hasattr(light, 'setShadowCaster') and len(tokens) >= 19 and tokens[18] == 'shadow':
 						light.setShadowCaster(True, 2048, 2048)
 						light.setCameraMask(BitMask32.bit(4))
 					parentNode.setLight(lightNode)
-					lightNode.setTag("type", "spot") # We can look this up later when we go to save, to differentiate between spotlights and directionals
+					lightNode.setTag('type', 'spot') # We can look this up later when we go to save, to differentiate between spotlights and directionals
 					self.lights.append(lightNode)
-			elif tokens[0] == "dock":
+			elif tokens[0] == 'dock':
 				dock = Dock(aiWorld.space, int(tokens[1]))
 				pos = Vec3(float(tokens[2]), float(tokens[3]), float(tokens[4]))
 				dock.setPosition(pos)
@@ -620,29 +620,29 @@ class Map(DirectObject):
 					break
 				dock.setRotation(Vec3(0, math.degrees(-math.atan2(normal.getY(), normal.getZ())), math.degrees(math.atan2(normal.getX(), normal.getZ()))))
 				aiWorld.docks.append(dock)
-			elif tokens[0] == "physicsentity":
+			elif tokens[0] == 'physicsentity':
 				if net.netMode == net.MODE_SERVER:
-					file = tokens[1] + ".txt"
+					file = tokens[1] + '.txt'
 					data = readPhysicsEntityFile(file)
-					parts = tokens[1].rpartition("/")
-					directory = mapDirectory + "/" + parts[0]
+					parts = tokens[1].rpartition('/')
+					directory = mapDirectory + '/' + parts[0]
 					obj = entities.PhysicsEntity(aiWorld.world, aiWorld.space, data, directory, tokens[1])
 					obj.setPosition(Vec3(float(tokens[2]), float(tokens[3]), float(tokens[4])))
 					obj.setRotation(Vec3(float(tokens[5]), float(tokens[6]), float(tokens[7])))
 					obj.controller.commitLastPosition()
 					entityGroup.spawnEntity(obj)
-			elif tokens[0] == "spawnpoint":
+			elif tokens[0] == 'spawnpoint':
 				# Setup spawn point
 				geom = SpawnPoint(aiWorld.space)
 				geom.setPosition(Vec3(float(tokens[1]), float(tokens[2]), float(tokens[3])))
 				geom.setRotation(Vec3(float(tokens[4]), float(tokens[5]), float(tokens[6])))
 				aiWorld.spawnPoints.append(geom)
-			elif tokens[0] == "scenery":
-				scenery = loadModel(mapDirectory + "/" + tokens[1])
+			elif tokens[0] == 'scenery':
+				scenery = loadModel(mapDirectory + '/' + tokens[1])
 				scenery.setPos(float(tokens[2]), float(tokens[3]), float(tokens[4]))
 				scenery.reparentTo(renderLit)
 				self.sceneries[tokens[1]] = scenery
-		
+
 		# Create winnar platforms
 		entry = aiWorld.getFirstCollision(Vec3(0, 0, 100), Vec3(0, 0, -1))
 		height = 15
@@ -659,98 +659,98 @@ class Map(DirectObject):
 			self.platforms.append(p)
 
 	def save(self, aiWorld, entityGroup):
-		"Saves a basic representation of the current game state (including environment resources) to a map file."
+		'Saves a basic representation of the current game state (including environment resources) to a map file.'
 		class MapFile:
 			def __init__(self):
-				self.data = ""
+				self.data = ''
 			def write(self, line):
 				self.data += line
 		mapFile = MapFile()
-		mapFile.write("world " + str(self.worldSize) + "\n")
+		mapFile.write('world ' + str(self.worldSize) + '\n')
 		if aiWorld.navMesh != None:
-			mapFile.write("navmesh " + aiWorld.navMesh.filename + "\n")
+			mapFile.write('navmesh ' + aiWorld.navMesh.filename + '\n')
 		index = 0
 		for dock in aiWorld.docks:
 			if dock.active:
 				pos = dock.getPosition()
-				mapFile.write("dock " + str(index) + " " + str(pos.getX()) + " " + str(pos.getY()) + " " + str(pos.getZ()) + "\n")
+				mapFile.write('dock ' + str(index) + ' ' + str(pos.getX()) + ' ' + str(pos.getY()) + ' ' + str(pos.getZ()) + '\n')
 				index += 1
 		if self.isSurvival:
-			mapFile.write("survival\n")
+			mapFile.write('survival\n')
 		else:
 			if len(entityGroup.teams[0].getAllies()) > 0:
-				mapFile.write("teams " + str(len(entityGroup.teams[0].getAllies()) + 1) + " " + str(len(entityGroup.teams[1].getAllies()) + 1) + "\n")
+				mapFile.write('teams ' + str(len(entityGroup.teams[0].getAllies()) + 1) + ' ' + str(len(entityGroup.teams[1].getAllies()) + 1) + '\n')
 			else:
-				mapFile.write("teams " + str(len(entityGroup.teams)) + "\n")
+				mapFile.write('teams ' + str(len(entityGroup.teams)) + '\n')
 		for geom in self.staticGeometries.values():
 			pos = geom.getPosition()
-			keyword = "geometry"
+			keyword = 'geometry'
 			if not geom.node.isHidden():
-				keyword = "geometry-scenery"
-			mapFile.write(keyword + " " + geom.filename + " " + str(pos.getX()) + " " + str(pos.getY()) + " " + str(pos.getZ()) + "\n")
+				keyword = 'geometry-scenery'
+			mapFile.write(keyword + ' ' + geom.filename + ' ' + str(pos.getX()) + ' ' + str(pos.getY()) + ' ' + str(pos.getZ()) + '\n')
 		if self.skyBox != None:
-			mapFile.write("skybox " + self.skyBoxFilename + "\n")
+			mapFile.write('skybox ' + self.skyBoxFilename + '\n')
 		if self.ambientSound != None:
-			mapFile.write("sound " + self.ambientSound.filename.replace(self.mapDirectory + "/", "") + " " + str(self.ambientSound.getVolume()) + "\n")
+			mapFile.write('sound ' + self.ambientSound.filename.replace(self.mapDirectory + '/', '') + ' ' + str(self.ambientSound.getVolume()) + '\n')
 		if self.waterNode != None:
-			mapFile.write("water " + str(self.waterNode.getZ()) + "\n")
+			mapFile.write('water ' + str(self.waterNode.getZ()) + '\n')
 		for light in self.lights:
 			color = light.getNode(0).getColor()
-			mapFile.write("light ")
+			mapFile.write('light ')
 			if light.getNode(0).getParent(0) == renderObjects:
-				mapFile.write("objects ")
+				mapFile.write('objects ')
 			elif light.getNode(0).getParent(0) == renderEnvironment:
-				mapFile.write("environment ")
+				mapFile.write('environment ')
 			else:
-				mapFile.write("all ")
+				mapFile.write('all ')
 			if isinstance(light.getNode(0), AmbientLight):
-				mapFile.write("ambient " + light.getName() + " " + str(color.getX()) + " " + str(color.getY()) + " " + str(color.getZ()) + "\n")
+				mapFile.write('ambient ' + light.getName() + ' ' + str(color.getX()) + ' ' + str(color.getY()) + ' ' + str(color.getZ()) + '\n')
 			elif isinstance(light.getNode(0), Spotlight):
 				# Could be a real spotlight, or it could be a directional light, since we fake those.
-				if light.getTag("type") == "directional":
-					mapFile.write("directional " + light.getName() + " " + str(color.getX()) + " " + str(color.getY()) + " " + str(color.getZ()) + " " + str(light.getH()) + " " + str(light.getP()) + " " + str(light.getR()) + (" shadow" if light.node().isShadowCaster() else "") + "\n")
+				if light.getTag('type') == 'directional':
+					mapFile.write('directional ' + light.getName() + ' ' + str(color.getX()) + ' ' + str(color.getY()) + ' ' + str(color.getZ()) + ' ' + str(light.getH()) + ' ' + str(light.getP()) + ' ' + str(light.getR()) + (' shadow' if light.node().isShadowCaster() else '') + '\n')
 				else:
 					pos = light.getPos(render)
 					atten = light.getNode(0).getAttenuation()
 					fov = light.getNode(0).getLens().getFov()
 					exponent = light.getNode(0).getExponent()
-					mapFile.write("spot " + light.getName() + " " + " " + str(pos.getX()) + " " + str(pos.getY()) + " " + str(pos.getZ()) + " " + str(light.getH()) + " " + str(light.getP()) + " " + str(light.getR()) + " " + str(color.getX()) + " " + str(color.getY()) + " " + str(color.getZ()) + " " + str(atten.getX()) + " " + str(atten.getY()) + " " + str(atten.getZ()) + " " + str(fov) + " " + str(exponent) + " " + (" shadow" if light.getTag("shadow") == "true" else "") + "\n")
+					mapFile.write('spot ' + light.getName() + ' ' + ' ' + str(pos.getX()) + ' ' + str(pos.getY()) + ' ' + str(pos.getZ()) + ' ' + str(light.getH()) + ' ' + str(light.getP()) + ' ' + str(light.getR()) + ' ' + str(color.getX()) + ' ' + str(color.getY()) + ' ' + str(color.getZ()) + ' ' + str(atten.getX()) + ' ' + str(atten.getY()) + ' ' + str(atten.getZ()) + ' ' + str(fov) + ' ' + str(exponent) + ' ' + (' shadow' if light.getTag('shadow') == 'true' else '') + '\n')
 			elif isinstance(light.getNode(0), PointLight):
 				atten = light.getNode(0).getAttenuation()
 				pos = light.getPos(render)
-				mapFile.write("point " + light.getName() + " " + str(pos.getX()) + " " + str(pos.getY()) + " " + str(pos.getZ()) + " " + str(color.getX()) + " " + str(color.getY()) + " " + str(color.getZ()) + " " + str(atten.getX()) + " " + str(atten.getY()) + " " + str(atten.getZ()) + "\n")
+				mapFile.write('point ' + light.getName() + ' ' + str(pos.getX()) + ' ' + str(pos.getY()) + ' ' + str(pos.getZ()) + ' ' + str(color.getX()) + ' ' + str(color.getY()) + ' ' + str(color.getZ()) + ' ' + str(atten.getX()) + ' ' + str(atten.getY()) + ' ' + str(atten.getZ()) + '\n')
 		for sceneryFile in self.sceneries.keys():
 			pos = self.sceneries[sceneryFile].getPos(render)
-			mapFile.write("scenery " + sceneryFile + " " + str(pos.getX()) + " " + str(pos.getY()) + " " + str(pos.getZ()) + "\n")
+			mapFile.write('scenery ' + sceneryFile + ' ' + str(pos.getX()) + ' ' + str(pos.getY()) + ' ' + str(pos.getZ()) + '\n')
 		for obj in (entity for entity in entityGroup.entities.values() if isinstance(entity, entities.PhysicsEntity)):
 			pos = obj.getPosition()
 			hpr = obj.node.getHpr()
-			mapFile.write("physicsentity " + obj.dataFile + " " + str(pos.getX()) + " " + str(pos.getY()) + " " + str(pos.getZ()) + " " + str(hpr.getX()) + " " + str(hpr.getY()) + " " + str(hpr.getZ()) + "\n")
+			mapFile.write('physicsentity ' + obj.dataFile + ' ' + str(pos.getX()) + ' ' + str(pos.getY()) + ' ' + str(pos.getZ()) + ' ' + str(hpr.getX()) + ' ' + str(hpr.getY()) + ' ' + str(hpr.getZ()) + '\n')
 		for glass in (entity for entity in entityGroup.entities.values() if isinstance(entity, entities.Glass)):
 			pos = glass.getPosition()
 			hpr = glass.getRotation()
-			mapFile.write("glass " + str(glass.glassWidth) + " " + str(glass.glassHeight) + " " + str(pos.getX()) + " " + str(pos.getY()) + " " + str(pos.getZ()) + " " + str(hpr.getX()) + " " + str(hpr.getY()) + " " + str(hpr.getZ()) + "\n")
+			mapFile.write('glass ' + str(glass.glassWidth) + ' ' + str(glass.glassHeight) + ' ' + str(pos.getX()) + ' ' + str(pos.getY()) + ' ' + str(pos.getZ()) + ' ' + str(hpr.getX()) + ' ' + str(hpr.getY()) + ' ' + str(hpr.getZ()) + '\n')
 		for point in aiWorld.spawnPoints:
 			if point.active:
 				pos = point.getPosition()
 				rot = point.getRotation()
-				mapFile.write("spawnpoint " + str(pos.getX()) + " " + str(pos.getY()) + " " + str(pos.getZ()) + " " + str(rot.getX()) + " " + str(rot.getY()) + " " + str(rot.getZ()) + "\n")
-		stream = open(self.filename, "w")
+				mapFile.write('spawnpoint ' + str(pos.getX()) + ' ' + str(pos.getY()) + ' ' + str(pos.getZ()) + ' ' + str(rot.getX()) + ' ' + str(rot.getY()) + ' ' + str(rot.getZ()) + '\n')
+		stream = open(self.filename, 'w')
 		stream.write(mapFile.data)
 		stream.close()
-	
+
 	def update(self):
-		"Updates the custom sounds and the skybox associated with this Map."
+		'Updates the custom sounds and the skybox associated with this Map.'
 		if self.skyBox != None:
 			camPos = camera.getPos(render)
 			self.skyBox.setPos(camPos - Vec3(0, 0, 25))
 		if self.waterNode != None:
-			self.waterNode.setShaderInput("time", clock.time)
+			self.waterNode.setShaderInput('time', clock.time)
 			if reflectionCamera != None:
 				reflectionCamera.setMat(base.camera.getMat() * self.waterPlane.getReflectionMat())
-	
+
 	def delete(self):
-		"Releases all resources, including scenery, physics geometries, and environment sounds and lights."
+		'Releases all resources, including scenery, physics geometries, and environment sounds and lights.'
 		global map
 		map = None
 		if self.skyBox != None:
@@ -777,11 +777,11 @@ class Map(DirectObject):
 			del self.ambientSound
 
 class StaticGeometry(DirectObject):
-	"A StaticGeometry is a potentially invisible, immovable physics object, modeled as a trimesh."
+	'A StaticGeometry is a potentially invisible, immovable physics object, modeled as a trimesh.'
 	def __init__(self, space, directory, filename=None):
 		assert filename != None
 		self.filename = filename
-		self.node = loadModel(directory + "/" + self.filename)
+		self.node = loadModel(directory + '/' + self.filename)
 		self.node.reparentTo(renderEnvironment)
 		self.node.hide()
 		self.node.setCollideMask(BitMask32(1))
@@ -790,58 +790,58 @@ class StaticGeometry(DirectObject):
 		self.geometry.setCollideBits(BitMask32(0x00000001))
 		self.geometry.setCategoryBits(BitMask32(0x00000001))
 		space.setSurfaceType(self.geometry, 0)
-	
+
 	def setPosition(self, pos):
 		self.geometry.setPosition(pos)
 		self.node.setPos(pos)
-	
+
 	def getPosition(self):
 		return self.geometry.getPosition()
-	
+
 	def setRotation(self, hpr):
 		self.node.setHpr(hpr)
 		self.geometry.setQuat(self.node.getQuat(render))
-	
+
 	def getRotation(self):
 		return self.node.getHpr()
-		
+
 	def commitChanges(self):
-		"Updates the NodePath to reflect the position of the ODE geometry."
+		'Updates the NodePath to reflect the position of the ODE geometry.'
 		self.node.setPosQuat(renderEnvironment, self.getPosition(), Quat(self.geometry.getQuaternion()))
 
 class SpawnPoint(DirectObject):
-	"Marks a location for units to spawn."
+	'Marks a location for units to spawn.'
 	def __init__(self, space):
-		self.node = loadModel("models/spawnpoint/SpawnPoint")
+		self.node = loadModel('models/spawnpoint/SpawnPoint')
 		self.node.reparentTo(renderEnvironment)
 		self.active = True
-	
+
 	def setPosition(self, pos):
 		self.node.setPos(pos)
-	
+
 	def getPosition(self):
 		return self.node.getPos()
-	
+
 	def setRotation(self, hpr):
 		self.node.setHpr(hpr)
-	
+
 	def getRotation(self):
 		return self.node.getHpr()
-	
+
 	def delete(self):
 		self.active = False
-		deleteModel(self.node, "models/spawnpoint/SpawnPoint")
+		deleteModel(self.node, 'models/spawnpoint/SpawnPoint')
 
 class Dock(SpawnPoint):
-	"Docks have a one-to-one relationship with Teams. Their Controllers increment the team's money and spawn newly purchased units."
+	'Docks have a one-to-one relationship with Teams. Their Controllers increment the team's money and spawn newly purchased units.'
 	def __init__(self, space, teamIndex):
 		self.teamIndex = teamIndex
 		self.active = True
 		self.radius = 6
 		self.vradius = 2
-		self.node = loadModel("models/dock/Dock")
+		self.node = loadModel('models/dock/Dock')
 		self.node.reparentTo(renderEnvironment)
-		self.shieldNode = loadModel("models/shield/shield")
+		self.shieldNode = loadModel('models/shield/shield')
 		self.shieldNode.reparentTo(self.node)
 		self.shieldNode.setScale(self.radius)
 		self.shieldNode.setTwoSided(True)
@@ -849,62 +849,62 @@ class Dock(SpawnPoint):
 		self.shieldNode.setColor(0.8, 0.9, 1.0, 0.6)
 		self.shieldNode.setTransparency(TransparencyAttrib.MAlpha)
 		self.shieldNode.hide(BitMask32.bit(4)) # Don't cast shadows
-	
+
 	def setPosition(self, pos):
 		self.node.setPos(pos - Vec3(0, 0, self.vradius))
-	
+
 	def getPosition(self):
 		return self.node.getPos() + Vec3(0, 0, self.vradius)
 
 class Platform(DirectObject):
-	"Makes a platform upon which to parade the game winners."
+	'Makes a platform upon which to parade the game winners.'
 	def __init__(self, space):
-		self.node = loadModel("maps/platform")
+		self.node = loadModel('maps/platform')
 		self.node.reparentTo(renderEnvironment)
-		self.collisionNode = CollisionNode("cnode")
+		self.collisionNode = CollisionNode('cnode')
 		self.collisionNode.addSolid(CollisionSphere(0, 0, 0, 5))
 		self.collisionNodePath = self.node.attachNewNode(self.collisionNode)
 		self.collisionNode.setCollideMask(BitMask32(1))
-		odeCollisionNode = loadModel("maps/platform-geometry")
+		odeCollisionNode = loadModel('maps/platform-geometry')
 		triMeshData = OdeTriMeshData(odeCollisionNode, True)
 		self.geometry = OdeTriMeshGeom(space, triMeshData)
 		self.geometry.setCollideBits(BitMask32(0x00000001))
 		self.geometry.setCategoryBits(BitMask32(0x00000001))
 		space.setSurfaceType(self.geometry, 0)
-	
+
 	def setPosition(self, pos):
 		self.geometry.setPosition(pos)
 		self.node.setPos(pos)
-	
+
 	def getPosition(self):
 		return self.geometry.getPosition()
-	
+
 	def setRotation(self, hpr):
 		self.node.setHpr(hpr)
 		self.geometry.setQuaternion(self.node.getQuat(render))
-	
+
 	def getRotation(self):
 		return self.node.getHpr()
-	
+
 	def show(self):
 		self.geometry.enable()
 		self.node.reparentTo(renderEnvironment)
-	
+
 	def hide(self):
 		self.geometry.disable()
 		self.node.reparentTo(hidden)
-	
+
 	def delete(self):
-		deleteModel(self.node, "models/spawnpoint/SpawnPoint")
+		deleteModel(self.node, 'models/spawnpoint/SpawnPoint')
 		self.geometry.destroy()
-		
+
 	def commitChanges(self):
-		"Updates the NodePath to reflect the position of the ODE geometry."
+		'Updates the NodePath to reflect the position of the ODE geometry.'
 		self.node.setPosQuat(renderEnvironment, self.getPosition(), Quat(self.geometry.getQuaternion()))
 
 class Mouse:
-	"""A mouse can be created by any object that needs it (usually a controller).
-	However, there should only be one mouse active at a time, since each Mouse object will recenter the cursor every frame."""
+	'''A mouse can be created by any object that needs it (usually a controller).
+	However, there should only be one mouse active at a time, since each Mouse object will recenter the cursor every frame.'''
 	enabled = True
 	def __init__(self):
 		base.disableMouse()
@@ -919,17 +919,17 @@ class Mouse:
 		self._maxY = math.pi * 0.5
 		self._minY = -self._maxY
 		self.lastUpdate = 0
-	
+
 	def setYLimit(self, maxY, minY):
 		self._maxY = maxY
 		self._minY = minY
-		
+
 	def setSpeed(self, speed):
-		"Sets the sensitivity of the mouse."
+		'Sets the sensitivity of the mouse.'
 		self.speed = speed
 
 	def update(self):
-		"Updates the mouse's position and speed, then recenters the cursor in the window."
+		'Updates the mouse's position and speed, then recenters the cursor in the window.'
 		if not Mouse.enabled:
 			return
 		self.lastUpdate = clock.time
@@ -950,10 +950,10 @@ class Mouse:
 
 	def setX(self, x):
 		self._x = x
-	
+
 	def setY(self, y):
 		self._y = y
-	
+
 	def getX(self):
 		return self._x
 
@@ -965,7 +965,7 @@ class Mouse:
 
 	def getY(self):
 		return self._y
-	
+
 	@staticmethod
 	def showCursor():
 		Mouse.enabled = False
@@ -980,11 +980,11 @@ class Mouse:
 		props.setCursorHidden(True)
 		base.win.requestProperties(props)
 		base.win.movePointer(0, base.win.getProperties().getXSize() / 2, base.win.getProperties().getYSize() / 2)
-		
+
 class Light:
-	"""At this time, only point lights are supported. Really though, what do you need a spotlight for?
+	'''At this time, only point lights are supported. Really though, what do you need a spotlight for?
 	This class is necessary because every time a Panda3D light is added, all shaders must be regenerated.
-	This class keeps a constant number of lights active at all times, but sets the unnecessary extra lights to have no effect."""
+	This class keeps a constant number of lights active at all times, but sets the unnecessary extra lights to have no effect.'''
 	def __init__(self, color, attenuation):
 		self.color = Vec4(color)
 		self.attenuation = Vec3(attenuation)
@@ -999,12 +999,12 @@ class Light:
 		if self.node != None:
 			self.node[0].setColor(self.color)
 	def setAttenuation(self, attenuation):
-		"Attenuation is a 3D vector containing quadratic, linear, and constant attenuation coefficients."
+		'Attenuation is a 3D vector containing quadratic, linear, and constant attenuation coefficients.'
 		self.attenuation = Vec3(attenuation)
 		if self.node != None:
 			self.node[0].setAttenuation(self.attenuation)
 	def add(self):
-		"Adds this light to the active light list, basically enabling it."
+		'Adds this light to the active light list, basically enabling it.'
 		if not self in lights:
 			lights.append(self)
 			if len(lights) <= len(lightNodes) and self.node == None:
@@ -1013,7 +1013,7 @@ class Light:
 				self.node[0].setColor(self.color)
 				self.node[0].setAttenuation(self.attenuation)
 	def remove(self):
-		"Removes this light from the active light list, disabling it."
+		'Removes this light from the active light list, disabling it.'
 		if self in lights:
 			lights.remove(self)
 		if self.node != None:
@@ -1022,7 +1022,7 @@ class Light:
 		self.node = None
 
 def impulseToForce(fx, fy = None, fz = None):
-	"Converts an impulse to a force (either a vector or a scalar) by dividing by the timestep of the last ODE frame."
+	'Converts an impulse to a force (either a vector or a scalar) by dividing by the timestep of the last ODE frame.'
 	if fy != None and fz != None:
 		force = Vec3(fx, fy, fz)
 		return force / clock.timeStep
@@ -1030,7 +1030,7 @@ def impulseToForce(fx, fy = None, fz = None):
 		return fx / clock.timeStep
 
 def frange(start, end=None, inc=None):
-    "A range function that accepts float increments."
+    'A range function that accepts float increments.'
     if end == None:
         end = start + 0.0
         start = 0.0
@@ -1046,7 +1046,7 @@ def frange(start, end=None, inc=None):
     for i in xrange(1,count):
         L[i] = L[i-1] + inc
     return L
-	
+
 def lerp(a, b, scale):
-	"Interpolate between two Vec3's, based on the 'scale' parameter, where 'scale' goes from 0 to 1."
+	'Interpolate between two Vec3's, based on the 'scale' parameter, where 'scale' goes from 0 to 1.'
 	return a + ((b - a) * scale)

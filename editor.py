@@ -18,7 +18,7 @@ engine.loadConfigFile()
 # Setup window
 props = WindowProperties()
 props.setCursorHidden(True)
-props.setTitle("A3P Editor")
+props.setTitle('A3P Editor')
 base.win.requestProperties(props)
 base.setBackgroundColor(0, 0, 0)
 
@@ -51,6 +51,6 @@ def gameTask(task):
 
 	return task.cont
 
-taskMgr.add(gameTask, "Game Task")
+taskMgr.add(gameTask, 'Game Task')
 
 run()
