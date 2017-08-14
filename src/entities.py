@@ -925,9 +925,6 @@ class Grenade(ObjectEntity):
 
 	def getTeam(self):
 		if self.team == None:
-			if not entityGroup:
-				return self.team
-
 			team = EntityGroup.default.getEntity(self.teamId)
 			if team != None:
 				self.setTeam(team)
