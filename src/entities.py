@@ -696,6 +696,7 @@ class TeamEntity(Entity):
 class Actor(ObjectEntity):
 	"""An Actor is an ObjectEntity controlled by either a player or an AI controller.
 	Actors can contain components, such as guns, engines, shields, etc."""
+
 	def __init__(self, world, space, filename, controller, local = net.netMode == net.MODE_SERVER):
 		self.team = None
 		self.teamId = 0
@@ -723,8 +724,8 @@ class Actor(ObjectEntity):
 		else:
 			return self.team
 
-	def setTeamId(self, id):
-		self.teamId = id
+	def setTeamId(self, teamId):
+		self.teamId = teamId
 		self.getTeam() # Trigger the process to try and find our team. If it hasn't spawned yet, we get the default team.
 
 	def setTeam(self, team):
@@ -918,8 +919,8 @@ class Grenade(ObjectEntity):
 		self.grenadeAlive = True
 		self.actor = None
 
-	def setTeamId(self, id, entityGroup):
-		self.teamId = id
+	def setTeamId(self, teamId, entityGroup):
+		self.teamId = teamId
 		self.getTeam(entityGroup) # Trigger the process to try and find our team. If it hasn't spawned yet, we get the default team.
 
 	def getTeam(self, entityGroup=None):
@@ -958,6 +959,8 @@ class Molotov(ObjectEntity):
 
 	def __init__(self, world, space):
 		self.team = None
+		self.teamId = 0
+
 		ObjectEntity.__init__(self, "models/grenade/Grenade", controllers.MolotovController())
 		self.collisionNode = CollisionNode("cnode")
 		self.collisionNodePath = self.node.attachNewNode(self.collisionNode)
@@ -979,6 +982,9 @@ class Molotov(ObjectEntity):
 	def setActor(self, actor):
 		self.actor = actor
 
+	def setTeamId(self, teamId):
+		self.teamId = teamId
+
 	def setTeam(self, team):
 		self.team = team
 
@@ -986,14 +992,18 @@ class Molotov(ObjectEntity):
 		return self.team
 
 class GraphicsObject(DirectObject):
+
 	def __init__(self):
 		self.active = True
+
 	def delete(self):
 		self.active = False
+
 	def update(self):
 		pass
 
 class Spike(GraphicsObject):
+
 	def __init__(self, pos, direction):
 		GraphicsObject.__init__(self)
 		self.node = engine.loadModel("models/spike/spike")
