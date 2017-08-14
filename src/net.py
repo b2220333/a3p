@@ -94,16 +94,18 @@ class Connection:
 		self.ready = False
 
 class PythonNetContext(NetworkContext):
+
 	def __init__(self, localPort = None):
 		global netMode
 		netMode = MODE_SERVER
 		self.mode = MODE_SERVER
 		if localPort == None:
 			localPort = 1337
+
 		self.port = localPort
 		self.socket = socket(AF_INET, SOCK_DGRAM)
+		self.socket.setblocking(False)
 		self.bindSocket(localPort)
-		self.socket.setblocking(0)
 		self.clientConnected = False
 		self.activeConnections = dict() # Server only - connected clients
 		self.hostConnection = Connection() # Client only - connection to server
@@ -124,6 +126,7 @@ class PythonNetContext(NetworkContext):
 		port = 1337
 		if len(args) > 1:
 			port = int(args[1])
+
 		self.hostConnection.address = (str(ip), port)
 		self.hostConnection.lastSentPacketTime = timeFunction()
 		self.hostConnection.ready = True

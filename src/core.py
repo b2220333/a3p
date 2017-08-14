@@ -449,8 +449,6 @@ class Game(DirectObject):
 		visitorFont = loader.loadFont("menu/visitor2.ttf")
 		self.promptText = OnscreenText(pos = (0, 0.85), scale = 0.1, fg = (1, 1, 1, 1), shadow = (0, 0, 0, 0.5), font = visitorFont, mayChange = True)
 		self.scoreText = OnscreenText(pos = (0, 0.92), scale = 0.06, fg = (1, 1, 1, 1), shadow = (0, 0, 0, 0.5), font = visitorFont, mayChange = True)
-		self.winSound = audio.FlatSound("sounds/win.ogg")
-		self.loseSound = audio.FlatSound("sounds/lose.ogg")
 		self.errorSound = audio.FlatSound("sounds/error.ogg")
 
 		self.playerLastActive = -1 # -1 means the player is currently active
@@ -488,8 +486,6 @@ class Game(DirectObject):
 			self.backend.map.hidePlatforms()
 			self.spawnedOnce = False
 			self.matchInProgress = True
-			self.winSound.stop()
-			self.loseSound.stop()
 
 		self.gameui.show()
 		self.unitSelector.hide()
@@ -580,11 +576,6 @@ class Game(DirectObject):
 		self.localTeam.platformSpawnPlayer(self.backend.map.platforms[self.localTeam.lastMatchPosition].getPosition() + Vec3(0, 0, 2))
 		self.gameui.showUsernames()
 
-		if self.localTeam.isAlly(winningTeam):
-			self.winSound.play()
-		else:
-			self.loseSound.play()
-
 		self.matchReset()
 
 		self.updateScoreText()
@@ -660,8 +651,6 @@ class Game(DirectObject):
 		if self.gameui != None:
 			self.gameui.delete()
 
-		self.winSound.stop()
-		self.loseSound.stop()
 		if not self.promptText.isEmpty():
 			self.promptText.destroy()
 		if not self.scoreText.isEmpty():
@@ -710,10 +699,6 @@ class Tutorial(Game):
 				Game.handleSpacebar(self)
 
 	def endMatch(self, winningTeam):
-		if self.localTeam.isAlly(winningTeam):
-			self.winSound.play()
-		else:
-			self.loseSound.play()
 		self.matchReset()
 
 	def reset(self):
@@ -762,8 +747,6 @@ class Tutorial(Game):
 		else:
 			self.spawnedOnce = False
 			self.matchInProgress = True
-			self.winSound.stop()
-			self.loseSound.stop()
 			self.gameui.show()
 			self.promptText.hide()
 			self.scoreText.hide()
