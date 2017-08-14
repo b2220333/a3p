@@ -333,7 +333,7 @@ def init(dropOffFactor, distanceFactor, dopplerFactor):
 	addSoundGroup(SoundGroup("shotgun", ["sounds/shotgun.ogg"], volume = 1.0))
 	addSoundGroup(SoundGroup("large-explosion", ["sounds/large-explosion.ogg", "sounds/large-explosion2.ogg", "sounds/large-explosion3.ogg", "sounds/large-explosion4.ogg", "sounds/large-explosion5.ogg"], volume = 1.0))
 	addSoundGroup(SoundGroup("sniper-rifle", ["sounds/sniper-rifle.ogg"], volume = 1.0))
-	addSoundGroup(SoundGroup("grenade", ["sounds/grenade.ogg", "sounds/grenade2.ogg", "sounds/grenade3.ogg"], volume = 1.0))
+	addSoundGroup(SoundGroup("grenade", ["sounds/grenade.ogg", "sounds/grenade2.ogg"], volume = 0.5))
 	addSoundGroup(SoundGroup("grenade-launch", ["sounds/grenade-launch.ogg"], volume = 0.3))
 	addSoundGroup(SoundGroup("ricochet", ["sounds/ricochet1.ogg", "sounds/ricochet2.ogg", "sounds/ricochet3.ogg", "sounds/ricochet4.ogg", "sounds/ricochet5.ogg"], volume = 0.15))
 	addSoundGroup(SoundGroup("grenade-bounce", ["sounds/grenade-bounce.ogg"], volume = 0.2))

@@ -701,7 +701,9 @@ class MeleeClaw(Weapon):
 		Weapon.hide(self)
 
 GRENADE_LAUNCHER = 249
+
 class GrenadeLauncher(Weapon):
+
 	def __init__(self, actor, id):
 		Weapon.__init__(self, actor, id)
 		self.force = 400
@@ -734,9 +736,9 @@ class GrenadeLauncher(Weapon):
 		Component.clientUpdate(self, aiWorld, entityGroup, iterator)
 		if iterator != None:
 			if net.Boolean.getFrom(iterator):
-				# We're firing, play the launch sound. Everything else is taken care of by the Grenade being spawned.
-				self.grenadeLaunchSound.play(entity = self.actor)
 				self.grenadeId = net.Uint8.getFrom(iterator)
+				self.grenadeLaunchSound.play(entity=entityGroup.getEntity(self.grenadeId))
+
 		grenade = entityGroup.getEntity(self.grenadeId)
 		if grenade != None and isinstance(grenade, entities.Grenade):
 			grenade.setActor(self.actor)
