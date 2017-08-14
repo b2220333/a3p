@@ -919,16 +919,16 @@ class Grenade(ObjectEntity):
 		self.grenadeAlive = True
 		self.actor = None
 
-	def setTeamId(self, teamId, entityGroup):
+	def setTeamId(self, teamId):
 		self.teamId = teamId
-		self.getTeam(entityGroup) # Trigger the process to try and find our team. If it hasn't spawned yet, we get the default team.
+		self.getTeam() # Trigger the process to try and find our team. If it hasn't spawned yet, we get the default team.
 
-	def getTeam(self, entityGroup=None):
+	def getTeam(self):
 		if self.team == None:
 			if not entityGroup:
 				return self.team
 
-			team = entityGroup.getEntity(self.teamId)
+			team = EntityGroup.default.getEntity(self.teamId)
 			if team != None:
 				self.setTeam(team)
 				return self.team
@@ -982,14 +982,23 @@ class Molotov(ObjectEntity):
 	def setActor(self, actor):
 		self.actor = actor
 
-	def setTeamId(self, teamId):
-		self.teamId = teamId
-
 	def setTeam(self, team):
 		self.team = team
 
 	def getTeam(self):
-		return self.team
+		if self.team == None:
+			team = EntityGroup.default.getEntity(self.teamId)
+			if team != None:
+				self.setTeam(team)
+				return self.team
+			else:
+				return TeamEntity.default
+		else:
+			return self.team
+
+	def setTeamId(self, teamId):
+		self.teamId = teamId
+		self.getTeam() # Trigger the process to try and find our team. If it hasn't spawned yet, we get the default team.
 
 class GraphicsObject(DirectObject):
 

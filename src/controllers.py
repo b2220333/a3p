@@ -603,7 +603,7 @@ class GrenadeController(ObjectController):
 	def readSpawnPacket(aiWorld, entityGroup, iterator, entity = None):
 		entity = entities.Grenade(aiWorld.world, aiWorld.space)
 		entity = ObjectController.readSpawnPacket(aiWorld, entityGroup, iterator, entity)
-		entity.setTeamId(net.Uint8.getFrom(iterator), entityGroup)
+		entity.setTeamId(net.Uint8.getFrom(iterator))
 		return entity
 
 	def setEntity(self, entity):
