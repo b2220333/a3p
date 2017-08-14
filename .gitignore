@@ -94,3 +94,6 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# Nuitka:
+distributable/
