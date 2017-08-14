@@ -4,6 +4,7 @@ import os
 import zlib
 import time
 import sys
+import ipgetter
 
 from socket import *
 
@@ -87,6 +88,7 @@ class NetworkContext:
 		pass # Clean up.
 
 class Connection:
+
 	def __init__(self):
 		self.address = ("", 0)
 		self.lastPacketTime = timeFunction()
@@ -103,6 +105,7 @@ class PythonNetContext(NetworkContext):
 			localPort = 1337
 
 		self.port = localPort
+		self.publicAddress = ipgetter.myip()
 		self.socket = socket(AF_INET, SOCK_DGRAM)
 		self.socket.setblocking(False)
 		self.bindSocket(localPort)

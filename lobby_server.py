@@ -11,9 +11,10 @@ PACKET_CLIENTCONNECTNOTIFICATION = 19
 
 class ServerInfo(object):
 
-    def __init__(self, ip, port, username, map, active_players, player_slots):
+    def __init__(self, ip, port, connect_address, username, map, active_players, player_slots):
         self.ip = ip
         self.port = port
+        self.connect_address = connect_address
         self.username = username
         self.map = map
         self.active_players = active_players
@@ -86,8 +87,8 @@ class LobbyServer(object):
         datagram.add_uint16(len(self.server_info))
 
         for info in self.server_info:
-            datagram.add_string(info.ip)
-            datagram.add_uint16(info.port)
+            datagram.add_string(info.connect_address[0])
+            datagram.add_uint16(info.connect_address[1])
             datagram.add_string(info.username)
             datagram.add_string(info.map)
             datagram.add_uint8(info.active_players)
@@ -100,6 +101,7 @@ class LobbyServer(object):
         map = iterator.get_string()
         active_players = iterator.get_uint8()
         player_slots = iterator.get_uint8()
+        connect_address = [iterator.get_string(), iterator.get_uint16()]
         info = self.get_existing_info(username)
 
         if info:
@@ -107,7 +109,10 @@ class LobbyServer(object):
             info.active_players = active_players
             info.player_slots = player_slots
         else:
-            info = ServerInfo(address[0], address[1],
+            info = ServerInfo(
+                address[0],
+                address[1],
+                connect_address,
                 username,
                 map,
                 active_players,
@@ -118,6 +123,9 @@ class LobbyServer(object):
         self.timeout_tasks[address] = self.current_time
 
     def handle_unregisterhost(self, address):
+        if address not in self.timeout_tasks:
+            return
+
         del self.timeout_tasks[address]
         host = self.get_info_from_address(address[0], address[1])
 

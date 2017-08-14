@@ -1,7 +1,6 @@
 from pandac.PandaModules import *
 import engine
 import net
-
 from direct.distributed.PyDatagram import PyDatagram
 
 LOBBY_SERVER_ADDRESS = "127.0.0.1"
@@ -15,6 +14,8 @@ def registerHost(username, map, players, playerSlots):
 	p.add(net.String(map))
 	p.add(net.Uint8(players))
 	p.add(net.Uint8(playerSlots))
+	p.add(net.String(net.context.publicAddress))
+	p.add(net.Uint16(net.context.port))
 	net.context.send(p, address)
 
 def getHosts():
@@ -29,7 +30,9 @@ def connectTo(ip, port = None):
 			ip, port = ip.split(":")
 		else:
 			port = 1337
+
 		port = int(port)
+
 	engine.log.info("Notifying lobby server of intention to connect to " + ip + ":" + str(port))
 	p = net.Packet()
 	p.add(net.Uint8(net.PACKET_CLIENTCONNECTNOTIFICATION))
