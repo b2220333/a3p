@@ -18,10 +18,10 @@ class Component(DirectObject):
 		self.active = True
 		self.id = id
 		self.criticalUpdate = False
-	
+
 	def needsToSendUpdate(self):
 		return self.criticalUpdate
-	
+
 	def addCriticalPacket(self, p, packetUpdate):
 		# If we have a critical packet on an update frame, and we add it to the critical packet queue,
 		# it will get sent again on the next update frame.
@@ -30,7 +30,7 @@ class Component(DirectObject):
 			self.criticalUpdate = True
 		elif not p in self.criticalPackets:
 			self.criticalPackets.append(p)
-		
+
 	def serverUpdate(self, aiWorld, entityGroup, packetUpdate):
 		p = net.Packet()
 		if packetUpdate:
@@ -45,13 +45,13 @@ class Component(DirectObject):
 
 	def clientUpdate(self, aiWorld, entityGroup, iterator = None):
 		pass
-	
+
 	def delete(self):
 		self.active = False
-	
+
 	def hide(self):
 		pass
-	
+
 	def show(self):
 		pass
 
@@ -66,7 +66,7 @@ class Weapon(Component):
 		# If we're zoomed, we need to be more accurate. Or at least, do something different.
 		# AI bots are always zoomed in by default, to make them more challenging.
 		# PlayerControllers will update this flag.
-		self.zoomed = True 
+		self.zoomed = True
 		self.selected = False
 		self.fireTime = 0
 		self.lastFire = -10000
@@ -76,7 +76,7 @@ class Weapon(Component):
 		self.isAutomatic = False
 		self.reloadActive = False
 		self.lastTrigger = 0
-		
+
 		# Parameters for AI controllers
 		self.burstTimer = -1
 		self.burstDelayTimer = -1
@@ -98,7 +98,7 @@ class Weapon(Component):
 			result = False
 		self.lastTrigger = engine.clock.time
 		return result
-	
+
 	def isReady(self):
 		return engine.clock.time - self.lastFire > self.fireTime
 
@@ -114,17 +114,17 @@ class Weapon(Component):
 			self.selected = True
 			if self.node != None:
 				self.node.show()
-	
+
 	def hide(self):
 		Component.hide(self)
 		if self.active:
 			self.selected = False
 			if self.node != None:
 				self.node.hide()
-	
+
 	def delete(self):
 		Component.delete(self)
-		
+
 class Gun(Weapon):
 	"Guns don't kill people, but they sure help."
 	def __init__(self, actor, damage, modelFile, id):
@@ -147,39 +147,39 @@ class Gun(Weapon):
 		self.showTime = -1 # For the showing animation
 		self.totalShowTime = 0.3
 		Gun.hide(self)
-	
+
 	def getPosition(self):
 		return self.node.getPos()
-	
+
 	def setPosition(self, pos):
 		self.node.setPos(pos)
-	
+
 	def getRotation(self):
 		return self.node.getHpr()
-	
+
 	def setRotation(self, hpr):
 		self.node.setHpr(hpr)
-	
+
 	def show(self):
 		Weapon.show(self)
 		self.showTime = engine.clock.time
 		self.showSound.play(entity = self.actor)
 		self._updatePosition(1.0, 90)
-	
+
 	def hide(self):
 		Weapon.hide(self)
 		self.newReloadActive = False
 		self.reloadActive = False
 		self.reloadStarted = False
 		self.lastReload = -1
-	
+
 	def reload(self):
 		if not self.reloadActive and self.selected and self.ammo < self.clipSize:
 			self.lastReload = engine.clock.time
 			self.newReloadActive = True
 			self.reloadActive = True
 			self.reloadStarted = True
-		
+
 	def fire(self):
 		if self.ammo > 0 and not self.reloadActive and self.showTime == -1: # We can't be switching weapons
 			result = Weapon.fire(self)
@@ -189,12 +189,12 @@ class Gun(Weapon):
 		elif self.showTime == -1 and self.isReady():
 			self.reload()
 		return False
-	
+
 	def bulletTest(self, aiWorld, entityGroup, origin, direction):
 		"""Low-level bullet ray test used by most guns.
 		Returns the position of the bullet hit, and the ObjectEntity damaged, if any."""
 		queue = aiWorld.getCollisionQueue(origin, direction)
-		for i in range(queue.getNumEntries()):
+		for i in xrange(queue.getNumEntries()):
 			entry = queue.getEntry(i)
 			pos = entry.getSurfacePoint(render)
 			normal = entry.getSurfaceNormal(render)
@@ -210,7 +210,7 @@ class Gun(Weapon):
 		if self.reloadStarted:
 			self.addCriticalPacket(p, packetUpdate)
 			self.reloadStarted = False
-		
+
 		self.reloadActive = self.newReloadActive
 		self.activeSound = 0 # No sound
 		if self.reloadActive:
@@ -254,7 +254,7 @@ class Gun(Weapon):
 				self.reloadActive = False # So clients also have an accurate reloadActive value
 				self.reloadSound.play(entity = self.actor)
 				self.activeSound = 0 # Only play once
-	
+
 	def _updatePosition(self, offset, angleOffset):
 		vector = self.actor.controller.targetPos - self.actor.getPosition()
 		pos = vector.cross(Vec3(0, 0, 1))
@@ -262,7 +262,7 @@ class Gun(Weapon):
 		self.setPosition(self.actor.getPosition() + (pos * (self.actor.radius + 0.1)) + Vec3(0, 0, offset))
 		self.node.lookAt(Point3(self.actor.controller.targetPos))
 		self.node.setP(self.node.getP() + angleOffset)
-	
+
 	def delete(self):
 		self.ricochetSound.delete()
 		self.reloadSound.delete()
@@ -283,11 +283,11 @@ class ChainGun(Gun):
 
 	def serverUpdate(self, aiWorld, entityGroup, packetUpdate):
 		p = Gun.serverUpdate(self, aiWorld, entityGroup, packetUpdate)
-		
+
 		if self.active and self.firing:
 			self.addCriticalPacket(p, packetUpdate)
 			p.add(net.Boolean(True))
-			
+
 			vector = self.actor.controller.targetPos - self.actor.getPosition()
 			pos = vector.cross(Vec3(0, 0, 1))
 			pos.normalize()
@@ -301,16 +301,16 @@ class ChainGun(Gun):
 			else:
 				angleX = uniform(-2, 2)
 				angleY = uniform(-2, 2)
-				
+
 			mat = Mat3()
 			mat.setRotateMatNormaxis(angleX, render.getRelativeVector(self.node, Vec3(0, 0, 1)))
 			direction = mat.xformVec(direction)
 			mat = Mat3()
 			mat.setRotateMatNormaxis(angleY, render.getRelativeVector(self.node, Vec3(1, 0, 0)))
 			direction = mat.xformVec(direction)
-			
+
 			p.add(net2.StandardVec3(direction))
-			
+
 			entity = None
 			hitPos = None
 			if direction.length() > 0:
@@ -320,7 +320,7 @@ class ChainGun(Gun):
 			else:
 				p.add(net.Boolean(True)) # Bullet hit something
 				p.add(net2.StandardVec3(hitPos))
-			
+
 				if entity != None:
 					p.add(net.Boolean(True))
 					p.add(net.Uint8(entity.getId()))
@@ -338,20 +338,20 @@ class ChainGun(Gun):
 		if iterator != None:
 			if net.Boolean.getFrom(iterator): # We're firing
 				self.lastFire = engine.clock.time
-				
+
 				if self.active:
 					self.chainGunSound.play(entity = self.actor)
 					self.light.add()
-				
+
 				direction = net2.StandardVec3.getFrom(iterator)
-				
+
 				if net.Boolean.getFrom(iterator): # Bullet hit something
 					hitPos = net2.StandardVec3.getFrom(iterator)
 					if self.active:
 						origin = self.getPosition() + (direction * random() * 4)
 						pos = hitPos - (direction * random() * 4)
 						self.tracer.draw(origin, pos)
-					
+
 					if net.Boolean.getFrom(iterator):
 						entityId = net.Uint8.getFrom(iterator)
 						entity = entityGroup.getEntity(entityId)
@@ -370,7 +370,7 @@ class ChainGun(Gun):
 		elif self.active:
 			self.light.setPos(self.getPosition())
 			self.light.setAttenuation((0, 0, 0.005 + math.pow((engine.clock.time - self.lastFire), 2) * 8))
-	
+
 	def delete(self):
 		self.chainGunSound.delete()
 		self.tracer.delete()
@@ -393,11 +393,11 @@ class Shotgun(Gun):
 
 	def serverUpdate(self, aiWorld, entityGroup, packetUpdate):
 		p = Gun.serverUpdate(self, aiWorld, entityGroup, packetUpdate)
-		
+
 		if self.active and self.firing:
 			self.addCriticalPacket(p, packetUpdate)
 			p.add(net.Boolean(True))
-			
+
 			vector = self.actor.controller.targetPos - self.actor.getPosition()
 			pos = vector.cross(Vec3(0, 0, 1))
 			pos.normalize()
@@ -406,7 +406,7 @@ class Shotgun(Gun):
 			direction.normalize()
 
 			p.add(net2.StandardVec3(direction))
-			
+
 			entity = None
 			hitPos = None
 			if direction.length() > 0:
@@ -416,7 +416,7 @@ class Shotgun(Gun):
 			else:
 				p.add(net.Boolean(True)) # Bullet hit something
 				p.add(net2.StandardVec3(hitPos))
-			
+
 				if entity != None:
 					p.add(net.Boolean(True))
 					p.add(net.Uint8(entity.getId()))
@@ -438,23 +438,23 @@ class Shotgun(Gun):
 		if iterator != None:
 			if net.Boolean.getFrom(iterator): # We're firing
 				self.lastFire = engine.clock.time
-				
+
 				if self.active:
 					self.shotGunSound.play(entity = self.actor)
 					self.light.add()
-				
+
 				direction = net2.StandardVec3.getFrom(iterator)
-				
+
 				if net.Boolean.getFrom(iterator): # Bullet hit something
 					hitPos = net2.StandardVec3.getFrom(iterator)
 					if self.active:
 						radius = (hitPos - self.getPosition()).length() / 5
-						for _ in range(5):
+						for _ in xrange(5):
 							particles.add(particles.SparkParticleGroup(hitPos + Vec3(uniform(-radius, radius), uniform(-radius, radius), uniform(-radius, radius))))
 						origin = self.getPosition() + (direction * random() * 4)
 						pos = hitPos - (direction * random() * 4)
 						self.tracer.draw(origin, pos)
-					
+
 					if net.Boolean.getFrom(iterator):
 						entityId = net.Uint8.getFrom(iterator)
 						entity = entityGroup.getEntity(entityId)
@@ -470,7 +470,7 @@ class Shotgun(Gun):
 		elif self.active:
 			self.light.setPos(self.getPosition())
 			self.light.setAttenuation((0, 0, 0.005 + math.pow((engine.clock.time - self.lastFire), 2) * 8))
-	
+
 	def delete(self):
 		self.shotGunSound.delete()
 		self.tracer.delete()
@@ -495,10 +495,10 @@ class SniperRifle(Gun):
 		self.reloadTime = 3.0
 		self.range = 300
 		self.accuracy = 0.27
-	
+
 	def serverUpdate(self, aiWorld, entityGroup, packetUpdate):
 		p = Gun.serverUpdate(self, aiWorld, entityGroup, packetUpdate)
-		
+
 		if self.active and self.firing:
 			self.addCriticalPacket(p, packetUpdate)
 			p.add(net.Boolean(True))
@@ -511,14 +511,14 @@ class SniperRifle(Gun):
 			direction.normalize()
 
 			p.add(net2.StandardVec3(direction))
-			
+
 			entity, hitPos, normal, queue = self.bulletTest(aiWorld, entityGroup, origin, direction)
 			if hitPos == None:
 				p.add(net.Boolean(False)) # Bullet didn't hit anything
 			else:
 				p.add(net.Boolean(True)) # Bullet hit something
 				p.add(net2.StandardVec3(hitPos))
-			
+
 				if entity != None:
 					p.add(net.Boolean(True))
 					p.add(net.Uint8(entity.getId()))
@@ -536,15 +536,15 @@ class SniperRifle(Gun):
 
 	def clientUpdate(self, aiWorld, entityGroup, iterator = None):
 		Gun.clientUpdate(self, aiWorld, entityGroup, iterator)
-			
+
 		if iterator != None:
 			if net.Boolean.getFrom(iterator): # We're firing
 				if self.active:
 					self.sniperSound.play(entity = self.actor)
 					self.light.add()
-				
+
 				direction = net2.StandardVec3.getFrom(iterator)
-				
+
 				if net.Boolean.getFrom(iterator): # Bullet hit something
 					hitPos = net2.StandardVec3.getFrom(iterator)
 					if self.active:
@@ -569,13 +569,13 @@ class SniperRifle(Gun):
 		elif self.active:
 			self.light.setPos(self.getPosition())
 			self.light.setAttenuation((0, 0, 0.005 + math.pow((engine.clock.time - self.lastFire), 2) * 8))
-	
+
 	def hide(self):
 		self.zoomed = False
 		self.fov = 70
 		self.desiredFov = 70
 		Gun.hide(self)
-	
+
 	def delete(self):
 		self.sniperSound.delete()
 		self.tracer.delete()
@@ -597,19 +597,19 @@ class MeleeClaw(Weapon):
 		self.damage = 75
 		self.fireTime = 1.25
 		self.hide()
-	
+
 	def getPosition(self):
 		return self.node.getPos()
-	
+
 	def setPosition(self, pos):
 		self.node.setPos(pos)
-	
+
 	def getRotation(self):
 		return self.node.getHpr()
-	
+
 	def setRotation(self, hpr):
 		self.node.setHpr(hpr)
-	
+
 	def serverUpdate(self, aiWorld, entityGroup, packetUpdate):
 		p = Weapon.serverUpdate(self, aiWorld, entityGroup, packetUpdate)
 		if self.firing and self.active:
@@ -638,16 +638,16 @@ class MeleeClaw(Weapon):
 			# At this point, the blade is actually in the target.
 			p.add(net.Uint8(2)) # 2 = We're now actually damaging the entity
 			p.add(net.Uint8(self.impaleTarget.getId()))
-			
+
 			# Stop the player from flying past the target.
 			if self.impaleTarget.health > self.damage: # Only add force if we don't kill the target. If the target dies, the explosion will already push us away.
 				self.actor.addForce(engine.impulseToForce(self.impulseVector * -800))
-			
+
 			self.impaleTarget = None
 		else:
 			p.add(net.Uint8(0)) # 0 = Nothing's happening
 		return p
-	
+
 	def clientUpdate(self, aiWorld, entityGroup, iterator = None):
 		Weapon.clientUpdate(self, aiWorld, entityGroup, iterator)
 		if iterator != None:
@@ -667,7 +667,7 @@ class MeleeClaw(Weapon):
 					pos = (enemy.getPosition() + self.actor.getPosition()) * 0.5
 					particles.add(particles.HitRegisterParticleGroup(pos, enemy.getTeam().color, 2))
 					enemy.damage(self.actor, self.damage, False)
-		
+
 		# Animation code
 		if self.selected and self.active:
 			self.setPosition(self.actor.getPosition())
@@ -681,7 +681,7 @@ class MeleeClaw(Weapon):
 			elif engine.clock.time - self.impaleStart > 0.75 + self.node.getDuration("Retract"):
 				self.impaleStart = -1
 				self.hide()
-	
+
 	def delete(self):
 		self.clawSound.delete()
 		self.clawFailSound.delete()
@@ -689,12 +689,12 @@ class MeleeClaw(Weapon):
 		self.node.cleanup()
 		self.node.removeNode()
 		Weapon.delete(self)
-	
+
 	def show(self):
 		if self.active:
 			self.node.show()
 		Weapon.show(self)
-	
+
 	def hide(self):
 		if self.active:
 			self.node.hide()
@@ -718,7 +718,7 @@ class GrenadeLauncher(Weapon):
 			direction.normalize()
 			direction.setZ(direction.getZ() + 0.5)
 			direction.normalize()
-			
+
 			origin = self.actor.getPosition() + (direction * (self.actor.radius + 0.1))
 			grenade = entities.Grenade(aiWorld.world, aiWorld.space)
 			grenade.setTeam(self.actor.getTeam())
@@ -729,7 +729,7 @@ class GrenadeLauncher(Weapon):
 			p.add(net.Uint8(grenade.getId()))
 		self.firing = False
 		return p
-	
+
 	def clientUpdate(self, aiWorld, entityGroup, iterator = None):
 		Component.clientUpdate(self, aiWorld, entityGroup, iterator)
 		if iterator != None:
@@ -740,7 +740,7 @@ class GrenadeLauncher(Weapon):
 		grenade = entityGroup.getEntity(self.grenadeId)
 		if grenade != None and isinstance(grenade, entities.Grenade):
 			grenade.setActor(self.actor)
-	
+
 	def delete(self):
 		self.grenadeLaunchSound.delete()
 		Component.delete(self)
@@ -762,7 +762,7 @@ class MolotovThrower(Weapon):
 			direction.normalize()
 			direction.setZ(direction.getZ() + 0.5)
 			direction.normalize()
-			
+
 			origin = self.actor.getPosition() + (direction * (self.actor.radius + 0.1))
 			grenade = entities.Molotov(aiWorld.world, aiWorld.space)
 			grenade.setTeam(self.actor.getTeam())
@@ -773,7 +773,7 @@ class MolotovThrower(Weapon):
 			p.add(net.Uint8(grenade.getId()))
 		self.firing = False
 		return p
-	
+
 	def clientUpdate(self, aiWorld, entityGroup, iterator = None):
 		Component.clientUpdate(self, aiWorld, entityGroup, iterator)
 		if iterator != None:
@@ -784,7 +784,7 @@ class MolotovThrower(Weapon):
 		grenade = entityGroup.getEntity(self.grenadeId)
 		if grenade != None and isinstance(grenade, entities.Grenade):
 			grenade.setActor(self.actor)
-	
+
 	def delete(self):
 		self.grenadeLaunchSound.delete()
 		Component.delete(self)
@@ -806,18 +806,18 @@ class Pistol(Gun):
 
 	def serverUpdate(self, aiWorld, entityGroup, packetUpdate):
 		p = Gun.serverUpdate(self, aiWorld, entityGroup, packetUpdate)
-		
+
 		if self.active and self.firing:
 			self.addCriticalPacket(p, packetUpdate)
 			p.add(net.Boolean(True))
-			
+
 			vector = self.actor.controller.targetPos - self.actor.getPosition()
 			pos = vector.cross(Vec3(0, 0, 1))
 			pos.normalize()
 			origin = self.actor.getPosition() + (pos * (self.actor.radius + 0.1))
 			direction = self.actor.controller.targetPos - origin
 			direction.normalize()
-			
+
 			inaccuracy = 0.5 if self.zoomed else 1.5
 			angleX = uniform(-inaccuracy, inaccuracy)
 			angleY = uniform(-inaccuracy, inaccuracy)
@@ -827,9 +827,9 @@ class Pistol(Gun):
 			mat = Mat3()
 			mat.setRotateMatNormaxis(angleY, render.getRelativeVector(self.node, Vec3(1, 0, 0)))
 			direction = mat.xformVec(direction)
-			
+
 			p.add(net2.StandardVec3(direction))
-			
+
 			entity = None
 			hitPos = None
 			if direction.length() > 0:
@@ -844,10 +844,10 @@ class Pistol(Gun):
 					p.add(net.Uint8(entity.getId()))
 					totalDamage = self.damage * max(0, 1 - (vector.length() / 200)) * max(0, normal.dot(-direction) + 0.1)
 					p.add(net.Uint16(totalDamage))
-				
+
 					pinned = False
 					if isinstance(entity, entities.BasicDroid):
-						for i in range(queue.getNumEntries()):
+						for i in xrange(queue.getNumEntries()):
 							entry = queue.getEntry(i)
 							pos = entry.getSurfacePoint(render)
 							testEntity = entityGroup.getEntityFromEntry(entry)
@@ -872,20 +872,20 @@ class Pistol(Gun):
 		if iterator != None:
 			if net.Boolean.getFrom(iterator): # We're firing
 				self.lastFire = engine.clock.time
-				
+
 				if self.active:
 					self.pistolSound.play(entity = self.actor)
 					self.light.add()
-				
+
 				direction = net2.StandardVec3.getFrom(iterator)
-				
+
 				if net.Boolean.getFrom(iterator): # Bullet hit something
 					hitPos = net2.StandardVec3.getFrom(iterator)
 					if self.active:
 						origin = self.getPosition() + (direction * random() * 4)
 						pos = hitPos - (direction * random() * 4)
 						self.tracer.draw(origin, pos)
-					
+
 					if net.Boolean.getFrom(iterator):
 						entityId = net.Uint8.getFrom(iterator)
 						entity = entityGroup.getEntity(entityId)
@@ -898,11 +898,11 @@ class Pistol(Gun):
 								self.pinSound.play(position = hitPos)
 								if not entity.pinned:
 									entity.pin(hitPos - (direction * entity.radius))
-								
+
 							spike = entities.Spike(pinPos, direction)
 							spike.attachTo(entity)
 							entityGroup.addGraphicsObject(spike)
-								
+
 							entity.damage(self.actor, damage)
 							if isinstance(entity, entities.Actor):
 								particles.add(particles.HitRegisterParticleGroup(hitPos - direction, entity.getTeam().color, damage * 2 / self.damage))
@@ -917,7 +917,7 @@ class Pistol(Gun):
 		elif self.active:
 			self.light.setPos(self.getPosition())
 			self.light.setAttenuation((0, 0, 0.005 + math.pow((engine.clock.time - self.lastFire), 2) * 8))
-	
+
 	def delete(self):
 		self.pistolSound.delete()
 		self.tracer.delete()

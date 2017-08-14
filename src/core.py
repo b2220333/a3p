@@ -311,7 +311,7 @@ class PointControlBackend(ServerBackend):
 		while queue == None or queue.getNumEntries() == 0:
 			queue = self.aiWorld.getCollisionQueue(Vec3(uniform(-size, size), uniform(-size, size), 100), Vec3(0, 0, -1))
 			pos = None
-			for i in range(queue.getNumEntries()):
+			for i in xrange(queue.getNumEntries()):
 				entry = queue.getEntry(i)
 				if entry.getSurfaceNormal(render).getZ() >= 0:
 					pos = entry.getSurfacePoint(render)
@@ -368,7 +368,7 @@ class SurvivalBackend(ServerBackend):
 		if self.numClients > 0:
 			livePlayers, deadPlayers = self.getPlayerCounts()
 			if not self.zombiesSpawned and livePlayers == self.numClients:
-				for i in range(self.zombieCounts[self.matchNumber]):
+				for i in xrange(self.zombieCounts[self.matchNumber]):
 					self.zombieTeam.respawn(self.zombieLoadouts[self.matchNumber][0], self.zombieLoadouts[self.matchNumber][1])
 				self.zombiesSpawned = True
 				self.zombieSpawnTime = engine.clock.time
@@ -416,7 +416,7 @@ class ClientBackend(Backend):
 		try:
 			self.gameOver = net.Boolean.getFrom(iterator)
 			winningTeam = self.entityGroup.getEntity(net.Uint8.getFrom(iterator))
-			for i in range(len(self.entityGroup.teams)):
+			for i in xrange(len(self.entityGroup.teams)):
 				id = net.Uint8.getFrom(iterator)
 				team = self.entityGroup.getEntity(id)
 				pos = net.Uint8.getFrom(iterator)
@@ -461,11 +461,13 @@ class Game(DirectObject):
 		self.unitSelector = ui.UnitSelectorScreen(self.startMatch)
 		if isinstance(self.backend, SurvivalBackend):
 			self.unitSelector.disableUnits()
+
 		if isinstance(self.backend, ClientBackend):
 			self.accept("client-setup", self.gameInfoCallback)
 			self.unitSelector.hide()
 			self.promptText.setText("Connecting...")
 			self.scoreText.hide()
+
 		self.gameui = ui.GameUI()
 		self.gameui.hide()
 		self.accept("space", self.handleSpacebar)
@@ -497,7 +499,7 @@ class Game(DirectObject):
 		weaponSelections = self.unitSelector.getUnitWeapons()
 		specialSelections = self.unitSelector.getUnitSpecials()
 		self.localTeam.clearUnits()
-		for i in range(len(weaponSelections)):
+		for i in xrange(len(weaponSelections)):
 			self.localTeam.purchaseUnit(weaponSelections[i], specialSelections[i])
 
 		self.localTeam.setPrimaryWeapon(self.unitSelector.getPrimaryWeapon())
@@ -680,7 +682,7 @@ class Tutorial(Game):
 		self.messages = ["Find and capture the drop pods to earn money!", "Use your units to help defeat the enemy.", "Try using your special abilities."]
 		visitorFont = loader.loadFont("menu/visitor2.ttf")
 		self.messageText = OnscreenText(pos = (-engine.aspectRatio + 0.05, 0.9), align = TextNode.ALeft, scale = 0.07, fg = (1, 1, 1, 1), shadow = (0, 0, 0, 0.5), font = visitorFont, mayChange = True)
-		for i in range(4):
+		for i in xrange(4):
 			image = OnscreenImage(image = "images/part" + str(i + 1) + ".jpg", pos = (0, 0, 0), scale = (1680.0/1050.0, 1, 1))
 			image.hide()
 			self.tutorialScreens.append(image)
@@ -1110,7 +1112,7 @@ class JunkBelt:
 			node.setRenderModeWireframe()
 			self.models.append(node)
 
-		for _ in range(750):
+		for _ in xrange(750):
 			instance = render.attachNewNode("junk")
 			angle = uniform(0, 2 * math.pi)
 			height = uniform(-0.5, 0.5)
@@ -1127,7 +1129,7 @@ class JunkBelt:
 			self.instances.append(instance)
 
 	def update(self):
-		for i in range(len(self.instances)):
+		for i in xrange(len(self.instances)):
 			self.instances[i].setHpr(self.instances[i].getHpr() + (self.avels[i] * engine.clock.timeStep))
 
 	def delete(self):

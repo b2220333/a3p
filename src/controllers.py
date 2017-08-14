@@ -150,7 +150,7 @@ class TeamEntityController(Controller):
 		if len(aiWorld.docks) > 0:
 			entity.dock = [x for x in aiWorld.docks if x.teamIndex == dockIndex][0]
 		numAllies = net.Uint8.getFrom(iterator)
-		for i in range(numAllies):
+		for i in xrange(numAllies):
 			entity.addAlly(net.Uint8.getFrom(iterator))
 		entity.score = net.Int16.getFrom(iterator)
 		entity.matchScore = net.Int16.getFrom(iterator)
@@ -254,7 +254,7 @@ class TeamEntityController(Controller):
 			if net.Boolean.getFrom(data):
 				self.entity.username = net.String.getFrom(data)
 			numPurchases = net.Uint8.getFrom(data)
-			for i in range(numPurchases):
+			for i in xrange(numPurchases):
 				pos = net2.HighResVec3.getFrom(data)
 				self.spawnSound.play(position = pos)
 				self.light.setPos(pos)
@@ -386,7 +386,7 @@ class ObjectController(Controller):
 				a = 0
 				b = 0
 				numSnapshots = len(self.snapshots)
-				for i in range(numSnapshots):
+				for i in xrange(numSnapshots):
 					if self.snapshots[i].time > currentTime and numSnapshots > i + 1 and self.snapshots[i + 1].time < currentTime:
 						a = i + 1
 						b = i
@@ -636,7 +636,7 @@ class GrenadeController(ObjectController):
 			if distance > 0:
 				vector.normalize()
 				queue = aiWorld.getCollisionQueue(self.lastPosition, vector, engine.renderEnvironment)
-				for i in range(queue.getNumEntries()):
+				for i in xrange(queue.getNumEntries()):
 					entry = queue.getEntry(i)
 					collision = entry.getSurfacePoint(render)
 					v = collision - self.lastPosition
@@ -705,7 +705,7 @@ class MolotovController(ObjectController):
 			if distance > 0:
 				vector.normalize()
 				queue = aiWorld.getCollisionQueue(self.lastPosition, vector, engine.renderEnvironment)
-				for i in range(queue.getNumEntries()):
+				for i in xrange(queue.getNumEntries()):
 					entry = queue.getEntry(i)
 					collision = entry.getSurfacePoint(render)
 					v = collision - self.lastPosition
@@ -801,7 +801,7 @@ class ActorController(ObjectController):
 				self.entity.components[id].clientUpdate(aiWorld, entityGroup, data)
 				updatedComponents.append(id)
 				id = net.Uint8.getFrom(data)
-			for id in (x for x in range(len(self.entity.components)) if not x in updatedComponents):
+			for id in (x for x in xrange(len(self.entity.components)) if not x in updatedComponents):
 				self.entity.components[id].clientUpdate(aiWorld, entityGroup)
 
 			self.onFire = net.Boolean.getFrom(data)
@@ -851,7 +851,7 @@ class DroidController(ActorController):
 		entity = ActorController.readSpawnPacket(aiWorld, entityGroup, iterator, entity)
 		numWeapons = net.Uint8.getFrom(iterator)
 		weapons = []
-		for _ in range(numWeapons):
+		for _ in xrange(numWeapons):
 			id = net.Uint8.getFrom(iterator)
 			if id == 255: # 255 = None
 				id = None
@@ -919,7 +919,7 @@ class DroidController(ActorController):
 				if distance > self.entity.radius * 0.9:
 					vector.normalize()
 					queue = aiWorld.getCollisionQueue(self.lastPosition, vector, engine.renderEnvironment)
-					for i in range(queue.getNumEntries()):
+					for i in xrange(queue.getNumEntries()):
 						entry = queue.getEntry(i)
 						collision = entry.getSurfacePoint(render)
 						v = collision - self.lastPosition
@@ -1254,7 +1254,7 @@ class PlayerController(DroidController):
 			self.lastTargetCheck = engine.clock.time
 			queue = aiWorld.getRayCollisionQueue(self.pickRayNP)
 			camDistance = (camera.getPos() - self.entity.getPosition()).length() + self.entity.radius
-			for i in range(queue.getNumEntries()):
+			for i in xrange(queue.getNumEntries()):
 				entry = queue.getEntry(i)
 				t = entry.getSurfacePoint(render)
 				targetVector = camera.getPos() - t
@@ -1317,7 +1317,7 @@ class PlayerController(DroidController):
 		if iterator != None:
 			self.sprinting = net.Boolean.getFrom(iterator)
 			cmds = net.Uint8.getFrom(iterator)
-			for i in range(cmds):
+			for i in xrange(cmds):
 				id = net.Uint8.getFrom(iterator)
 				entity = entityGroup.getEntity(id)
 				if entity == None: # Do nothing
@@ -1561,7 +1561,7 @@ class Special(DirectObject):
 	def clientUpdateStart(self, aiWorld, entityGroup, iterator = None):
 		if iterator != None:
 			criticalPackets = net.Uint8.getFrom(iterator)
-			for _ in range(criticalPackets):
+			for _ in xrange(criticalPackets):
 				self.clientUpdate(aiWorld, entityGroup, iterator)
 
 	def clientUpdate(self, aiWorld, entityGroup, iterator = None):

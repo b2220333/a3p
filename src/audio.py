@@ -374,7 +374,7 @@ class SoundGroup(DirectObject):
 		if enabled:
 			for file in self.soundFiles:
 				self.sounds[file] = []
-				for _ in range(3):
+				for _ in xrange(3):
 					sound = manager.loadSfx(file)
 					sound.setVolume(self.volume)
 					self.sounds[file].append(sound)

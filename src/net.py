@@ -265,7 +265,7 @@ class PythonNetContext(NetworkContext):
 			if code == PACKET_HOSTLIST:
 				numHosts = Uint16.getFrom(iterator)
 				hosts = []
-				for _ in range(numHosts):
+				for _ in xrange(numHosts):
 					ip = String.getFrom(iterator)
 					port = Uint16.getFrom(iterator)
 					user = String.getFrom(iterator)

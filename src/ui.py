@@ -131,7 +131,7 @@ class GameUI(DirectObject):
 		for t in self.teamScores:
 			t.delete()
 		del self.teamScores[:]
-		for i in range(len(self.teams)):
+		for i in xrange(len(self.teams)):
 			color = self.teams[i].color
 			yOffset = self.verticalOffset - 0.06 + (i * 0.05)
 			xOffset = -engine.aspectRatio + 0.02
@@ -203,7 +203,7 @@ class GameUI(DirectObject):
 		self.specialBar.setValue(max(0, engine.clock.time - self.localTeam.lastSpecialActivated))
 
 		allyList = []
-		for i in range(len(self.teams)):
+		for i in xrange(len(self.teams)):
 			team = self.teams[i]
 			for bot in (x for x in team.actors if x.active):
 				if bot.getTeam().isAlly(self.localTeam):
@@ -228,7 +228,7 @@ class GameUI(DirectObject):
 			self.healthBars[0].removeNode()
 			del self.healthBars[0]
 
-		for i in range(len(allyList)):
+		for i in xrange(len(allyList)):
 			actor = allyList[i]
 			self.healthBars[i].show()
 			if actor.getTeam() == self.localTeam:
@@ -363,7 +363,7 @@ class ChatLog(DirectObject):
 		self.messages = []
 		self.alwaysFocused = chatBoxAlwaysVisible
 		# Chats start at 0 at the bottom and count up
-		for i in range(maxChats):
+		for i in xrange(maxChats):
 			text = OnscreenText(pos = (-engine.aspectRatio + 0.02, verticalOffset + 0.18 + (i * 0.05)), scale = 0.035, align = TextNode.ALeft, fg = (1, 1, 1, 1), shadow = (0, 0, 0, 0.5), font = font, mayChange = True)
 			text.setBin("fixed", 200)
 			self.chatTexts.append(text)
@@ -447,7 +447,7 @@ class ChatLog(DirectObject):
 	def _updateChatLog(self):
 		self.messages = self.messages[0:len(self.chatTexts)]
 		index = 0
-		for index in range(len(self.messages)):
+		for index in xrange(len(self.messages)):
 			message = self.messages[index]
 			self.chatTexts[index].setText(message.text)
 		index = len(self.messages)
@@ -526,7 +526,7 @@ class UnitSelectorScreen(DirectObject):
 		# Weapons
 		origin = Vec3(-1.0, 0, 0.6)
 		offset = Vec3()
-		for i in range(6):
+		for i in xrange(6):
 			code = UnitSelectorScreen.codes[i]
 			slot = UnitIconSlot(code, UnitIconSlot.AcceptsWeapons, origin + offset, "images/buy-slot.png", UnitSelectorScreen.types[code][1], isSpecial = False)
 			self.buySlots.append(slot)
@@ -535,7 +535,7 @@ class UnitSelectorScreen(DirectObject):
 		# Specials
 		origin = Vec3(-0.25, 0, 0.6)
 		offset = Vec3()
-		for i in range(6, 11):
+		for i in xrange(6, 11):
 			code = UnitSelectorScreen.codes[i]
 			slot = UnitIconSlot(code, UnitIconSlot.AcceptsSpecials, origin + offset, "images/buy-slot.png", UnitSelectorScreen.types[code][1], isSpecial = True)
 			self.buySlots.append(slot)
@@ -543,8 +543,8 @@ class UnitSelectorScreen(DirectObject):
 
 		# Inventory slots
 		origin = Vec3(0.4, 0, 0.6)
-		for x in range(4):
-			for y in range(4):
+		for x in xrange(4):
+			for y in xrange(4):
 				slot = UnitIconSlot(-1, UnitIconSlot.AcceptsAny, origin + Vec3(x * 0.2, 0, -y * 0.2))
 				self.inventorySlots.append(slot)
 

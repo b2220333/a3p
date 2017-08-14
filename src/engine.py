@@ -185,22 +185,22 @@ def init(showFrameRate = False, daemon = False):
 	global isDaemon
 	global mf
 	global maps
-	
+
 	mf = None
-	
+
 	if not vfs.isDirectory("maps"):
 		mf = Multifile()
 		mf.openRead(ExecutionEnvironment.getEnvironmentVariable("PKG_ROOT") + "/pkg.mf")
-	
+
 	isDaemon = daemon
-	
+
 	if not daemon:
 		base.setBackgroundColor(2.0/255.0, 28.0/255.0, 53.0/255.0)
-	
+
 	log = Logger()
-	
+
 	sys.excepthook = exceptHook
-		
+
 	clock = Clock()
 	base.disableMouse() # Disable default mouse camera control
 	if not daemon:
@@ -215,7 +215,7 @@ def init(showFrameRate = False, daemon = False):
 	numMaxDynamicLights = 0
 	if enableShaders and not daemon:
 		numMaxDynamicLights = 2
-	for i in range(numMaxDynamicLights):
+	for i in xrange(numMaxDynamicLights):
 		light = PointLight("Light" + str(i))
 		light.setColor(Vec4(0, 0, 0, 1))
 		light.setAttenuation(Vec3(0, 0, 1))
@@ -245,7 +245,7 @@ def init(showFrameRate = False, daemon = False):
 		reflectionCamera.node().setActive(False)
 	particles.init()
 	maps = [x.split("\t") for x in readFile("maps/maps.txt").split("\n")]
-	
+
 def preloadModels():
 	global modelFileSuffix
 	if os.path.exists("models/basicdroid/BasicDroid.bam"):
@@ -308,7 +308,7 @@ def exceptHook(type, value, trace):
 	exceptionData = traceback.format_exc()
 	log.info(exceptionData)
 	print exceptionData
-	
+
 def clearLights():
 	global lights
 	for light in lights:
@@ -340,13 +340,13 @@ class Clock:
 		self._time = self.timerFunction()
 		self.timeStep = 0
 		self.lastFrameTime = self.time
-		
+
 	def update(self):
 		"Call once every frame."
 		self.lastFrameTime = self.time
 		self._time = self.timerFunction()
 		self.timeStep = min(0.1, max(0.005, self.time - self.lastFrameTime))
-	
+
 	@property
 	def time(self):
 		return self._time
@@ -390,7 +390,7 @@ class Map(DirectObject):
 		self.ambientSound = None
 		self.platforms = []
 		self.name = ""
-	
+
 	def addSoundGroup(self, soundGroup):
 		self.soundGroups[soundGroup.name] = soundGroup;
 
@@ -403,7 +403,7 @@ class Map(DirectObject):
 		geom.geometry.destroy()
 		if geom.node in self.staticGeometries:
 			del self.staticGeometries[geom.node]
-	
+
 	def showPlatforms(self):
 		for p in self.platforms:
 			p.show()
@@ -416,7 +416,7 @@ class Map(DirectObject):
 		for light in self.lights:
 			if isinstance(light.getNode(0), Spotlight) and light.node().isShadowCaster():
 				light.node().setShadowCaster(False)
-	
+
 	def enableShadows(self):
 		for light in self.lights:
 			if light.getTag("shadow") == "true":
@@ -430,7 +430,7 @@ class Map(DirectObject):
 		self.name = name
 		self.filename = "maps/" + self.name + ".txt"
 		mapDirectory = "maps"
-		
+
 		data = readFile(self.filename)
 
 		lines = data.split('\n')
@@ -447,7 +447,7 @@ class Map(DirectObject):
 						colors = [Vec4(0.7, 0.0, 0.0, 1), Vec4(0.0, 0.0, 0.7, 1), Vec4(0.2, 0.0, 0.0, 1), Vec4(0.0, 0.0, 0.2, 1)]
 					else: # Free-for-all up to 4 players
 						colors = [Vec4(0.5, 0.0, 0.0, 1), Vec4(0.0, 0.0, 0.5, 1), Vec4(0, 0.5, 0, 1), Vec4(0.5, 0.5, 0, 1)]
-					for i in range(numTeams):
+					for i in xrange(numTeams):
 						team = entities.TeamEntity()
 						team.color = colors[i]
 						docks = [x for x in aiWorld.docks if x.teamIndex == i]
@@ -472,7 +472,7 @@ class Map(DirectObject):
 				numTeams = 4
 				if net.netMode == net.MODE_SERVER:
 					colors = [Vec4(0.4, 0.0, 0.0, 1), Vec4(0.0, 0.0, 0.4, 1), Vec4(0, 0.4, 0, 1), Vec4(0.4, 0.4, 0, 1)]
-					for i in range(4):
+					for i in xrange(4):
 						team = entities.TeamEntity()
 						team.money = 300 # Starting money amount for survival
 						team.color = colors[i]
@@ -559,7 +559,7 @@ class Map(DirectObject):
 					light = Spotlight(tokens[3])
 					lens = PerspectiveLens()
 					lens.setFov(45)
-					light.setExponent(0) 
+					light.setExponent(0)
 					light.setLens(lens)
 					light.setColor(Vec4(float(tokens[4]), float(tokens[5]), float(tokens[6]), 1))
 					lightNode = parentNode.attachNewNode(light)
@@ -612,7 +612,7 @@ class Map(DirectObject):
 				dock.setPosition(pos)
 				normal = Vec3(0, 0, 1)
 				queue = aiWorld.getCollisionQueue(Vec3(pos.getX(), pos.getY(), pos.getZ()), Vec3(0, 0, -1))
-				for i in range(queue.getNumEntries()):
+				for i in xrange(queue.getNumEntries()):
 					entry = queue.getEntry(i)
 					if entityGroup.getEntityFromEntry(entry) != None:
 						continue
@@ -642,13 +642,13 @@ class Map(DirectObject):
 				scenery.setPos(float(tokens[2]), float(tokens[3]), float(tokens[4]))
 				scenery.reparentTo(renderLit)
 				self.sceneries[tokens[1]] = scenery
-		
+
 		# Create winnar platforms
 		entry = aiWorld.getFirstCollision(Vec3(0, 0, 100), Vec3(0, 0, -1))
 		height = 15
 		if entry != None:
 			height = entry.getSurfacePoint(render).getZ() + 10.0
-		for i in range(numTeams):
+		for i in xrange(numTeams):
 			p = Platform(aiWorld.space)
 			spacing = 7
 			vspacing = 2
@@ -738,7 +738,7 @@ class Map(DirectObject):
 		stream = open(self.filename, "w")
 		stream.write(mapFile.data)
 		stream.close()
-	
+
 	def update(self):
 		"Updates the custom sounds and the skybox associated with this Map."
 		if self.skyBox != None:
@@ -748,7 +748,7 @@ class Map(DirectObject):
 			self.waterNode.setShaderInput("time", clock.time)
 			if reflectionCamera != None:
 				reflectionCamera.setMat(base.camera.getMat() * self.waterPlane.getReflectionMat())
-	
+
 	def delete(self):
 		"Releases all resources, including scenery, physics geometries, and environment sounds and lights."
 		global map
@@ -790,21 +790,21 @@ class StaticGeometry(DirectObject):
 		self.geometry.setCollideBits(BitMask32(0x00000001))
 		self.geometry.setCategoryBits(BitMask32(0x00000001))
 		space.setSurfaceType(self.geometry, 0)
-	
+
 	def setPosition(self, pos):
 		self.geometry.setPosition(pos)
 		self.node.setPos(pos)
-	
+
 	def getPosition(self):
 		return self.geometry.getPosition()
-	
+
 	def setRotation(self, hpr):
 		self.node.setHpr(hpr)
 		self.geometry.setQuat(self.node.getQuat(render))
-	
+
 	def getRotation(self):
 		return self.node.getHpr()
-		
+
 	def commitChanges(self):
 		"Updates the NodePath to reflect the position of the ODE geometry."
 		self.node.setPosQuat(renderEnvironment, self.getPosition(), Quat(self.geometry.getQuaternion()))
@@ -815,19 +815,19 @@ class SpawnPoint(DirectObject):
 		self.node = loadModel("models/spawnpoint/SpawnPoint")
 		self.node.reparentTo(renderEnvironment)
 		self.active = True
-	
+
 	def setPosition(self, pos):
 		self.node.setPos(pos)
-	
+
 	def getPosition(self):
 		return self.node.getPos()
-	
+
 	def setRotation(self, hpr):
 		self.node.setHpr(hpr)
-	
+
 	def getRotation(self):
 		return self.node.getHpr()
-	
+
 	def delete(self):
 		self.active = False
 		deleteModel(self.node, "models/spawnpoint/SpawnPoint")
@@ -849,10 +849,10 @@ class Dock(SpawnPoint):
 		self.shieldNode.setColor(0.8, 0.9, 1.0, 0.6)
 		self.shieldNode.setTransparency(TransparencyAttrib.MAlpha)
 		self.shieldNode.hide(BitMask32.bit(4)) # Don't cast shadows
-	
+
 	def setPosition(self, pos):
 		self.node.setPos(pos - Vec3(0, 0, self.vradius))
-	
+
 	def getPosition(self):
 		return self.node.getPos() + Vec3(0, 0, self.vradius)
 
@@ -871,33 +871,33 @@ class Platform(DirectObject):
 		self.geometry.setCollideBits(BitMask32(0x00000001))
 		self.geometry.setCategoryBits(BitMask32(0x00000001))
 		space.setSurfaceType(self.geometry, 0)
-	
+
 	def setPosition(self, pos):
 		self.geometry.setPosition(pos)
 		self.node.setPos(pos)
-	
+
 	def getPosition(self):
 		return self.geometry.getPosition()
-	
+
 	def setRotation(self, hpr):
 		self.node.setHpr(hpr)
 		self.geometry.setQuaternion(self.node.getQuat(render))
-	
+
 	def getRotation(self):
 		return self.node.getHpr()
-	
+
 	def show(self):
 		self.geometry.enable()
 		self.node.reparentTo(renderEnvironment)
-	
+
 	def hide(self):
 		self.geometry.disable()
 		self.node.reparentTo(hidden)
-	
+
 	def delete(self):
 		deleteModel(self.node, "models/spawnpoint/SpawnPoint")
 		self.geometry.destroy()
-		
+
 	def commitChanges(self):
 		"Updates the NodePath to reflect the position of the ODE geometry."
 		self.node.setPosQuat(renderEnvironment, self.getPosition(), Quat(self.geometry.getQuaternion()))
@@ -919,11 +919,11 @@ class Mouse:
 		self._maxY = math.pi * 0.5
 		self._minY = -self._maxY
 		self.lastUpdate = 0
-	
+
 	def setYLimit(self, maxY, minY):
 		self._maxY = maxY
 		self._minY = minY
-		
+
 	def setSpeed(self, speed):
 		"Sets the sensitivity of the mouse."
 		self.speed = speed
@@ -950,10 +950,10 @@ class Mouse:
 
 	def setX(self, x):
 		self._x = x
-	
+
 	def setY(self, y):
 		self._y = y
-	
+
 	def getX(self):
 		return self._x
 
@@ -965,7 +965,7 @@ class Mouse:
 
 	def getY(self):
 		return self._y
-	
+
 	@staticmethod
 	def showCursor():
 		Mouse.enabled = False
@@ -980,7 +980,7 @@ class Mouse:
 		props.setCursorHidden(True)
 		base.win.requestProperties(props)
 		base.win.movePointer(0, base.win.getProperties().getXSize() / 2, base.win.getProperties().getYSize() / 2)
-		
+
 class Light:
 	"""At this time, only point lights are supported. Really though, what do you need a spotlight for?
 	This class is necessary because every time a Panda3D light is added, all shaders must be regenerated.
@@ -1046,7 +1046,7 @@ def frange(start, end=None, inc=None):
     for i in xrange(1,count):
         L[i] = L[i-1] + inc
     return L
-	
+
 def lerp(a, b, scale):
 	"Interpolate between two Vec3's, based on the 'scale' parameter, where 'scale' goes from 0 to 1."
 	return a + ((b - a) * scale)

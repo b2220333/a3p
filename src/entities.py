@@ -35,7 +35,7 @@ class EntityGroup(DirectObject):
 		decay = max(1 - (time / self.cameraShakeTime), 0)
 		self.cameraShakeX = self.cameraShakeVelX * decay * math.sin(time * 7)
 		self.cameraShakeY = self.cameraShakeVelY * decay * math.sin(time * 12)
-		
+
 		for obj in self.graphicsObjects:
 			obj.update(self)
 
@@ -62,13 +62,13 @@ class EntityGroup(DirectObject):
 				return entity
 		else:
 			return None
-	
+
 	def spawnEntity(self, entity):
 		"Spawning an ObjectEntity involves sending off a network packet so everyone else has the ObjectEntity too."
 		self.generateEntityId(entity)
 		self.manager.spawnEntity(entity)
 		self.addEntity(entity)
-	
+
 	def addTeam(self, team):
 		self.teams.append(team)
 
@@ -78,13 +78,13 @@ class EntityGroup(DirectObject):
 		if isinstance(entity, ObjectEntity):
 			entity.node.reparentTo(engine.renderObjects)
 		self.entities[entity.getId()] = entity
-	
+
 	def removeEntity(self, entity):
 		"Removes the ObjectEntity from the entity list. Also schedules the ObjectEntity's resources to be cleared, as soon as possible."
 		entity.active = False
 		if entity.getId() in self.entities:
 			self.deletedEntities.append(entity)
-	
+
 	# offset is used to ensure Fragments and other local-only entities don't interfere
 	# with IDs from server-client synched entities.
 	def generateEntityId(self, entity, offset = 0):
@@ -92,23 +92,23 @@ class EntityGroup(DirectObject):
 		while id in self.entities:
 			id = offset + int(round(random() * 255))
 		entity.setId(id)
-	
+
 	def clearDeletedEntities(self):
 		for entity in self.deletedEntities:
 			if entity.getId() in self.entities:
 				del self.entities[entity.getId()]
 			entity.clear(self)
 		del self.deletedEntities[:]
-	
+
 	def addGraphicsObject(self, obj):
 		if not obj in self.graphicsObjects:
 			self.graphicsObjects.append(obj)
-	
+
 	def removeGraphicsObject(self, obj):
 		obj.delete(self)
 		if obj in self.graphicsObjects:
 			self.graphicsObjects.remove(obj)
-	
+
 	def getNearestPhysicsEntity(self, pos):
 		closest = None
 		closestDist = 1000000
@@ -127,12 +127,12 @@ class EntityGroup(DirectObject):
 			entity.controller.clearCriticalPackets()
 		for object in self.graphicsObjects:
 			object.delete(self)
-		
+
 	def deleteEntity(self, entity, killed = False):
 		"Deleting an ObjectEntity involves sending off a network packet so everyone else also deletes the ObjectEntity."
 		self.manager.deleteEntity(entity, killed)
 		self.removeEntity(entity)
-	
+
 	def shakeCamera(self, amount = 6):
 		if random() > 0.5:
 			self.cameraShakeVelX = amount
@@ -151,10 +151,10 @@ class EntityGroup(DirectObject):
 		sourceEntity is excluded from damage and force, and damagingEntity gets the credit for any damage done.
 		If damagingEntity is None, sourceEntity gets the credit. If both are None, no damage is done.
 		"""
-		
+
 		particles.add(particles.SparkParticleGroup(position, numParticles = 500, speed = damageRadius * 2.5, lifeTime = 1.0, size = 6.0))
 		particles.add(particles.ExplosionParticleGroup(position))
-		
+
 		for entity in (entity for entity in self.entities.values() if entity != sourceEntity and isinstance(entity, ObjectEntity)):
 			vector = entity.getPosition() - position
 			distance = vector.length()
@@ -204,7 +204,7 @@ class Entity(DirectObject):
 
 	def setId(self, id):
 		self.id = id
-	
+
 	def damage(self, entity, damage, ranged = True):
 		"Useful for Entities that have health."
 		pass
@@ -213,7 +213,7 @@ class Entity(DirectObject):
 		"Killing an ObjectEntity triggers a death animation. Deleting an entity just silently removes it."
 		if self.active:
 			self.delete(entityGroup, True, localDelete)
-	
+
 	def delete(self, entityGroup, killed = False, localDelete = True):
 		"""Schedules this ObjectEntity to be cleared and removed from the given EntityGroup."""
 		if self.active:
@@ -223,12 +223,12 @@ class Entity(DirectObject):
 				entityGroup.deleteEntity(self, killed)
 			else:
 				entityGroup.removeEntity(self)
-	
+
 	def clear(self, entityGroup):
 		"""Clears all resources associated with this Entity."""
 		self.controller.delete(self.killed)
 		self.active = False
-	
+
 	def setLocal(self, local):
 		self.isLocal = local
 
@@ -243,74 +243,74 @@ class ObjectEntity(Entity):
 		self.radius = 0
 		if filename != None:
 			self.loadModel(filename)
-	
+
 	def loadModel(self, filename):
 		self.filename = filename
 		self.node = engine.loadModel(filename)
 		self.node.setName(str(int(self.id)))
 		self.radius = self.node.getBounds().getRadius()
-	
+
 	def setId(self, id):
 		Entity.setId(self, id)
 		if self.node != None:
 			self.node.setName(str(int(id)))
-	
+
 	def getPosition(self):
 		return self.body.getPosition()
-	
+
 	def setPosition(self, pos):
 		self.node.setPos(pos)
 		self.body.setPosition(pos)
-	
+
 	def setRotation(self, hpr):
 		self.node.setHpr(hpr)
 		self.body.setQuaternion(self.node.getQuat(render))
-	
+
 	def getRotation(self):
 		return self.node.getHpr()
-	
+
 	def setLinearVelocity(self, vel):
 		self.body.setLinearVel(vel)
-	
+
 	def getLinearVelocity(self):
 		return self.body.getLinearVel()
-	
+
 	def setAngularVelocity(self, vel):
 		self.body.setAngularVel(vel)
-	
+
 	def getAngularVelocity(self):
 		return self.body.getAngularVel()
-	
+
 	def setQuaternion(self, quat):
 		self.body.setQuaternion(quat)
 		self.node.setQuat(quat)
-	
+
 	def getQuaternion(self):
 		return self.body.getQuaternion()
-	
+
 	def addTorque(self, torque):
 		self.body.addTorque(torque.getX(), torque.getY(), torque.getZ())
-	
+
 	def addForce(self, force):
 		self.body.addForce(force)
-	
+
 	def addForceAtPosition(self, direction, position):
 		self.body.addForceAtPos(direction.getX(), direction.getY(), direction.getZ(), position.getX(), position.getY(), position.getZ())
 
 	def commitChanges(self):
 		"Updates the visual orientation and position of this ObjectEntity to reflect that of the ODE body."
 		self.node.setPosQuat(engine.renderObjects, self.getPosition(), Quat(self.body.getQuaternion()))
-	
+
 	def damage(self, entity, damage, ranged = True):
 		"Useful for Entities that have health."
 		Entity.damage(self, entity, damage, ranged)
-	
+
 	def kill(self, aiWorld, entityGroup, localDelete = True):
 		Entity.kill(self, aiWorld, entityGroup, localDelete)
-	
+
 	def delete(self, entityGroup, killed = False, localDelete = True):
 		Entity.delete(self, entityGroup, killed, localDelete)
-	
+
 	def clear(self, entityGroup):
 		"""Clears all resources associated with this ObjectEntity."""
 		Entity.clear(self, entityGroup)
@@ -364,10 +364,10 @@ class DropPod(ObjectEntity):
 		self.amountIndicatorNode.setBin("fixed", 102) # 102 so it's in front of all the MeshDrawer particles.
 		self.amountIndicatorNode.hide(BitMask32.bit(4)) # Don't cast shadows
 		self.amountIndicatorNode.setBillboardPointEye()
-		
+
 	def delete(self, entityGroup, killed = False, localDelete = True):
 		ObjectEntity.delete(self, entityGroup, killed, localDelete)
-	
+
 	def kill(self, aiWorld, entityGroup, localDelete = True):
 		if self.active:
 			position = self.getPosition()
@@ -375,7 +375,7 @@ class DropPod(ObjectEntity):
 			explosionSound = audio.SoundPlayer("large-explosion")
 			explosionSound.play(position = position)
 			# Add fragments
-			for _ in range(8):
+			for _ in xrange(8):
 				offset = Vec3(uniform(-1, 1), uniform(-1, 1), uniform(0, 1))
 				offset.normalize()
 				fragment = Fragment(aiWorld.world, aiWorld.space, position + (offset * 1.5), offset * 30)
@@ -428,7 +428,7 @@ class Glass(ObjectEntity):
 	def __init__(self, world, space):
 		ObjectEntity.__init__(self, "models/fragment/GlassFragment", controllers.GlassController())
 		self.body = OdeBody(world)
-		
+
 	def initGlass(self, world, space, width, height):
 		engine.deleteModel(self.node, "models/fragment/GlassFragment")
 		maker = CardMaker("glassNode")
@@ -457,21 +457,21 @@ class Glass(ObjectEntity):
 		self.shattered = False
 		self.glassWidth = width
 		self.glassHeight = height
-	
+
 	def getPosition(self):
 		return self.geometry.getPosition()
-	
+
 	def setPosition(self, pos):
 		self.node.setPos(pos)
 		self.geometry.setPosition(pos)
-	
+
 	def setRotation(self, hpr):
 		self.node.setHpr(hpr)
 		self.geometry.setQuaternion(self.node.getQuat(render))
-	
+
 	def getRotation(self):
 		return self.node.getHpr()
-	
+
 	def damage(self, entity, damage, ranged = True):
 		self.shattered = True
 
@@ -480,7 +480,7 @@ class Glass(ObjectEntity):
 		pos = self.getPosition()
 		shatterSound = audio.SoundPlayer("glass-shatter")
 		shatterSound.play(position = pos)
-		for _ in range(40):
+		for _ in xrange(40):
 			offset = Vec3(uniform(-self.glassWidth / 2.0, self.glassWidth / 2.0), 0, uniform(-self.glassHeight / 2.0, self.glassHeight / 2.0))
 			fragment = GlassFragment(aiWorld.world, aiWorld.space, render.getRelativePoint(self.node, offset), Vec3())
 			entityGroup.generateEntityId(fragment, 1024)
@@ -572,7 +572,7 @@ class PhysicsEntity(ObjectEntity):
 					m.setCylinder(density, 3, float(tokens[3]), float(tokens[4])) # 1 = X axis, 2 = Y axis, 3 = Z axis
 				self.body.setMass(m)
 			i += 1
-	
+
 	def clear(self, entityGroup):
 		ObjectEntity.clear(self, entityGroup)
 		for geom in self.geometries:
@@ -710,7 +710,7 @@ class Actor(ObjectEntity):
 		self.pinRotation = None
 		self.pinTime = 0
 		ObjectEntity.__init__(self, filename, controller, local)
-	
+
 	def getTeam(self):
 		if self.team == None:
 			team = EntityGroup.default.getEntity(self.teamId)
@@ -721,11 +721,11 @@ class Actor(ObjectEntity):
 				return TeamEntity.default
 		else:
 			return self.team
-	
+
 	def setTeamId(self, id):
 		self.teamId = id
 		self.getTeam() # Trigger the process to try and find our team. If it hasn't spawned yet, we get the default team.
-	
+
 	def setTeam(self, team):
 		self.team = team
 		if self.team.isSurvivors:
@@ -736,10 +736,10 @@ class Actor(ObjectEntity):
 			ratio = float(self.health) / 100.0
 			self.maxHealth = 150
 			self.health = int(ratio * 150.0)
-	
+
 	def setRangedDamageRatio(self, ratio):
 		self.rangedDamageRatio = ratio
-	
+
 	def pin(self, pos):
 		self.pinned = True
 		self.pinPosition = pos
@@ -767,13 +767,13 @@ class Actor(ObjectEntity):
 				if isinstance(self.killer, PlayerDroid) and self.killer.isLocal:
 					entityGroup.shakeCamera()
 		ObjectEntity.kill(self, aiWorld, entityGroup, localDelete)
-	
+
 	def delete(self, entityGroup, killed = False, localDelete = True):
 		for component in self.components:
 			component.delete()
 		self.getTeam().removeActor(self)
 		ObjectEntity.delete(self, entityGroup, killed, localDelete)
-	
+
 	def clear(self, entityGroup):
 		ObjectEntity.clear(self, entityGroup)
 
@@ -821,19 +821,19 @@ class BasicDroid(Actor):
 		self.weaponIds = []
 		self.specialId = None
 		self.special = None
-	
+
 	def setTeam(self, team):
 		Actor.setTeam(self, team)
-	
+
 	def setWeapons(self, weapons):
 		self.weaponIds = weapons
 		for id in self.weaponIds:
 			if id in components.types:
 				self.components.append(components.types[id](self, len(self.components)))
-		
+
 	def getWeapons(self):
 		return [x for x in self.components if isinstance(x, components.Weapon)]
-	
+
 	def setSpecial(self, special):
 		self.specialId = special
 		if self.special != None:
@@ -848,7 +848,7 @@ class BasicDroid(Actor):
 			if cloaked:
 				alpha = 0.1
 			self.node.setColor(1, 1, 1, alpha)
-	
+
 	def setShielded(self, shielded):
 		self.shielded = shielded
 		if self.active:
@@ -862,16 +862,16 @@ class BasicDroid(Actor):
 	def kill(self, aiWorld, entityGroup, localDelete = True):
 		if self.active:
 			position = self.getPosition()
-			
+
 			entityGroup.explode(position, force = 2000, damage = 0, damageRadius = 25, sourceEntity = self)
-			
+
 			explosionSound = audio.SoundPlayer("large-explosion")
 			explosionSound.play(position = position)
 		Actor.kill(self, aiWorld, entityGroup, localDelete)
 
 	def delete(self, entityGroup, killed = False, localDelete = True):
 		Actor.delete(self, entityGroup, killed, localDelete)
-	
+
 	def clear(self, entityGroup):
 		Actor.clear(self, entityGroup)
 		engine.deleteModel(self.shieldNode, "models/shield/shield")
@@ -881,15 +881,15 @@ class PlayerDroid(BasicDroid):
 		BasicDroid.__init__(self, world, space, controller, local)
 		self.username = "Unnamed"
 		self.scoreMultiplier = 2.0
-	
+
 	def setTeam(self, team):
 		BasicDroid.setTeam(self, team)
 		self.getTeam().setPlayer(self)
-	
+
 	def setWeapons(self, weapons):
 		self.components.append(components.MeleeClaw(self, 0))
 		BasicDroid.setWeapons(self, weapons)
-	
+
 	def setUsername(self, name):
 		self.username = name
 
@@ -915,11 +915,11 @@ class Grenade(ObjectEntity):
 		self.commitChanges()
 		self.grenadeAlive = True
 		self.actor = None
-	
+
 	def setTeamId(self, id):
 		self.teamId = id
 		self.getTeam() # Trigger the process to try and find our team. If it hasn't spawned yet, we get the default team.
-	
+
 	def getTeam(self):
 		if self.team == None:
 			team = entityGroup.getEntity(self.teamId)
@@ -930,17 +930,17 @@ class Grenade(ObjectEntity):
 				return TeamEntity.default
 		else:
 			return self.team
-	
+
 	def setActor(self, actor):
 		self.actor = actor
-	
+
 	def setTeam(self, team):
 		self.team = team
-	
+
 	def damage(self, entity, damage, ranged = True):
 		"Immediately trigger an explosion."
 		self.grenadeAlive = False
-	
+
 	def kill(self, aiWorld, entityGroup, localDelete = True):
 		"Immediately trigger an explosion."
 		if self.active:
@@ -971,10 +971,10 @@ class Molotov(ObjectEntity):
 		self.commitChanges()
 		self.grenadeAlive = True
 		self.actor = None
-	
+
 	def setActor(self, actor):
 		self.actor = actor
-	
+
 	def setTeam(self, team):
 		self.team = team
 
@@ -996,11 +996,11 @@ class Spike(GraphicsObject):
 		self.spawnTime = engine.clock.time
 		self.entity = None
 		self.lifetime = 5.0
-		
+
 	def delete(self, entityGroup):
 		GraphicsObject.delete(self)
 		self.node.removeNode()
-	
+
 	def attachTo(self, entity):
 		if (self.node.getPos() - entity.getPosition()).length() > entity.radius + 0.5:
 			vector = self.node.getPos() - entity.getPosition()
@@ -1010,7 +1010,7 @@ class Spike(GraphicsObject):
 		self.node.wrtReparentTo(entity.node)
 		self.entity = entity
 		self.lifetime = 15.0
-		
+
 	def update(self, entityGroup):
 		GraphicsObject.update(self)
 		if not self.active:

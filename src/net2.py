@@ -26,7 +26,7 @@ class StandardVec3(net.Object):
 		z = net.StandardFloat(self.data.getZ())
 		x.addTo(datagram)
 		y.addTo(datagram)
-		z.addTo(datagram)	
+		z.addTo(datagram)
 	@staticmethod
 	def getFrom(iterator):
 		return Vec3(net.StandardFloat.getFrom(iterator), net.StandardFloat.getFrom(iterator), net.StandardFloat.getFrom(iterator))
@@ -38,7 +38,7 @@ class StandardQuat(net.Object):
 		w = net.StandardFloat(self.data.getW())
 		x.addTo(datagram)
 		y.addTo(datagram)
-		z.addTo(datagram)	
+		z.addTo(datagram)
 		w.addTo(datagram)
 	@staticmethod
 	def getFrom(iterator):
@@ -51,7 +51,7 @@ class HighResVec4(net.Object):
 		w = net.HighResFloat(self.data.getW())
 		x.addTo(datagram)
 		y.addTo(datagram)
-		z.addTo(datagram)	
+		z.addTo(datagram)
 		w.addTo(datagram)
 	@staticmethod
 	def getFrom(iterator):
@@ -96,7 +96,7 @@ class EntitySnapshot(net.Object):
 		quat = StandardQuat(self.quat)
 		pos.addTo(datagram)
 		quat.addTo(datagram)
-		
+
 	@staticmethod
 	def getFrom(iterator):
 		es = EntitySnapshot()
@@ -105,11 +105,11 @@ class EntitySnapshot(net.Object):
 		es.time = engine.clock.time
 		es.empty = False
 		return es
-	
+
 	def commitTo(self, entity):
 		entity.setQuaternion(self.quat)
 		entity.setPosition(self.pos)
-	
+
 	def lerp(self, snapshot, scale):
 		result = EntitySnapshot()
 		result.pos = self.pos + ((snapshot.pos - self.pos) * scale)
@@ -122,10 +122,10 @@ class EntitySnapshot(net.Object):
 		self.quat = Quat(snapshot.quat)
 		self.time = engine.clock.time
 		self.empty = snapshot.empty
-	
+
 	def almostEquals(self, snapshot):
 		return self.quat.almostEqual(snapshot.quat, 2) and self.pos.almostEqual(snapshot.pos, 0.2)
-	
+
 class NetManager(DirectObject):
 	def __init__(self):
 		self.lastPacketUpdate = 0
@@ -141,22 +141,22 @@ class NetManager(DirectObject):
 		self.requestedEntitySpawns = dict()
 		self.lastCheckSumSent = 0
 		self.accept("chat-outgoing", self.chatHandler)
-	
+
 	def spawnEntity(self, entity):
 		p = entity.controller.buildSpawnPacket()
 		self.spawnPackets.append(p)
-	
+
 	def chatHandler(self, username, message):
 		p = net.Packet()
 		p.add(net.Uint8(net.PACKET_CHAT))
 		p.add(net.String(username))
 		p.add(net.String(message))
 		self.chatPackets.append(p)
-	
+
 	def deleteEntity(self, entity, killed = False):
 		p = entity.controller.buildDeletePacket(killed)
 		self.deletePackets.append(p)
-	
+
 	def processPacket(self, packet, backend, sender = None):
 		iterator = PyDatagramIterator(packet)
 		lastId = "None"
@@ -266,7 +266,7 @@ class NetManager(DirectObject):
 					total = net.Uint8.getFrom(iterator)
 					entities = []
 					missingEntities = []
-					for _ in range(total):
+					for _ in xrange(total):
 						id = net.Uint8.getFrom(iterator)
 						if id not in backend.entityGroup.entities.keys():
 							missingEntities.append(id)
@@ -298,7 +298,7 @@ class NetManager(DirectObject):
 		if engine.clock.time - self.lastPacketUpdate >= net.SERVER_TICK:
 			packetUpdate = True
 			self.lastPacketUpdate = engine.clock.time # Reset packet update timer
-		
+
 		sendSpawn = False
 		spawnPacket = net.Packet()
 		if len(self.spawnPackets) > 0 and packetUpdate:
@@ -306,7 +306,7 @@ class NetManager(DirectObject):
 			for p in self.spawnPackets:
 				spawnPacket.add(p)
 			del self.spawnPackets[:]
-		
+
 		entityList = backend.entityGroup.entities.values()
 		updatedEntities = []
 		controllerPacket = net.Packet()
@@ -325,7 +325,7 @@ class NetManager(DirectObject):
 			data = PyDatagram()
 			controllerPacket.addTo(data)
 			self.processPacket(data, backend)
-		
+
 		deletePacket = net.Packet()
 		sendDelete = False
 		if len(self.deletePackets) > 0 and packetUpdate:
@@ -333,7 +333,7 @@ class NetManager(DirectObject):
 			for p in self.deletePackets:
 				deletePacket.add(p)
 			del self.deletePackets[:]
-		
+
 		if packetUpdate:
 			outboundPacket = net.Packet()
 			outboundPacket.add(spawnPacket)
@@ -380,14 +380,14 @@ class NetManager(DirectObject):
 		if len(entityList) > len(updatedEntities):
 			for entity in (x for x in entityList if x.active and not x in updatedEntities):
 				entity.controller.clientUpdate(backend.aiWorld, backend.entityGroup)
-		
+
 		clientAddress = [] if net.netMode == net.MODE_SERVER else [net.context.hostConnection]
 		emptyPacket = net.Packet()
 		emptyPacket.add(net.Uint8(net.PACKET_EMPTY))
 		for client in (x for x in net.context.activeConnections.values() + clientAddress if net.timeFunction() - x.lastSentPacketTime > 0.5 and x.ready):
 			net.context.send(emptyPacket, client.address)
-		
+
 		net.context.writeTick()
-			
+
 	def delete(self):
 		self.ignoreAll()

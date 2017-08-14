@@ -65,7 +65,7 @@ class World:
 		else:
 			self.traverser = base.cTrav
 			self.traverser.clearColliders()
-		
+
 		# Setup the physics world
 		self.world = OdeWorld()
 		# Create a space and add a contactgroup to it to add the contact joints
@@ -74,7 +74,7 @@ class World:
 		self.contactGroup = OdeJointGroup()
 		self.space.setAutoCollideJointGroup(self.contactGroup)
 		self.space.setCollisionEvent("physicsCollision")
-		
+
 		self.world.setGravity(0, 0, -35)
 
 		# Surface IDs: 0 - ground 1 - objects 2 - actors
@@ -85,13 +85,13 @@ class World:
 		self.world.setSurfaceEntry(0, 2, 10.0, 0.3, 7, 0.9, 0.00001, 0.0, 0.01)
 		self.world.setSurfaceEntry(2, 2, 0.2, 0.3, 7, 0.9, 0.00001, 0.0, 0.01)
 		self.world.setSurfaceEntry(0, 0, 1.0, 0.3, 7, 0.9, 0.00001, 0.0, 0.01)
-	
+
 	def update(self):
 		"Steps the ODE simulation."
 		self.space.autoCollide()
 		self.world.quickStep(engine.clock.timeStep)
 		self.contactGroup.empty() # Clear the contact joints
-	
+
 	def getNearestDroid(self, entityGroup, pos):
 		"Gets an entity on any opposing team with the smallest straight-line distance from the specified position."
 		distance = -1
@@ -113,7 +113,7 @@ class World:
 				distance = vector.length()
 				enemy = entity
 		return enemy
-	
+
 	def getNearestDropPod(self, entityGroup, pos):
 		"Gets the nearest drop pod."
 		distance = -1
@@ -124,7 +124,7 @@ class World:
 				distance = vector.length()
 				pod = entity
 		return pod
-	
+
 	def getNearestSpawnPoint(self, pos):
 		lowestDistance = -1
 		returnValue = None
@@ -135,7 +135,7 @@ class World:
 				lowestDistance = dist
 				returnValue = point
 		return returnValue
-	
+
 	def getNearestDock(self, pos):
 		lowestDistance = -1
 		returnValue = None
@@ -146,7 +146,7 @@ class World:
 				lowestDistance = dist
 				returnValue = point
 		return returnValue
-	
+
 	def getNearestOpenSpawnPoint(self, team, entityGroup, pos, minRadius = 50):
 		dockList = [team.dock] if team.dock != None else []
 		points = sorted(dockList + self.spawnPoints, key = lambda x: (x.getPosition() - pos).length())
@@ -170,7 +170,7 @@ class World:
 		if team != None and team.dock != None:
 			spawns.append(team.dock)
 		return choice(spawns).getPosition()
-	
+
 	def getRandomOpenSpawnPoint(self, team, entityGroup, minRadius = 50, zombieSpawnsOnly = False):
 		if zombieSpawnsOnly:
 			spawns = self.spawnPoints[1:]
@@ -193,7 +193,7 @@ class World:
 			return spawns[0].getPosition()
 		else:
 			return choice(goodSpawns).getPosition()
-	
+
 	def getRayCollisionQueue(self, rayNP, node = None):
 		"""Gets a CollisionHandlerQueue containing all collisions along the specified ray.
 		Only checks for collisions with the specified NodePath, if one is given."""
@@ -206,7 +206,7 @@ class World:
 		self.traverser.clearColliders()
 		queue.sortEntries()
 		return queue
-		
+
 	def getCollisionQueue(self, position, direction, node = None):
 		"""Gets a CollisionHandlerQueue containing all collisions along the specified ray.
 		Only checks for collisions with the specified NodePath, if one is given."""
@@ -226,7 +226,7 @@ class World:
 		nodepath.removeNode()
 		queue.sortEntries()
 		return queue
-	
+
 	def getRayFirstCollision(self, rayNP, node = None):
 		"""Gets a CollisionEntry for the first collision along the specified ray.
 		Only checks for collisions with the specified NodePath, if one is given."""
@@ -235,7 +235,7 @@ class World:
 			return queue.getEntry(0)
 		else:
 			return None
-	
+
 	def getFirstCollision(self, position, direction, node = None):
 		"""Gets a CollisionEntry for the first collision along the specified ray.
 		Only checks for collisions with the specified NodePath, if one is given."""
@@ -244,7 +244,7 @@ class World:
 			return queue.getEntry(0)
 		else:
 			return None
-	
+
 	def testCollisions(self, node, traversePath = None):
 		if traversePath == None:
 			traversePath = engine.renderLit
@@ -255,7 +255,7 @@ class World:
 		self.traverser.clearColliders()
 		queue.sortEntries()
 		return queue
-	
+
 	def delete(self):
 		"Destroys the ODE world. IMPORTANT: do not delete the AI world before deleting the entity group."
 		for point in self.spawnPoints:
@@ -285,10 +285,10 @@ class NavMesh:
 			self._processNode(node)
 			node.removeNode()
 			navMeshCache[directory + "/" + self.filename] = self
-	
+
 	def delete(self):
 		pass
-	
+
 	def _processNode(self, node):
 		geomNodeCollection = node.findAllMatches('**/+GeomNode')
 		for nodePath in geomNodeCollection:
@@ -296,19 +296,19 @@ class NavMesh:
 			self._processGeomNode(geomNode)
 		for edge in self.edges:
 			if len(edge.nodes) <= 1:
-				# This edge isn't between two nodes, so we don't need to worry about it when pathfinding. 
-				# But we still need it for determining which node an agent is in. 
+				# This edge isn't between two nodes, so we don't need to worry about it when pathfinding.
+				# But we still need it for determining which node an agent is in.
 				edge.navigable = False
 
 	def _processGeomNode(self, geomNode):
-		for i in range(geomNode.getNumGeoms()):
+		for i in xrange(geomNode.getNumGeoms()):
 			geom = geomNode.getGeom(i)
 			state = geomNode.getGeomState(i)
 			self._processGeom(geom)
 
 	def _processGeom(self, geom):
 		vdata = geom.getVertexData()
-		for i in range(geom.getNumPrimitives()):
+		for i in xrange(geom.getNumPrimitives()):
 			prim = geom.getPrimitive(i)
 			self._processPrimitive(prim, vdata)
 
@@ -319,10 +319,10 @@ class NavMesh:
 			vi = prim.getVertex(index)
 			vertex.setRow(vi)
 			return vertex.getData3f()
-		for p in range(prim.getNumPrimitives()):
+		for p in xrange(prim.getNumPrimitives()):
 			s = prim.getPrimitiveStart(p)
 			e = prim.getPrimitiveEnd(p)
-			for i in range(s, e):
+			for i in xrange(s, e):
 				v = getVertex(i)
 				if i + 1 >= e:
 					break
@@ -341,7 +341,7 @@ class NavMesh:
 			edge = Edge(Vec3(v1), Vec3(v2))
 			self.edges.append(edge)
 		return edge
-	
+
 	def _checkForEdge(self, v1, v2):
 		epsilon = 0.1
 		for edge in self.edges:
@@ -372,14 +372,14 @@ class NavMesh:
 					highestNode = node
 			return highestNode
 		return nodes[0]
-	
+
 	def findPath(self, startPos, endPos, radius = 1):
 		"A* algorithm."
 		startNode = self.getNode(startPos, radius)
 		endNode = self.getNode(endPos, radius)
 		return self.findPathFromNodes(startNode, endNode, startPos, endPos, radius)
-	
-	def findPathFromNodes(self, startNode, endNode, startPos, endPos, radius = 1):	
+
+	def findPathFromNodes(self, startNode, endNode, startPos, endPos, radius = 1):
 		# Clear pathfinding data
 		for edge in self.edges:
 			edge.closed = False
@@ -457,19 +457,19 @@ class NavNode:
 				self.edgeNormals.append(normal)
 			else:
 				self.edgeNormals.append(reverseNormal)
-	
+
 	def containerTest(self, p, radius = 1):
 		p2 = Vec3(p.getX(), p.getY(), 0)
 		if p.getZ() > self.highest + radius + 1 or p.getZ() < self.lowest - radius - 1:
 			return False
-		for i in range(len(self.edgeNormals)):
+		for i in xrange(len(self.edgeNormals)):
 			vector = p2 - self.edges[i].flatCenter
 			vector.normalize()
 			if vector.dot(self.edgeNormals[i]) < 0:
 				return False
 		# To do: vertical test
 		return True
-	
+
 	def _addEdge(self, edge):
 		if not edge in self.edges:
 			if edge.a.getZ() < self.lowest:
@@ -504,7 +504,7 @@ class Edge:
 		self.hScore = 0
 		self.fScore = 0
 		self.navigable = True
-	
+
 	def intersects(self, c, d, radius = 0):
 		def ccw(u,v,w):
 			return (w.getY() - u.getY()) * (v.getX() - u.getX()) > (v.getY() - u.getY()) * (w.getX() - u.getX())
@@ -515,13 +515,13 @@ class Edge:
 	def addNode(self, node):
 		if node not in self.nodes:
 			self.nodes.append(node)
-	
+
 	def cost(self, pos):
 		# The cost is the distance from given point to the closer of our two corners.
 		dist1 = (self.a - pos).length()
 		dist2 = (self.b - pos).length()
 		return min(dist1, dist2)
-	
+
 	def costToEdge(self, edge):
 		# The cost is the distance between the two closest corners of the two edges.
 		dist1 = (self.a - edge.a).length()
@@ -529,14 +529,14 @@ class Edge:
 		dist3 = (self.a - edge.b).length()
 		dist4 = (self.b - edge.a).length()
 		return min(dist1, dist2, dist3, dist4)
-	
+
 	def getNodes(self):
 		return self.nodes
-	
+
 	def addNeighbor(self, e):
 		if not e in self.neighbors:
 			self.neighbors.append(e)
-	
+
 	def getNeighbors(self):
 		return self.neighbors
 
