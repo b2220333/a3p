@@ -14,6 +14,7 @@ class EntityGroup(DirectObject):
 	"""An entity group handles all the logistics of Entities and Impostors.
 	The entity group actually steps the ODE world and space in the AI world, and it updates all the controllers as well."""
 	default = None
+
 	def __init__(self, netManager):
 		self.entities = dict()
 		self.graphicsObjects = []
@@ -894,7 +895,8 @@ class PlayerDroid(BasicDroid):
 		self.username = name
 
 class Grenade(ObjectEntity):
-	"Grenades trigger an explosion animation when damaged. Most of the action happens in the GrenadeController."
+	"""Grenades trigger an explosion animation when damaged. Most of the action happens in the GrenadeController."""
+
 	def __init__(self, world, space):
 		self.team = None
 		self.teamId = 0
@@ -941,11 +943,9 @@ class Grenade(ObjectEntity):
 		self.team = team
 
 	def damage(self, entity, damage, ranged = True):
-		"Immediately trigger an explosion."
 		self.grenadeAlive = False
 
 	def kill(self, aiWorld, entityGroup, localDelete = True):
-		"Immediately trigger an explosion."
 		if self.active:
 			pos = self.getPosition()
 			grenadeSound = audio.SoundPlayer("grenade")
@@ -954,7 +954,8 @@ class Grenade(ObjectEntity):
 			entityGroup.explode(pos, force = 4000, damage = 67, damageRadius = 20, sourceEntity = self, damagingEntity = self.actor) # Give damage credit to our parent actor
 
 class Molotov(ObjectEntity):
-	"Molotovs are basically flaming grenades. Most of the action happens in the MolotovController."
+	"""Molotovs are basically flaming grenades. Most of the action happens in the MolotovController."""
+
 	def __init__(self, world, space):
 		self.team = None
 		ObjectEntity.__init__(self, "models/grenade/Grenade", controllers.MolotovController())
@@ -980,6 +981,9 @@ class Molotov(ObjectEntity):
 
 	def setTeam(self, team):
 		self.team = team
+
+	def getTeam(self):
+		return self.team
 
 class GraphicsObject(DirectObject):
 	def __init__(self):
