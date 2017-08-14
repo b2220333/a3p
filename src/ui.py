@@ -518,7 +518,7 @@ class UnitSelectorScreen(DirectObject):
 		self.infoTitle = OnscreenText(pos = Vec3(0.075, 0.2, 0), parent = self.infoDialog, align = TextNode.ALeft, scale = 0.1, fg = (1, 1, 1, 1), font = visitorFont, mayChange = True)
 		self.infoCostText = OnscreenText(pos = Vec3(0.97, 0.2, 0), parent = self.infoDialog, align = TextNode.ARight, scale = 0.1, fg = (1, 1, 1, 1), font = visitorFont, mayChange = True)
 		dejavuFont = loader.loadFont("menu/DejaVuSans.ttf")
-		self.infoText = OnscreenText(pos = Vec3(0.075, 0.12, 0), parent = self.infoDialog, wordwrap = 18, align = TextNode.ALeft, scale = 0.05, fg = (1, 1, 1, 1), font = dejavuFont, mayChange = True)
+		self.infoText = OnscreenText(pos = Vec3(0.075, 0.12, 0), parent = self.infoDialog, wordwrap = 18, align = TextNode.ALeft, scale = 0.03, fg = (1, 1, 1, 1), font = dejavuFont, mayChange = True)
 		self.infoPromptText = OnscreenText(pos = Vec3(0.97, -0.24, 0), text = "Click to purchase", parent = self.infoDialog, align = TextNode.ARight, scale = 0.05, fg = (1, 1, 1, 1), font = visitorFont, mayChange = False)
 
 		# Buy slots
