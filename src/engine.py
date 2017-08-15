@@ -176,6 +176,14 @@ def loadAnimation(filename, animations):
 def deleteModel(node, filename):
 	node.removeNode()
 
+def toggleGui():
+	"""Hides or Shows aspect2d nodepath"""
+
+	if aspect2d.isHidden():
+		aspect2d.show()
+	else:
+		aspect2d.hide()
+
 def init(showFrameRate = False, daemon = False):
 	"""Initializes various global components, like audio, lighting, and the clock. Should be called once at the beginning of the program."""
 
@@ -224,6 +232,7 @@ def init(showFrameRate = False, daemon = False):
 	ai.init()
 	audio.init(dropOffFactor = 1.4, distanceFactor = 14, dopplerFactor = 0.0)
 	base.accept('f1', base.screenshot)
+	base.accept('f2', toggleGui)
 
 	numMaxDynamicLights = 0
 	if enableShaders and not daemon:
