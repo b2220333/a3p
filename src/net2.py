@@ -9,6 +9,7 @@ from pandac.PandaModules import Vec3, Quat, Vec4
 from Queue import Queue # So we have the Empty exception
 
 class HighResVec3(net.Object):
+
 	def addTo(self, datagram):
 		x = net.HighResFloat(self.data.getX())
 		y = net.HighResFloat(self.data.getY())
@@ -16,10 +17,13 @@ class HighResVec3(net.Object):
 		x.addTo(datagram)
 		y.addTo(datagram)
 		z.addTo(datagram)
+
 	@staticmethod
 	def getFrom(iterator):
 		return Vec3(net.HighResFloat.getFrom(iterator), net.HighResFloat.getFrom(iterator), net.HighResFloat.getFrom(iterator))
+
 class StandardVec3(net.Object):
+
 	def addTo(self, datagram):
 		x = net.StandardFloat(self.data.getX())
 		y = net.StandardFloat(self.data.getY())
@@ -27,10 +31,13 @@ class StandardVec3(net.Object):
 		x.addTo(datagram)
 		y.addTo(datagram)
 		z.addTo(datagram)
+
 	@staticmethod
 	def getFrom(iterator):
 		return Vec3(net.StandardFloat.getFrom(iterator), net.StandardFloat.getFrom(iterator), net.StandardFloat.getFrom(iterator))
+
 class StandardQuat(net.Object):
+
 	def addTo(self, datagram):
 		x = net.StandardFloat(self.data.getX())
 		y = net.StandardFloat(self.data.getY())
@@ -40,9 +47,11 @@ class StandardQuat(net.Object):
 		y.addTo(datagram)
 		z.addTo(datagram)
 		w.addTo(datagram)
+
 	@staticmethod
 	def getFrom(iterator):
 		return Quat(net.StandardFloat.getFrom(iterator), net.StandardFloat.getFrom(iterator), net.StandardFloat.getFrom(iterator), net.StandardFloat.getFrom(iterator))
+
 class HighResVec4(net.Object):
 	def addTo(self, datagram):
 		x = net.HighResFloat(self.data.getX())
@@ -53,10 +62,13 @@ class HighResVec4(net.Object):
 		y.addTo(datagram)
 		z.addTo(datagram)
 		w.addTo(datagram)
+
 	@staticmethod
 	def getFrom(iterator):
 		return Vec4(net.HighResFloat.getFrom(iterator), net.HighResFloat.getFrom(iterator), net.HighResFloat.getFrom(iterator), net.HighResFloat.getFrom(iterator))
+
 class LowResVec3(net.Object):
+
 	def addTo(self, datagram):
 		x = net.LowResFloat(self.data.getX())
 		y = net.LowResFloat(self.data.getY())
@@ -64,10 +76,13 @@ class LowResVec3(net.Object):
 		x.addTo(datagram)
 		y.addTo(datagram)
 		z.addTo(datagram)
+
 	@staticmethod
 	def getFrom(iterator):
 		return Vec3(net.LowResFloat.getFrom(iterator), net.LowResFloat.getFrom(iterator), net.LowResFloat.getFrom(iterator))
+
 class SmallVec3(net.Object):
+
 	def addTo(self, datagram):
 		x = net.SmallFloat(self.data.getX())
 		y = net.SmallFloat(self.data.getY())
@@ -75,10 +90,13 @@ class SmallVec3(net.Object):
 		x.addTo(datagram)
 		y.addTo(datagram)
 		z.addTo(datagram)
+
 	@staticmethod
 	def getFrom(iterator):
 		return Vec3(net.SmallFloat.getFrom(iterator), net.SmallFloat.getFrom(iterator), net.SmallFloat.getFrom(iterator))
+
 class EntitySnapshot(net.Object):
+
 	def __init__(self):
 		self.pos = Vec3()
 		self.quat = Quat()
@@ -127,6 +145,7 @@ class EntitySnapshot(net.Object):
 		return self.quat.almostEqual(snapshot.quat, 2) and self.pos.almostEqual(snapshot.pos, 0.2)
 
 class NetManager(DirectObject):
+
 	def __init__(self):
 		self.lastPacketUpdate = 0
 		self.spawnPackets = []
