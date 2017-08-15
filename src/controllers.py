@@ -18,8 +18,12 @@ def init():
 	global types, specialTypes
 	# Important: Shield droid and cloak droid MUST come before chaingun droid, due to inheritance issues.
 	# When determining the controller's type, readSpawnPacket stops at the first match.
-	types = {net.SPAWN_BOT:AIController, net.SPAWN_PLAYER:PlayerController, net.SPAWN_TEAMENTITY:TeamEntityController, net.SPAWN_PHYSICSENTITY:PhysicsEntityController, net.SPAWN_GRENADE:GrenadeController, net.SPAWN_GLASS:GlassController, net.SPAWN_MOLOTOV:MolotovController, net.SPAWN_POD:DropPodController}
-	specialTypes = {KAMIKAZE_SPECIAL:KamikazeSpecial, SHIELD_SPECIAL:ShieldSpecial, CLOAK_SPECIAL:CloakSpecial, AWESOME_SPECIAL:AwesomeSpecial, ROCKET_SPECIAL:RocketSpecial}
+	types = {net.SPAWN_BOT:AIController, net.SPAWN_PLAYER:PlayerController, net.SPAWN_TEAMENTITY: TeamEntityController,
+		net.SPAWN_PHYSICSENTITY:PhysicsEntityController, net.SPAWN_GRENADE:GrenadeController, net.SPAWN_GLASS:GlassController,
+		net.SPAWN_MOLOTOV:MolotovController, net.SPAWN_POD:DropPodController}
+
+	specialTypes = {KAMIKAZE_SPECIAL:KamikazeSpecial, SHIELD_SPECIAL:ShieldSpecial, CLOAK_SPECIAL:CloakSpecial, AWESOME_SPECIAL:AwesomeSpecial,
+		ROCKET_SPECIAL:RocketSpecial}
 
 class Controller(DirectObject):
 

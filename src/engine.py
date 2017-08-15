@@ -250,6 +250,7 @@ def preloadModels():
 	global modelFileSuffix
 	if os.path.exists("models/basicdroid/BasicDroid.bam"):
 		modelFileSuffix = ".bam"
+
 	cacheModel("models/basicdroid/BasicDroid")
 	cacheModel("models/basicdroid/chaingun")
 	cacheModel("models/basicdroid/BasicDroid-lowres")

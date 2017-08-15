@@ -56,6 +56,7 @@ class Component(DirectObject):
 		pass
 
 class Weapon(Component):
+
 	def __init__(self, actor, id):
 		Component.__init__(self, actor, id)
 		self.zoomedFov = 50
@@ -63,6 +64,7 @@ class Weapon(Component):
 		self.zoomedMouseSpeed = 0.3
 		self.defaultCrosshair = 1 # Wide crosshairs
 		self.zoomedCrosshair = 2 # Narrow crosshairs
+
 		# If we're zoomed, we need to be more accurate. Or at least, do something different.
 		# AI bots are always zoomed in by default, to make them more challenging.
 		# PlayerControllers will update this flag.
@@ -126,7 +128,8 @@ class Weapon(Component):
 		Component.delete(self)
 
 class Gun(Weapon):
-	"Guns don't kill people, but they sure help."
+	"""Guns don't kill people, but they sure help."""
+
 	def __init__(self, actor, damage, modelFile, id):
 		Weapon.__init__(self, actor, id)
 		self.clipSize = 10
@@ -478,7 +481,9 @@ class Shotgun(Gun):
 		Gun.delete(self)
 
 SNIPER = 252
+
 class SniperRifle(Gun):
+
 	def __init__(self, actor, id):
 		Gun.__init__(self, actor, 50, "models/basicdroid/sniper", id)
 		self.defaultCrosshair = 0 # No crosshair
@@ -531,6 +536,7 @@ class SniperRifle(Gun):
 					p.add(net.Boolean(False))
 		else:
 			p.add(net.Boolean(False))
+
 		self.firing = False
 		return p
 

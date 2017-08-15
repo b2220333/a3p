@@ -12,27 +12,20 @@ from direct.gui.DirectGui import *
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.gui.OnscreenText import OnscreenText
 
-dejavuFont = loader.loadFont("menu/DejaVuSans.ttf")
-visitorFont = loader.loadFont("menu/visitor2.ttf")
-
 class GameUI(DirectObject):
 
 	def __init__(self):
 		self.localTeam = None
 		self.aspectRatio = float(base.win.getProperties().getXSize()) / float(base.win.getProperties().getYSize())
 
-		self.crosshairs = []
-		self.crosshairs.append(None)
-		crosshairFiles = ["images/wide-crosshair.png", "images/narrow-crosshair.png", "images/sniper-crosshair.png"]
-		for file in crosshairFiles:
-			c = OnscreenImage(image = file, pos = (0, 0, 0), scale = 0.1)
-			c.setTransparency(TransparencyAttrib.MAlpha)
-			c.setColor(1, 1, 1, 0.5)
-			c.setBin("transparent", 0)
-			c.hide()
-			self.crosshairs.append(c)
+		self.crosshairs = [None]
+		crosshairFiles = ["images/wide-crosshair.png", "images/narrow-crosshair.png", "images/sniper-scope-zoomed.png"]
+		for filename in crosshairFiles:
+			self.loadCrosshair(filename)
 
 		self.currentCrosshair = 1
+
+		visitorFont = loader.loadFont("menu/visitor2.ttf")
 		self.specialReadySound = audio.FlatSound("sounds/special-ready.ogg")
 		self.lastSpecialReady = True
 
@@ -61,6 +54,8 @@ class GameUI(DirectObject):
 		self.playerUsernames = []
 		self.teams = []
 		self.teamScores = []
+		font = loader.loadFont("menu/DejaVuSans.ttf")
+
 		self.verticalOffset = -0.8
 
 		self.healthBar = StatusBar(range = 100, pos = (engine.aspectRatio - 0.02, 0, self.verticalOffset - 0.04), hpr = (0, 0, -90), width = 0.075, height = 0.5)
@@ -109,6 +104,25 @@ class GameUI(DirectObject):
 
 		self.chatLog = ChatLog(self.verticalOffset + 0.1)
 
+	def loadCrosshair(self, filename):
+		if filename == "images/sniper-scope-zoomed.png":
+			# load the sniper scope/crosshair to scale with the screen
+			c = OnscreenImage(image = "images/sniper-scope-zoomed.png", pos = (0, 0, 0))
+			c.setScale(render2d, VBase3(1))
+			c.setSx(2)
+			c.setTransparency(TransparencyAttrib.MAlpha)
+			c.setColor(1, 1, 1, 1)
+			c.setBin("transparent", 0)
+			c.hide()
+			self.crosshairs.append(c)
+		else:
+			c = OnscreenImage(image = filename, pos = (0, 0, 0), scale = 0.1)
+			c.setTransparency(TransparencyAttrib.MAlpha)
+			c.setColor(1, 1, 1, 0.5)
+			c.setBin("transparent", 0)
+			c.hide()
+			self.crosshairs.append(c)
+
 	def setTeams(self, teams, team):
 		self.localTeam = team
 
@@ -121,12 +135,12 @@ class GameUI(DirectObject):
 		self.teams = teams
 		for username in self.playerUsernames:
 			username.removeNode()
-
 		del self.playerUsernames[:]
+		font = loader.loadFont("menu/DejaVuSans.ttf")
 		for team in teams:
 			text = TextNode("playerId")
 			text.setText("")
-			text.setFont(dejavuFont)
+			text.setFont(font)
 			text.setAlign(TextNode.ACenter)
 			textNp = render.attachNewNode(text)
 			textNp.setBillboardPointEye()
@@ -145,7 +159,6 @@ class GameUI(DirectObject):
 			bar.setColors(fg = (1, 1, 1, 1), bg = (color.getX(), color.getY(), color.getZ(), 0.5))
 			if self.hidden:
 				bar.hide()
-
 			self.teamScores.append(bar)
 
 		self.chatLog.setTeam(self.localTeam)
@@ -155,12 +168,16 @@ class GameUI(DirectObject):
 	def hide(self):
 		for img in self.specialIndicators:
 			img.hide()
+
 		if self.crosshairs[self.currentCrosshair] != None:
 			self.crosshairs[self.currentCrosshair].hide()
+
 		for h in self.healthBars:
 			h.hide()
+
 		for t in self.teamScores:
 			t.hide()
+
 		self.specialBar.hide()
 		self.healthBar.hide()
 		self.hideUsernames()
@@ -181,13 +198,17 @@ class GameUI(DirectObject):
 	def show(self):
 		if self.crosshairs[self.currentCrosshair] != None:
 			self.crosshairs[self.currentCrosshair].show()
+
 		for img in self.specialIndicators:
 			img.show()
+
 		self.ammoTextNode.show()
 		for h in self.healthBars:
 			h.show()
+
 		for t in self.teamScores:
 			t.show()
+
 		self.showUsernames()
 		self.specialBar.show()
 		self.healthBar.show()
@@ -369,15 +390,16 @@ class ChatLog(DirectObject):
 	def __init__(self, verticalOffset, displayTime = 15.0, maxChats = 8, chatBoxAlwaysVisible = False, showOwnChats = True):
 		self.localTeam = None
 		self.displayTime = displayTime # Time before chats disappear
+		font = loader.loadFont("menu/DejaVuSans.ttf")
 		self.chatTexts = []
 		self.messages = []
 		self.alwaysFocused = chatBoxAlwaysVisible
 		for i in xrange(maxChats):
-			text = OnscreenText(pos = (-engine.aspectRatio + 0.02, verticalOffset + 0.18 + (i * 0.05)), scale = 0.035, align = TextNode.ALeft, fg = (1, 1, 1, 1), shadow = (0, 0, 0, 0.5), font = dejavuFont, mayChange = True)
+			text = OnscreenText(pos = (-engine.aspectRatio + 0.02, verticalOffset + 0.18 + (i * 0.05)), scale = 0.035, align = TextNode.ALeft, fg = (1, 1, 1, 1), shadow = (0, 0, 0, 0.5), font = font, mayChange = True)
 			text.setBin("fixed", 200)
 			self.chatTexts.append(text)
 
-		self.chatBox = DirectEntry(text = "", entryFont = dejavuFont, pos = (-engine.aspectRatio + 0.02, 0, verticalOffset + 0.13), scale = .035, text_fg = Vec4(1, 1, 1, 1), frameColor = (0, 0, 0, 0.5), width = 35, initialText="", numLines = 1, focus = 1 if self.alwaysFocused else 0, rolloverSound = None, clickSound = None)
+		self.chatBox = DirectEntry(text = "", entryFont = font, pos = (-engine.aspectRatio + 0.02, 0, verticalOffset + 0.13), scale = .035, text_fg = Vec4(1, 1, 1, 1), frameColor = (0, 0, 0, 0.5), width = 35, initialText="", numLines = 1, focus = 1 if self.alwaysFocused else 0, rolloverSound = None, clickSound = None)
 		self.chatBox.setTransparency(TransparencyAttrib.MAlpha)
 		self.chatBox.setBin("fixed", 200)
 		if not self.alwaysFocused:
@@ -522,6 +544,7 @@ class UnitSelectorScreen(DirectObject):
 		self.background.setTransparency(TransparencyAttrib.MAlpha)
 		self.background.setColor(1, 1, 1, 0.6)
 
+		visitorFont = loader.loadFont("menu/visitor2.ttf")
 		self.balanceText = OnscreenText(parent = self.container, pos = Vec3(1.05, -0.55, 0), text = "$0", align = TextNode.ARight, scale = 0.1, fg = (1, 1, 1, 1), shadow = (0, 0, 0, 0.5), font = visitorFont, mayChange = True)
 		inventoryLabel = OnscreenText(parent = self.container, pos = Vec3(0.7, -0.15, 0), text = "Inventory", align = TextNode.ACenter, scale = 0.07, fg = (1, 1, 1, 1), shadow = (0, 0, 0, 0.5), font = visitorFont, mayChange = False)
 		playerLabel = OnscreenText(parent = self.container, pos = Vec3(-0.8, -0.575, 0), text = "Player", align = TextNode.ACenter, scale = 0.07, fg = (1, 1, 1, 1), shadow = (0, 0, 0, 0.5), font = visitorFont, mayChange = False)
@@ -534,6 +557,7 @@ class UnitSelectorScreen(DirectObject):
 		self.infoDialog.hide()
 		self.infoTitle = OnscreenText(pos = Vec3(0.075, 0.2, 0), parent = self.infoDialog, align = TextNode.ALeft, scale = 0.1, fg = (1, 1, 1, 1), font = visitorFont, mayChange = True)
 		self.infoCostText = OnscreenText(pos = Vec3(0.97, 0.2, 0), parent = self.infoDialog, align = TextNode.ARight, scale = 0.1, fg = (1, 1, 1, 1), font = visitorFont, mayChange = True)
+		dejavuFont = loader.loadFont("menu/DejaVuSans.ttf")
 		self.infoText = OnscreenText(pos = Vec3(0.075, 0.12, 0), parent = self.infoDialog, wordwrap = 18, align = TextNode.ALeft, scale = 0.03, fg = (1, 1, 1, 1), font = dejavuFont, mayChange = True)
 		self.infoPromptText = OnscreenText(pos = Vec3(0.97, -0.24, 0), text = "Click to purchase", parent = self.infoDialog, align = TextNode.ARight, scale = 0.05, fg = (1, 1, 1, 1), font = visitorFont, mayChange = False)
 
@@ -649,13 +673,10 @@ class UnitSelectorScreen(DirectObject):
 					self.infoText.setText(UnitSelectorScreen.types[slot.type][2])
 					showInfo = True
 					break
-
 			if not showInfo:
 				self.infoDialog.hide()
-
 			if self.pressed and self.selectedIcon != None:
 				self.selectedIcon.image["pos"] = pos
-
 			self.balanceText["text"] = "$" + str(self.team.money)
 
 	def _getMousePos(self):
@@ -790,6 +811,7 @@ class UnitIconSlot(DirectObject):
 		self.isSpecial = isSpecial
 		self.label = None
 		if label != None:
+			visitorFont = loader.loadFont("menu/visitor2.ttf")
 			self.label = OnscreenText(pos = Vec3(pos.getX() + 0.125, pos.getZ(), 0), text = label, align = TextNode.ALeft, scale = 0.075, fg = (1, 1, 1, 1), shadow = (0, 0, 0, 0.5), font = visitorFont, mayChange = False)
 
 		self.type = type
@@ -873,7 +895,7 @@ class ScoreBar(StatusBar):
 
 	def __init__(self, range, pos, hpr, width, height):
 		StatusBar.__init__(self, range, pos, hpr, width, height)
-		self.usernameText = OnscreenText(pos = (pos[0] + 0.0075, pos[2] - 0.0075, 0), align = TextNode.ALeft, scale = 0.05, fg = (1, 1, 1, 1), font = visitorFont, mayChange = True)
+		self.usernameText = OnscreenText(pos = (pos[0] + 0.0075, pos[2] - 0.0075, 0), align = TextNode.ALeft, scale = 0.05, fg = (1, 1, 1, 1), font = loader.loadFont("menu/visitor2.ttf"), mayChange = True)
 
 	def setUsername(self, name):
 		self.usernameText.setText(name)
@@ -938,6 +960,7 @@ class UnitStatusBar(StatusBar3D):
 		self.teamIndex = -1
 		self.text = TextNode("ammoText")
 		self.text.setText("")
+		visitorFont = loader.loadFont("menu/visitor2.ttf")
 		self.text.setFont(visitorFont)
 		self.text.setTextColor(1, 1, 1, 1)
 		self.text.setAlign(TextNode.ARight)
@@ -977,7 +1000,8 @@ class EditorUI(DirectObject):
 		self.cursorX = 0
 		self.cursorY = 0
 		self.currentPhysicsEntityFile = "block1"
-		self.entry = DirectEntry(text = "", entryFont = dejavuFont, pos = (-engine.aspectRatio + 0.02, 0, -0.77), scale = .035, text_fg = Vec4(1, 1, 1, 1), frameColor = (0, 0, 0, 0.5), width = 35, initialText="", numLines = 1, focus = 0, rolloverSound = None, clickSound = None,)
+		font = loader.loadFont("menu/DejaVuSans.ttf")
+		self.entry = DirectEntry(text = "", entryFont = font, pos = (-engine.aspectRatio + 0.02, 0, -0.77), scale = .035, text_fg = Vec4(1, 1, 1, 1), frameColor = (0, 0, 0, 0.5), width = 35, initialText="", numLines = 1, focus = 0, rolloverSound = None, clickSound = None,)
 		self.entry.setTransparency(TransparencyAttrib.MAlpha)
 		self.entry.hide()
 		self.entry.enterText(self.currentPhysicsEntityFile)
@@ -1009,6 +1033,7 @@ class Menu(DirectObject):
 
 	def __init__(self):
 		self.active = True
+		visitorFont = loader.loadFont("menu/visitor2.ttf")
 		self.dialog = DirectFrame(frameColor = (0.1, 0.4, 0.6, 0.6), frameSize=(-.45, .45, -.3375, .3375), pos = (0, 0, 0))
 		self.postProcessingCheckBox = DirectCheckButton(parent = self.dialog, text = "Post-processing", indicatorValue = engine.enablePostProcessing, pos = (0, 0, 0.225), boxRelief = DGG.FLAT, relief = DGG.FLAT, boxPlacement = "left", text_font = visitorFont, text_fg = (1, 1, 1, 1), text_scale = 2.0, boxImage = ("images/checkbox-disabled.jpg", "images/checkbox-enabled.jpg", None), frameColor = (0, 0, 0, 0), scale = 0.04, rolloverSound = None, clickSound = None, command = self.togglePostProcessing)
 		self.shadersCheckBox = DirectCheckButton(parent = self.dialog, text = "Shaders", indicatorValue = engine.enableShaders, pos = (0, 0, 0.1), boxRelief = DGG.FLAT, relief = DGG.FLAT, boxPlacement = "left", text_font = visitorFont, text_fg = (1, 1, 1, 1), text_scale = 2.0, boxImage = ("images/checkbox-disabled.jpg", "images/checkbox-enabled.jpg", None), frameColor = (0, 0, 0, 0), scale = 0.04, rolloverSound = None, clickSound = None, command = self.toggleShaders)
@@ -1056,6 +1081,7 @@ class HostList(DirectObject):
 		self.callback = callback
 		self.active = True
 		self.visible = False
+		visitorFont = loader.loadFont("menu/visitor2.ttf")
 		self.dialog = DirectFrame(frameColor = (0.0, 0.0, 0.0, 0.0), frameSize=(-.9, .9, -.9, .9), pos = (0, 0, 0))
 		self.background = OnscreenImage(image = "menu/background.jpg", pos = (0, 0, 0), parent = self.dialog, scale = (0.9, 1, 0.9))
 		self.background.setTransparency(TransparencyAttrib.MAlpha)
@@ -1116,6 +1142,7 @@ class HostList(DirectObject):
 		if not self.active:
 			return # In case the lobby calls this callback after the menu has been deleted.
 
+		dejavuFont = loader.loadFont("menu/DejaVuSans.ttf")
 		hover = None
 		click = None
 		self.serverList.destroy()
@@ -1158,6 +1185,8 @@ class LoginDialog(DirectObject):
 		self.callback = callback
 		self.active = True
 		self.visible = False
+		dejavuFont = loader.loadFont("menu/DejaVuSans.ttf")
+		visitorFont = loader.loadFont("menu/visitor2.ttf")
 		self.dialog = DirectFrame(frameColor = (0.0, 0.0, 0.0, 0.0), frameSize=(-.7, .7, -.15, .15), pos = (0, 0, 0))
 		self.background = OnscreenImage(image = "menu/background.jpg", pos = (0, 0, 0), parent = self.dialog, scale = (1, 1, .15 / .7), )
 		self.background.setTransparency(TransparencyAttrib.MAlpha)
@@ -1215,6 +1244,7 @@ class MapList(DirectObject):
 		self.callback = callback
 		self.active = True
 		self.visible = False
+		visitorFont = loader.loadFont("menu/visitor2.ttf")
 		self.dialog = DirectFrame(frameColor = (0.0, 0.0, 0.0, 0.0), frameSize=(-.9, .9, -.9, .9), pos = (0, 0, 0))
 		self.background = OnscreenImage(image = "menu/background.jpg", pos = (0, 0, 0), parent = self.dialog, scale = (0.9, 1, 0.9))
 		self.background.setTransparency(TransparencyAttrib.MAlpha)
