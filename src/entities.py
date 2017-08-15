@@ -780,7 +780,8 @@ class Actor(ObjectEntity):
 		ObjectEntity.clear(self, entityGroup)
 
 class BasicDroid(Actor):
-	"BasicDroid is the base for basically all the units in the game. Basically."
+	"""BasicDroid is the base for basically all the units in the game. Basically."""
+
 	def __init__(self, world, space, controller, local = net.netMode == net.MODE_SERVER):
 		Actor.__init__(self, world, space, "models/basicdroid/BasicDroid", controller, local)
 		self.radius = 1
@@ -869,6 +870,7 @@ class BasicDroid(Actor):
 
 			explosionSound = audio.SoundPlayer("large-explosion")
 			explosionSound.play(position = position)
+
 		Actor.kill(self, aiWorld, entityGroup, localDelete)
 
 	def delete(self, entityGroup, killed = False, localDelete = True):
@@ -879,6 +881,7 @@ class BasicDroid(Actor):
 		engine.deleteModel(self.shieldNode, "models/shield/shield")
 
 class PlayerDroid(BasicDroid):
+
 	def __init__(self, world, space, controller, local = net.netMode == net.MODE_SERVER):
 		BasicDroid.__init__(self, world, space, controller, local)
 		self.username = "Unnamed"
@@ -1030,6 +1033,7 @@ class Spike(GraphicsObject):
 			vector.normalize()
 			vector *= entity.radius
 			self.node.setPos(entity.getPosition() + vector)
+
 		self.node.wrtReparentTo(entity.node)
 		self.entity = entity
 		self.lifetime = 15.0
@@ -1038,5 +1042,6 @@ class Spike(GraphicsObject):
 		GraphicsObject.update(self)
 		if not self.active:
 			return
+
 		if engine.clock.time - self.spawnTime > self.lifetime or (self.entity != None and not self.entity.active):
 			self.delete(entityGroup)

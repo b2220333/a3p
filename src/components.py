@@ -1,7 +1,9 @@
 from direct.showbase.DirectObject import DirectObject
+from direct.gui.OnscreenImage import OnscreenImage
 from pandac.PandaModules import *
-from random import random, uniform
+from random import random, uniform, choice
 import math
+import time
 import engine
 import entities
 import audio
@@ -127,6 +129,46 @@ class Weapon(Component):
 	def delete(self):
 		Component.delete(self)
 
+class GunBulletSpawner(object):
+	"""A spawner that spawns bullet holes when a gun's bullet hits a surface"""
+
+	def __init__(self):
+		self.timeout = 5
+		self.pending_deletion = {}
+
+	@property
+	def timestamp(self):
+		return time.time()
+
+	@property
+	def bulletHole(self):
+		return choice(["images/bullet-hole.png", "images/bullet-hole-1.png"])
+
+	def update(self):
+		timestamp = self.timestamp
+
+		for (bulletTimestamp, bulletHoleNode) in self.pending_deletion.items():
+			if timestamp - bulletTimestamp >= self.timeout:
+				self.despawnBullet(bulletTimestamp, bulletHoleNode)
+
+	def spawnBullet(self, hitPos):
+		# TODO: Calculate the bullet hit rotation according to the node
+		# in which the bullet hit.
+		bulletHoleNode = OnscreenImage(parent=render, image=self.bulletHole,
+			pos=hitPos, hpr=(0, 0, uniform(0, 360)), scale=0.1)
+
+		bulletHoleNode.setTransparency(TransparencyAttrib.MAlpha)
+		bulletHoleNode.setTwoSided(True)
+		bulletHoleNode.setColor(1, 1, 1, 0.7)
+
+		# place the bullet hole node in the pending delete list,
+		# to be deleted after timeout.
+		self.pending_deletion[self.timestamp] = bulletHoleNode
+
+	def despawnBullet(self, bulletTimestamp, bulletHoleNode):
+		bulletHoleNode.destroy()
+		del self.pending_deletion[bulletTimestamp]
+
 class Gun(Weapon):
 	"""Guns don't kill people, but they sure help."""
 
@@ -149,6 +191,7 @@ class Gun(Weapon):
 		self.activeSound = 0 # Client side
 		self.showTime = -1 # For the showing animation
 		self.totalShowTime = 0.3
+		self.bulletSpawner = GunBulletSpawner()
 		Gun.hide(self)
 
 	def getPosition(self):
@@ -188,9 +231,12 @@ class Gun(Weapon):
 			result = Weapon.fire(self)
 			if result:
 				self.ammoAdditions -= 1
+
 			return result
+
 		elif self.showTime == -1 and self.isReady():
 			self.reload()
+
 		return False
 
 	def bulletTest(self, aiWorld, entityGroup, origin, direction):
@@ -204,7 +250,9 @@ class Gun(Weapon):
 			entity = entityGroup.getEntityFromEntry(entry)
 			if entity == self.actor:
 				continue
+
 			return (entity, pos, normal, queue)
+
 		return (None, None, None, None)
 
 	def serverUpdate(self, aiWorld, entityGroup, packetUpdate):
@@ -225,12 +273,14 @@ class Gun(Weapon):
 				self.newReloadActive = False
 				self.activeSound = 2 # Reload ready sound
 				self.addCriticalPacket(p, packetUpdate)
+
 		p.add(net.Uint8(self.activeSound))
 		p.add(net.Boolean(self.selected))
 		self.ammo += self.ammoAdditions
 		self.ammoAdditions = 0
 		if self.selected:
 			p.add(net.Uint8(self.ammo))
+
 		return p
 
 	def clientUpdate(self, aiWorld, entityGroup, iterator = None):
@@ -239,6 +289,7 @@ class Gun(Weapon):
 			self.activeSound = net.Uint8.getFrom(iterator)
 			if net.Boolean.getFrom(iterator):
 				self.ammo = net.Uint8.getFrom(iterator)
+
 		if self.actor.active:
 			offset = 0
 			angleOffset = 0
@@ -249,6 +300,7 @@ class Gun(Weapon):
 					angleOffset = 90 - (blend * 90)
 				else:
 					self.showTime = -1
+
 			if self.selected:
 				self._updatePosition(offset, angleOffset)
 			if self.activeSound == 1: # Reloading sound (actually no sound right now)
@@ -257,6 +309,8 @@ class Gun(Weapon):
 				self.reloadActive = False # So clients also have an accurate reloadActive value
 				self.reloadSound.play(entity = self.actor)
 				self.activeSound = 0 # Only play once
+
+		self.bulletSpawner.update()
 
 	def _updatePosition(self, offset, angleOffset):
 		vector = self.actor.controller.targetPos - self.actor.getPosition()
@@ -273,7 +327,9 @@ class Gun(Weapon):
 		Weapon.delete(self)
 
 CHAINGUN = 254
+
 class ChainGun(Gun):
+
 	def __init__(self, actor, id):
 		Gun.__init__(self, actor, 10, "models/basicdroid/chaingun", id)
 		self.clipSize = 50
@@ -318,6 +374,7 @@ class ChainGun(Gun):
 			hitPos = None
 			if direction.length() > 0:
 				entity, hitPos, normal, queue = self.bulletTest(aiWorld, entityGroup, origin, direction)
+
 			if hitPos == None:
 				p.add(net.Boolean(False)) # Bullet didn't hit anything
 			else:
@@ -332,6 +389,7 @@ class ChainGun(Gun):
 					p.add(net.Boolean(False))
 		else:
 			p.add(net.Boolean(False))
+
 		self.firing = False
 		return p
 
@@ -359,6 +417,7 @@ class ChainGun(Gun):
 						entityId = net.Uint8.getFrom(iterator)
 						entity = entityGroup.getEntity(entityId)
 						damage = net.Uint16.getFrom(iterator)
+
 						if entity != None:
 							entity.damage(self.actor, damage)
 							if isinstance(entity, entities.Actor):
@@ -368,6 +427,9 @@ class ChainGun(Gun):
 					else:
 						particles.add(particles.SparkParticleGroup(hitPos))
 						self.ricochetSound.play(position = hitPos)
+
+					self.bulletSpawner.spawnBullet(hitPos)
+
 		if engine.clock.time - self.lastFire > 0.1:
 			self.light.remove()
 		elif self.active:
@@ -381,7 +443,9 @@ class ChainGun(Gun):
 		Gun.delete(self)
 
 SHOTGUN = 253
+
 class Shotgun(Gun):
+
 	def __init__(self, actor, id):
 		Gun.__init__(self, actor, 150, "models/basicdroid/shotgun", id)
 		self.clipSize = 8
@@ -432,6 +496,7 @@ class Shotgun(Gun):
 					p.add(net.Boolean(False))
 		else:
 			p.add(net.Boolean(False))
+
 		self.firing = False
 		return p
 
@@ -468,6 +533,9 @@ class Shotgun(Gun):
 								particles.add(particles.HitRegisterParticleGroup(hitPos - direction, entity.getTeam().color, (damage * 3) / self.damage))
 					else:
 						self.ricochetSound.play(position = hitPos)
+
+					self.bulletSpawner.spawnBullet(hitPos)
+
 		if engine.clock.time - self.lastFire > 0.1:
 			self.light.remove()
 		elif self.active:
@@ -557,6 +625,7 @@ class SniperRifle(Gun):
 						origin = self.getPosition() + (direction * random() * 4)
 						pos = hitPos - (direction * random() * 4)
 						self.tracer.draw(origin, pos)
+
 					if net.Boolean.getFrom(iterator):
 						entityId = net.Uint8.getFrom(iterator)
 						entity = entityGroup.getEntity(entityId)
@@ -570,6 +639,9 @@ class SniperRifle(Gun):
 					else:
 						self.ricochetSound.play(position = hitPos)
 						particles.add(particles.SparkParticleGroup(hitPos))
+
+					self.bulletSpawner.spawnBullet(hitPos)
+
 		if engine.clock.time - self.lastFire > 0.1:
 			self.light.remove()
 		elif self.active:
@@ -589,7 +661,9 @@ class SniperRifle(Gun):
 		Gun.delete(self)
 
 MELEE_CLAW = 251
+
 class MeleeClaw(Weapon):
+
 	def __init__(self, actor, id):
 		Weapon.__init__(self, actor, id)
 		self.impaleStart = -1
@@ -638,6 +712,7 @@ class MeleeClaw(Weapon):
 					p.add(net.Boolean(False))
 			else:
 				p.add(net.Boolean(False))
+
 			self.firing = False
 		elif self.active and self.impaleStart != -1 and self.impaleTarget != None and self.impaleTarget.active and (self.actor.getPosition() - self.impaleTarget.getPosition()).length() < self.actor.radius + self.impaleTarget.radius + 0.5:
 			self.addCriticalPacket(p, packetUpdate)
@@ -652,6 +727,7 @@ class MeleeClaw(Weapon):
 			self.impaleTarget = None
 		else:
 			p.add(net.Uint8(0)) # 0 = Nothing's happening
+
 		return p
 
 	def clientUpdate(self, aiWorld, entityGroup, iterator = None):
@@ -674,7 +750,6 @@ class MeleeClaw(Weapon):
 					particles.add(particles.HitRegisterParticleGroup(pos, enemy.getTeam().color, 2))
 					enemy.damage(self.actor, self.damage, False)
 
-		# Animation code
 		if self.selected and self.active:
 			self.setPosition(self.actor.getPosition())
 			self.node.lookAt(Point3(self.actor.controller.targetPos))
@@ -699,11 +774,13 @@ class MeleeClaw(Weapon):
 	def show(self):
 		if self.active:
 			self.node.show()
+
 		Weapon.show(self)
 
 	def hide(self):
 		if self.active:
 			self.node.hide()
+
 		Weapon.hide(self)
 
 GRENADE_LAUNCHER = 249
@@ -735,6 +812,7 @@ class GrenadeLauncher(Weapon):
 			grenade.setLinearVelocity(direction * 40)
 			entityGroup.spawnEntity(grenade)
 			p.add(net.Uint8(grenade.getId()))
+
 		self.firing = False
 		return p
 
@@ -754,7 +832,9 @@ class GrenadeLauncher(Weapon):
 		Component.delete(self)
 
 MOLOTOV_THROWER = 247
+
 class MolotovThrower(Weapon):
+
 	def __init__(self, actor, id):
 		Weapon.__init__(self, actor, id)
 		self.grenadeLaunchSound = audio.SoundPlayer("grenade-launch")
@@ -779,6 +859,7 @@ class MolotovThrower(Weapon):
 			grenade.setLinearVelocity(direction * 40)
 			entityGroup.spawnEntity(grenade)
 			p.add(net.Uint8(grenade.getId()))
+
 		self.firing = False
 		return p
 
@@ -789,6 +870,7 @@ class MolotovThrower(Weapon):
 				# We're firing, play the launch sound. Everything else is taken care of by the Grenade being spawned.
 				self.grenadeLaunchSound.play(entity = self.actor)
 				self.grenadeId = net.Uint8.getFrom(iterator)
+
 		grenade = entityGroup.getEntity(self.grenadeId)
 		if grenade != None and isinstance(grenade, entities.Grenade):
 			grenade.setActor(self.actor)
@@ -798,7 +880,9 @@ class MolotovThrower(Weapon):
 		Component.delete(self)
 
 PISTOL = 248
+
 class Pistol(Gun):
+
 	def __init__(self, actor, id):
 		Gun.__init__(self, actor, 27, "models/basicdroid/pistol", id)
 		self.clipSize = 12
@@ -920,6 +1004,9 @@ class Pistol(Gun):
 						particles.add(particles.SparkParticleGroup(hitPos))
 						entityGroup.addGraphicsObject(entities.Spike(hitPos, direction))
 						self.ricochetSound.play(position = hitPos)
+
+					self.bulletSpawner.spawnBullet(hitPos)
+
 		if engine.clock.time - self.lastFire > 0.1:
 			self.light.remove()
 		elif self.active:
@@ -932,4 +1019,5 @@ class Pistol(Gun):
 		self.light.remove()
 		Gun.delete(self)
 
-types = {CHAINGUN:ChainGun, PISTOL:Pistol, SHOTGUN:Shotgun, SNIPER:SniperRifle, MELEE_CLAW:MeleeClaw, GRENADE_LAUNCHER:GrenadeLauncher, MOLOTOV_THROWER:MolotovThrower}
+types = {CHAINGUN:ChainGun, PISTOL:Pistol, SHOTGUN:Shotgun, SNIPER:SniperRifle, MELEE_CLAW:MeleeClaw, GRENADE_LAUNCHER:GrenadeLauncher,
+	MOLOTOV_THROWER:MolotovThrower}

@@ -463,7 +463,6 @@ class GlassController(Controller):
 		return entity
 
 	def serverUpdate(self, aiWorld, entityGroup, packetUpdate):
-		# Glass panes don't generally move. They just shatter.
 		return None
 
 	def clientUpdate(self, aiWorld, entityGroup, data = None):
@@ -1825,7 +1824,8 @@ class SpectatorController(Controller):
 
 import ai
 class EditController(Controller):
-	"The EditController handles all user input for the level editor."
+	"""The EditController handles all user input for the level editor."""
+
 	def __init__(self, aiWorld, entityGroup, map, ui, enableEdit = True):
 		Controller.__init__(self)
 		self.ui = ui
