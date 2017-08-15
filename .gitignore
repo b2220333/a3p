@@ -97,3 +97,7 @@ ENV/
 
 # Nuitka:
 distributable/
+
+# Screenshots:
+*.jpg
+*.jpeg

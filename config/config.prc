@@ -4,7 +4,7 @@ window-type none
 win-size 1280 720
 win-origin -2 -2
 fullscreen #f
-show-frame-rate-meter #t
+show-frame-rate-meter #f
 
 # Debug:
 want-pstats #f

@@ -65,16 +65,22 @@ def exit():
 	sys.exit()
 
 class Logger:
+
 	def __init__(self):
 		self.notify = DirectNotify().newCategory("core")
+
 	def error(self, msg):
 		self.notify.warning(msg)
+
 	def warning(self, msg):
 		self.notify.warning(msg)
+
 	def info(self, msg):
 		self.notify.info(msg)
+
 	def debug(self, msg):
 		self.notify.debug(msg)
+
 	def exception(self, msg):
 		self.notify.error(msg)
 
@@ -97,6 +103,7 @@ def loadConfigFile():
 		configFile = open(os.path.join(os.path.expanduser("~"), "a3p-config"), "r")
 	except IOError:
 		return
+
 	lines = configFile.read().split('\n')
 	configFile.close()
 	for line in lines:
@@ -113,6 +120,7 @@ def loadConfigFile():
 			enableShadows = parts[1] == "#t"
 		elif parts[0] == "username":
 			savedUsername = " ".join(parts[1:])
+
 	if windowHeight > 0:
 		aspectRatio = float(windowWidth) / float(windowHeight)
 
@@ -132,6 +140,7 @@ def saveConfigFile():
 			return "#t"
 		else:
 			return "#f"
+
 	configFile.write("enable-distortion-effects " + boolToStr(enableDistortionEffects) + "\n")
 	configFile.write("enable-shaders " + boolToStr(enableShaders) + "\n")
 	configFile.write("enable-post-processing " + boolToStr(enablePostProcessing) + "\n")
@@ -168,7 +177,8 @@ def deleteModel(node, filename):
 	node.removeNode()
 
 def init(showFrameRate = False, daemon = False):
-	"Initializes various global components, like audio, lighting, and the clock. Should be called once at the beginning of the program."
+	"""Initializes various global components, like audio, lighting, and the clock. Should be called once at the beginning of the program."""
+
 	global renderLit
 	global clock
 	global renderObjects
@@ -206,15 +216,19 @@ def init(showFrameRate = False, daemon = False):
 	if not daemon:
 		base.camNode.setCameraMask(BitMask32.bit(1))
 		base.camLens.setFov(defaultFov)
+
 	renderLit = render.attachNewNode("renderLit")
 	renderObjects = renderLit.attachNewNode("renderObjects")
 	renderEnvironment = renderLit.attachNewNode("renderEnvironment")
 	controllers.init()
 	ai.init()
 	audio.init(dropOffFactor = 1.4, distanceFactor = 14, dopplerFactor = 0.0)
+	base.accept('f1', base.screenshot)
+
 	numMaxDynamicLights = 0
 	if enableShaders and not daemon:
 		numMaxDynamicLights = 2
+
 	for i in xrange(numMaxDynamicLights):
 		light = PointLight("Light" + str(i))
 		light.setColor(Vec4(0, 0, 0, 1))
@@ -223,10 +237,13 @@ def init(showFrameRate = False, daemon = False):
 		lightNode.setPos(0, 0, 0)
 		renderLit.setLight(lightNode)
 		lightNodes.append((light, lightNode))
+
 	if enableShaders and not daemon:
 		shadersChanged()
+
 	if enablePostProcessing and not daemon:
 		postProcessingChanged()
+
 	if not daemon:
 		winprops = WindowProperties()
 		props = FrameBufferProperties()
@@ -243,6 +260,7 @@ def init(showFrameRate = False, daemon = False):
 		reflectionCamera = base.makeCamera(reflectionBuffer, scene = render, lens = base.cam.node().getLens(), mask = BitMask32.bit(4))
 		reflectionCamera.reparentTo(render)
 		reflectionCamera.node().setActive(False)
+
 	particles.init()
 	maps = [x.split("\t") for x in readFile("maps/maps.txt").split("\n")]
 
