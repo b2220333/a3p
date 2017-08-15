@@ -19,9 +19,9 @@ class GameUI(DirectObject):
 		self.aspectRatio = float(base.win.getProperties().getXSize()) / float(base.win.getProperties().getYSize())
 
 		self.crosshairs = [None]
-		crosshairFiles = ["images/wide-crosshair.png", "images/narrow-crosshair.png", "images/sniper-scope-zoomed.png"]
-		for filename in crosshairFiles:
-			self.loadCrosshair(filename)
+		self.crosshairs.extend([self.loadCrosshair(filename, fitToScreen, alpha) for (filename, fitToScreen, alpha) in \
+			[("images/wide-crosshair.png", False, 0.5), ("images/narrow-crosshair.png", False, 0.5),
+			("images/sniper-scope-zoomed.png", True, 1)]])
 
 		self.currentCrosshair = 1
 
@@ -104,24 +104,19 @@ class GameUI(DirectObject):
 
 		self.chatLog = ChatLog(self.verticalOffset + 0.1)
 
-	def loadCrosshair(self, filename):
-		if filename == "images/sniper-scope-zoomed.png":
-			# load the sniper scope/crosshair to scale with the screen
-			c = OnscreenImage(image = "images/sniper-scope-zoomed.png", pos = (0, 0, 0))
-			c.setScale(render2d, VBase3(1))
-			c.setSx(2)
-			c.setTransparency(TransparencyAttrib.MAlpha)
-			c.setColor(1, 1, 1, 1)
-			c.setBin("transparent", 0)
-			c.hide()
-			self.crosshairs.append(c)
-		else:
-			c = OnscreenImage(image = filename, pos = (0, 0, 0), scale = 0.1)
-			c.setTransparency(TransparencyAttrib.MAlpha)
-			c.setColor(1, 1, 1, 0.5)
-			c.setBin("transparent", 0)
-			c.hide()
-			self.crosshairs.append(c)
+	def loadCrosshair(self, filename, fitToScreen, alpha):
+		crosshair = OnscreenImage(image = filename, pos = (0, 0, 0), scale = 0.1)
+
+		if fitToScreen:
+			crosshair.setScale(render2d, VBase3(1))
+			crosshair.setSx(2)
+
+		crosshair.setTransparency(TransparencyAttrib.MAlpha)
+		crosshair.setColor(1, 1, 1, alpha)
+		crosshair.setBin("transparent", 0)
+		crosshair.hide()
+
+		return crosshair
 
 	def setTeams(self, teams, team):
 		self.localTeam = team
