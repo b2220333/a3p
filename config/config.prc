@@ -4,6 +4,7 @@ window-type none
 win-size 1280 720
 win-origin -2 -2
 fullscreen #f
+sync-video #t
 show-frame-rate-meter #f
 icon-filename images/icon.ico
 
@@ -13,6 +14,8 @@ want-pstats #f
 # Display:
 load-display pandagl
 aux-display pandadx9
+aux-display pandagl2
+aux-display pandagl
 aux-display p3tinydisplay
 
 # Resources:
