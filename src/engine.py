@@ -36,7 +36,7 @@ filters = None # Post processing filters
 enableDistortionEffects = True
 enableShaders = True
 enablePostProcessing = False
-enableAntialiasing = True
+enableAntialiasing = False
 enableShadows = True
 savedUsername = "Unnamed"
 reflectionEffectsNeeded = False # True if we're in a level with water
@@ -111,7 +111,7 @@ def loadConfigFile():
 	for line in lines:
 		parts = line.split()
 		if len(parts) == 0:
-			continue
+			cofntinue
 		if parts[0] == "enable-distortion-effects":
 			enableDistortionEffects = parts[1] == "#t"
 		elif parts[0] == "enable-shaders":
