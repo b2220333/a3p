@@ -10,6 +10,11 @@ import thread
 import hashlib
 import subprocess
 from panda3d.core import *
+
+if __debug__:
+    loadPrcFile('config/config.prc')
+    loadPrcFile('config/launcher.prc')
+
 from direct.showbase.ShowBase import ShowBase
 from direct.gui import OnscreenImage, DirectButton, OnscreenText
 
@@ -197,10 +202,6 @@ class Launcher(ShowBase):
         self.downloadQueue = []
 
 if __name__ == '__main__':
-    if __debug__:
-        loadPrcFile('config/config.prc')
-        loadPrcFile('config/launcher.prc')
-
     launcher = Launcher()
     launcher.setup()
     launcher.run()
