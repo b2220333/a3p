@@ -13,6 +13,8 @@ from panda3d.core import *
 from direct.showbase.ShowBase import ShowBase
 from direct.gui import OnscreenImage, DirectButton, OnscreenText
 
+DETACHED_PROCESS = 0x00000008
+
 class Launcher(ShowBase):
 
     def __init__(self):
@@ -83,16 +85,38 @@ class Launcher(ShowBase):
             raise RuntimeError('No files were found on the download server!')
 
         for filename in patcherFiles:
-            size, md5 = patcherFiles[filename]['size'], patcherFiles[filename]['md5']
+            data = patcherFiles[filename]
+            is_dir = data.pop('is_dir', False)
 
-            if not os.path.exists(filename):
-                self.downloadQueue.append(filename)
+            if is_dir:
+                self.recurseDirectory(filename, data)
+                continue
             else:
-                if os.path.getsize(filename) != size or self.getMd5(filename) != md5:
-                    self.downloadQueue.append(filename)
+                self.queueFile(filename, data['size'], data['md5'])
 
         if not len(self.downloadQueue) and not self.downloadingFile:
             self.launchGame()
+
+    def recurseDirectory(self, directory, data):
+        if not os.path.exists(directory):
+            os.mkdir(directory)
+
+        for filename in data:
+            sdata = data[filename]
+            is_dir = sdata.pop('is_dir', False)
+            filepath = os.path.join(directory, filename).replace('\\', '/')
+
+            if not is_dir:
+                self.queueFile(filepath, sdata['size'], sdata['md5'])
+            else:
+                self.recurseDirectory(filepath, sdata)
+
+    def queueFile(self, filename, size, md5):
+        if not os.path.exists(filename):
+            self.downloadQueue.append(filename)
+        else:
+            if os.path.getsize(filename) != size or self.getMd5(filename) != md5:
+                self.downloadQueue.append(filename)
 
     def downloadFile(self, filename):
         """
@@ -122,7 +146,7 @@ class Launcher(ShowBase):
         """
 
         self.updatingText.text = "Patching complete, starting game..."
-        thread.start_new_thread(subprocess.call, (self.executableName,), {'shell': False,})
+        subprocess.Popen([self.executableName], creationflags=DETACHED_PROCESS)
         self.__exit()
 
     def __exit(self):
@@ -130,7 +154,7 @@ class Launcher(ShowBase):
         Closes out of the game launcher
         """
 
-        self.userExit()
+        os._exit(-1)
 
     def __update(self, task):
         """
