@@ -5,6 +5,7 @@ win-size 1280 720
 win-origin -2 -2
 fullscreen #f
 show-frame-rate-meter #f
+icon-filename images/icon.ico
 
 # Debug:
 want-pstats #f
