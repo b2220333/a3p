@@ -36,6 +36,7 @@ filters = None # Post processing filters
 enableDistortionEffects = True
 enableShaders = True
 enablePostProcessing = False
+enableAntialiasing = True
 enableShadows = True
 savedUsername = "Unnamed"
 reflectionEffectsNeeded = False # True if we're in a level with water
@@ -94,6 +95,7 @@ def loadConfigFile():
 	global enableShaders
 	global enablePostProcessing
 	global enableShadows
+	global enableAntialiasing
 	global savedUsername
 	global windowWidth
 	global windowHeight
@@ -118,6 +120,8 @@ def loadConfigFile():
 			enablePostProcessing = parts[1] == "#t"
 		elif parts[0] == "enable-shadows":
 			enableShadows = parts[1] == "#t"
+		elif parts[0] == "enable-antialiasing":
+			enableAntialiasing = parts[1] == '#t'
 		elif parts[0] == "username":
 			savedUsername = " ".join(parts[1:])
 
@@ -129,6 +133,7 @@ def saveConfigFile():
 	global enableShaders
 	global enablePostProcessing
 	global enableShadows
+	global enableAntialiasing
 	global savedUsername
 	global windowWidth
 	global windowHeight
@@ -145,6 +150,7 @@ def saveConfigFile():
 	configFile.write("enable-shaders " + boolToStr(enableShaders) + "\n")
 	configFile.write("enable-post-processing " + boolToStr(enablePostProcessing) + "\n")
 	configFile.write("enable-shadows " + boolToStr(enableShadows) + "\n")
+	configFile.write("enable-antialiasing " + boolToStr(enableAntialiasing) + "\n")
 	configFile.write("username " + savedUsername)
 	configFile.close()
 
@@ -253,6 +259,9 @@ def init(showFrameRate = False, daemon = False):
 	if enablePostProcessing and not daemon:
 		postProcessingChanged()
 
+	if enableAntialiasing and not daemon:
+		antialiasingChanged()
+
 	if not daemon:
 		winprops = WindowProperties()
 		props = FrameBufferProperties()
@@ -297,6 +306,12 @@ def preloadModels():
 	cacheModel("maps/Block")
 	cacheModel("maps/block1")
 	cacheModel("models/crosshair/crosshair")
+
+def antialiasingChanged():
+	if enableAntialiasing:
+		render.setAntialias(AntialiasAttrib.MAuto)
+	else:
+		render.clearAntialias()
 
 def postProcessingChanged():
 	global filters

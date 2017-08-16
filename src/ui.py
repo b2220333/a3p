@@ -1029,11 +1029,12 @@ class Menu(DirectObject):
 	def __init__(self):
 		self.active = True
 		visitorFont = loader.loadFont("menu/visitor2.ttf")
-		self.dialog = DirectFrame(frameColor = (0.1, 0.4, 0.6, 0.6), frameSize=(-.45, .45, -.3375, .3375), pos = (0, 0, 0))
-		self.postProcessingCheckBox = DirectCheckButton(parent = self.dialog, text = "Post-processing", indicatorValue = engine.enablePostProcessing, pos = (0, 0, 0.225), boxRelief = DGG.FLAT, relief = DGG.FLAT, boxPlacement = "left", text_font = visitorFont, text_fg = (1, 1, 1, 1), text_scale = 2.0, boxImage = ("images/checkbox-disabled.jpg", "images/checkbox-enabled.jpg", None), frameColor = (0, 0, 0, 0), scale = 0.04, rolloverSound = None, clickSound = None, command = self.togglePostProcessing)
-		self.shadersCheckBox = DirectCheckButton(parent = self.dialog, text = "Shaders", indicatorValue = engine.enableShaders, pos = (0, 0, 0.1), boxRelief = DGG.FLAT, relief = DGG.FLAT, boxPlacement = "left", text_font = visitorFont, text_fg = (1, 1, 1, 1), text_scale = 2.0, boxImage = ("images/checkbox-disabled.jpg", "images/checkbox-enabled.jpg", None), frameColor = (0, 0, 0, 0), scale = 0.04, rolloverSound = None, clickSound = None, command = self.toggleShaders)
-		self.distortionEffectsCheckBox = DirectCheckButton(parent = self.dialog, text = "Distortion effects", indicatorValue = engine.enableDistortionEffects, pos = (0, 0, -0.025), boxRelief = DGG.FLAT, relief = DGG.FLAT, boxPlacement = "left", text_font = visitorFont, text_fg = (1, 1, 1, 1), text_scale = 2.0, boxImage = ("images/checkbox-disabled.jpg", "images/checkbox-enabled.jpg", None), frameColor = (0, 0, 0, 0), scale = 0.04, rolloverSound = None, clickSound = None, command = self.toggleDistortionEffects)
-		self.shadowsCheckBox = DirectCheckButton(parent = self.dialog, text = "Shadows", indicatorValue = engine.enableShadows, pos = (0, 0, -0.15), boxRelief = DGG.FLAT, relief = DGG.FLAT, boxPlacement = "left", text_font = visitorFont, text_fg = (1, 1, 1, 1), text_scale = 2.0, boxImage = ("images/checkbox-disabled.jpg", "images/checkbox-enabled.jpg", None), frameColor = (0, 0, 0, 0), scale = 0.04, rolloverSound = None, clickSound = None, command = self.toggleShadows)
+		self.dialog = DirectFrame(frameColor = (0.1, 0.4, 0.6, 0.6), frameSize=(-.45, .45, -.3375, .4375), pos = (0, 0, 0))
+		self.postProcessingCheckBox = DirectCheckButton(parent = self.dialog, text = "Post-processing", indicatorValue = engine.enablePostProcessing, pos = (0, 0, 0.325), boxRelief = DGG.FLAT, relief = DGG.FLAT, boxPlacement = "left", text_font = visitorFont, text_fg = (1, 1, 1, 1), text_scale = 2.0, boxImage = ("images/checkbox-disabled.jpg", "images/checkbox-enabled.jpg", None), frameColor = (0, 0, 0, 0), scale = 0.04, rolloverSound = None, clickSound = None, command = self.togglePostProcessing)
+		self.shadersCheckBox = DirectCheckButton(parent = self.dialog, text = "Shaders", indicatorValue = engine.enableShaders, pos = (0, 0, 0.2), boxRelief = DGG.FLAT, relief = DGG.FLAT, boxPlacement = "left", text_font = visitorFont, text_fg = (1, 1, 1, 1), text_scale = 2.0, boxImage = ("images/checkbox-disabled.jpg", "images/checkbox-enabled.jpg", None), frameColor = (0, 0, 0, 0), scale = 0.04, rolloverSound = None, clickSound = None, command = self.toggleShaders)
+		self.distortionEffectsCheckBox = DirectCheckButton(parent = self.dialog, text = "Distortion effects", indicatorValue = engine.enableDistortionEffects, pos = (0, 0, 0.1), boxRelief = DGG.FLAT, relief = DGG.FLAT, boxPlacement = "left", text_font = visitorFont, text_fg = (1, 1, 1, 1), text_scale = 2.0, boxImage = ("images/checkbox-disabled.jpg", "images/checkbox-enabled.jpg", None), frameColor = (0, 0, 0, 0), scale = 0.04, rolloverSound = None, clickSound = None, command = self.toggleDistortionEffects)
+		self.shadowsCheckBox = DirectCheckButton(parent = self.dialog, text = "Shadows", indicatorValue = engine.enableShadows, pos = (0, 0, -0.0), boxRelief = DGG.FLAT, relief = DGG.FLAT, boxPlacement = "left", text_font = visitorFont, text_fg = (1, 1, 1, 1), text_scale = 2.0, boxImage = ("images/checkbox-disabled.jpg", "images/checkbox-enabled.jpg", None), frameColor = (0, 0, 0, 0), scale = 0.04, rolloverSound = None, clickSound = None, command = self.toggleShadows)
+		self.antialiasingCheckBox = DirectCheckButton(parent = self.dialog, text = "Antialiasing", indicatorValue = engine.enableAntialiasing, pos = (0, 0, -0.1), boxRelief = DGG.FLAT, relief = DGG.FLAT, boxPlacement = "left", text_font = visitorFont, text_fg = (1, 1, 1, 1), text_scale = 2.0, boxImage = ("images/checkbox-disabled.jpg", "images/checkbox-enabled.jpg", None), frameColor = (0, 0, 0, 0), scale = 0.04, rolloverSound = None, clickSound = None, command = self.toggleAntialiasing)
 		exitButton = DirectButton(parent = self.dialog, text = "Exit", pos = (-0.25, 0, -0.26), relief = DGG.FLAT, text_font = visitorFont, frameSize = (-0.5, 0.5, -.15, .15), frameColor = (0.0, 0.0, 0.0, 0.5), text_fg = (1, 1, 1, 1), text_scale = 0.3, text_pos = (0, -0.04), scale = 0.35, rolloverSound = None, clickSound = None, command = self.delete)
 		resumeButton = DirectButton(parent = self.dialog, text = "Resume", pos = (0.25, 0, -0.26), relief = DGG.FLAT, text_font = visitorFont, frameSize = (-0.5, 0.5, -.15, .15), frameColor = (0.0, 0.0, 0.0, 0.5), text_fg = (1, 1, 1, 1), text_scale = 0.3, text_pos = (0, -0.04), scale = 0.35, rolloverSound = None, clickSound = None, command = self.toggle)
 		self.dialog.hide()
@@ -1064,6 +1065,10 @@ class Menu(DirectObject):
 	def toggleShadows(self, value):
 		engine.enableShadows = value
 		engine.shadowsChanged()
+
+	def toggleAntialiasing(self, value):
+		engine.enableAntialiasing = value
+		engine.antialiasingChanged()
 
 	def delete(self):
 		self.active = False

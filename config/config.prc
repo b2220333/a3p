@@ -28,3 +28,7 @@ text-flatten #f
 basic-shaders-only #f
 default-directnotify-level info
 notify-level fatal
+
+# Antialiasing:
+framebuffer-multisample 1
+multisamples 2
