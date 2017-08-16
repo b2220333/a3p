@@ -111,7 +111,7 @@ def loadConfigFile():
 	for line in lines:
 		parts = line.split()
 		if len(parts) == 0:
-			cofntinue
+			continue
 		if parts[0] == "enable-distortion-effects":
 			enableDistortionEffects = parts[1] == "#t"
 		elif parts[0] == "enable-shaders":
