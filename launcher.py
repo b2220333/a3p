@@ -91,7 +91,7 @@ class Launcher(ShowBase):
                 if os.path.getsize(filename) != size or self.getMd5(filename) != md5:
                     self.downloadQueue.append(filename)
 
-        if not len(self.downloadQueue):
+        if not len(self.downloadQueue) and not self.downloadingFile:
             self.launchGame()
 
     def downloadFile(self, filename):
@@ -112,7 +112,9 @@ class Launcher(ShowBase):
                 f.write(block)
 
         self.downloadingFile = False
-        self.launchGame()
+
+        if not len(self.downloadQueue) and not self.downloadingFile:
+            self.launchGame()
 
     def launchGame(self):
         """
