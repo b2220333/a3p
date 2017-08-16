@@ -197,6 +197,10 @@ class Launcher(ShowBase):
         self.downloadQueue = []
 
 if __name__ == '__main__':
+    if __debug__:
+        loadPrcFile('config/config.prc')
+        loadPrcFile('config/launcher.prc')
+
     launcher = Launcher()
     launcher.setup()
     launcher.run()
