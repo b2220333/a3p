@@ -14,7 +14,7 @@ want-pstats #f
 # Display:
 load-display pandagl
 aux-display pandadx9
-aux-display pandagesl2
+aux-display pandagles2
 aux-display pandagles
 aux-display p3tinydisplay
 
