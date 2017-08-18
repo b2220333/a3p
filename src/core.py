@@ -241,7 +241,7 @@ class ServerBackend(Backend):
 	def newConnectionCallback(self, client, username):
 		if not client in self.clients: # We may receive multiple "new client" packets. We need to ignore all but the first.
 			if self.numClients < len(self.entityGroup.teams):
-				engine.log.info("New connection from " + username + " (" + net.addressToString(client) + ")")
+				engine.log.info("New connection from " + net.addressToString(client))
 				messenger.send("chat-outgoing", ["Console", username + " connected."])
 				self.numClients += 1
 				if None in self.clients:
@@ -252,6 +252,7 @@ class ServerBackend(Backend):
 				team.setLocal(False)
 				team.setUsername(username)
 				net.context.addClient(client)
+					
 			else:
 				engine.log.info("Connection from " + username + " (" + net.addressToString(client) + ") refused. Server full.")
 				p = net.Packet()
@@ -917,7 +918,7 @@ class MainMenu(DirectObject):
 		if firstBoot and not skipIntro:
 			self.introTime = 4
 
-		self.showLogin = firstBoot
+		self.showLogin = True #firstBoot
 
 		self.hostList = ui.HostList(self.startClient)
 		self.mapList = ui.MapList(self.startServer)
@@ -932,6 +933,7 @@ class MainMenu(DirectObject):
 		self.serverMode = 0 # 0 for normal, 1 for tutorial
 		self.serverGameType = 0 # 0 for deathmatch, 1 for survival
 
+		self.token = None
 		self.username = "Unnamed"
 
 		self.startTime = -1
@@ -964,9 +966,10 @@ class MainMenu(DirectObject):
 			self.serverGameType = gametype
 			self.goTime = engine.clock.time
 
-	def setUsername(self, username):
+	def setUsername(self, username, token=None):
 		self.clickSound.play()
 		self.username = username
+		self.token = token
 		engine.savedUsername = self.username
 		engine.saveConfigFile()
 		self.loginDialog.hide()

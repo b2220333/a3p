@@ -101,3 +101,6 @@ distributable/
 # Screenshots:
 *.jpg
 *.jpeg
+
+# Visual Studio Code
+.vscode/

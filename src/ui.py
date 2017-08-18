@@ -11,6 +11,9 @@ import online
 from direct.gui.DirectGui import *
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.gui.OnscreenText import OnscreenText
+import requests
+import json
+import sys
 
 class GameUI(DirectObject):
 
@@ -1187,13 +1190,18 @@ class LoginDialog(DirectObject):
 		self.visible = False
 		dejavuFont = loader.loadFont("menu/DejaVuSans.ttf")
 		visitorFont = loader.loadFont("menu/visitor2.ttf")
-		self.dialog = DirectFrame(frameColor = (0.0, 0.0, 0.0, 0.0), frameSize=(-.7, .7, -.15, .15), pos = (0, 0, 0))
-		self.background = OnscreenImage(image = "menu/background.jpg", pos = (0, 0, 0), parent = self.dialog, scale = (1, 1, .15 / .7), )
+		self.dialog = DirectFrame(frameColor = (0.0, 0.0, 0.0, 0.0), frameSize=(-.1, .1, -.25, .15), pos = (0, 0, 0))
+		self.background = OnscreenImage(image = "menu/background.jpg", pos = (0, 0, 0), parent = self.dialog, scale = (1, 1, .25 / .7), )
 		self.background.setTransparency(TransparencyAttrib.MAlpha)
 		self.background.setColor(1, 1, 1, 0.8)
-		self.label = OnscreenText(parent = self.dialog, text = "Enter a username", pos = (0, .07), font = visitorFont, fg = (1, 1, 1, 1), scale = 0.1)
-		self.usernameEntry = DirectEntry(parent = self.dialog, pos = (-0.6, 0, -0.06), scale = .08, entryFont = dejavuFont, text_fg = Vec4(1, 1, 1, 1), frameColor = (0, 0, 0, 0.5), initialText = engine.savedUsername, numLines = 1, rolloverSound = None, clickSound = None, focus = 1, command = self.go)
-		self.loginButton = DirectButton(parent = self.dialog, text = "Login", pos = (0.4, 0, -.03), relief = DGG.FLAT, text_font = visitorFont, frameColor = (0, 0, 0, 0.5), frameSize = (-0.4, 0.4, -.14, .14), text_fg = (1, 1, 1, 1), text_scale = 0.3, text_pos = (0, -0.04), scale = 0.475, rolloverSound = None, clickSound = None, command = self.go)
+		self.label = OnscreenText(parent = self.dialog, text = "Login", pos = (0, .3), font = visitorFont, fg = (1, 1, 1, 1), scale = 0.1)
+		self.errorLabel = OnscreenText(parent = self.dialog, text = '', pos = (0, .23), font = visitorFont, fg = (1, 0, 0, 1), scale = 0.1)
+		self.usernameLabel = OnscreenText(parent = self.dialog, text='Username', pos=(-0.6, .09), font=visitorFont, fg = (1, 1, 1, 1), scale = 0.15)
+		self.usernameEntry = DirectEntry(parent = self.dialog, pos = (-.2, 0, .09), scale = .08, width=13, entryFont = dejavuFont, text_fg = Vec4(1, 1, 1, 1), frameColor = (0, 0, 0, 0.5), initialText = engine.savedUsername, numLines = 1, rolloverSound = None, clickSound = None, focus = 1, command = self.go)
+		self.passwordLabel = OnscreenText(parent = self.dialog, text='Password', pos=(-0.6, -.09), font=visitorFont, fg = (1, 1, 1, 1), scale = 0.15)
+		self.passwordEntry = DirectEntry(parent = self.dialog, pos = (-.2, 0, -.09), scale = .08, width=13, entryFont = dejavuFont, text_fg = Vec4(1, 1, 1, 1), frameColor = (0, 0, 0, 0.5), numLines = 1, rolloverSound = None, clickSound = None, obscured=True, command = self.go)
+		self.loginButton = DirectButton(parent = self.dialog, text = "Login", pos = (-.2, 0, -.25), relief = DGG.FLAT, text_font = visitorFont, frameColor = (0, 0, 0, 0.5), frameSize = (-0.4, 0.4, -.14, .14), text_fg = (1, 1, 1, 1), text_scale = 0.3, text_pos = (0, -0.04), scale = 0.475, rolloverSound = None, clickSound = None, command = self.go)
+		self.exitButton = DirectButton(parent = self.dialog, text = "Exit", pos = (.2, 0, -.25), relief = DGG.FLAT, text_font = visitorFont, frameColor = (0, 0, 0, 0.5), frameSize = (-0.4, 0.4, -.14, .14), text_fg = (1, 1, 1, 1), text_scale = 0.3, text_pos = (0, -0.04), scale = 0.475, rolloverSound = None, clickSound = None, command = self.exit)
 		self.dialog.setScale(0.0)
 		self.dialog.hide()
 		self.lastShow = -1
@@ -1229,7 +1237,38 @@ class LoginDialog(DirectObject):
 		self.visible = False
 
 	def go(self, value = None):
-		self.callback(self.usernameEntry.get())
+
+		titleId = config.GetString('playfab-id', '4503')
+		url = 'https://%s.playfabapi.com/Client/LoginWithPlayFab' % titleId
+
+		payload = {
+			'TitleId': titleId,
+			'Username': self.usernameEntry.get() or '',
+			'Password': self.passwordEntry.get() or '',
+		}
+		engine.log.info('Attempting to login %s.' % self.usernameEntry.get())
+
+		errors = {
+			400: 'Invalid username or password'
+		}
+
+		resp = requests.post(url, json=payload)
+		data = json.loads(resp.text)
+
+		engine.log.debug('Received response; Code: %d Reason: %s' % (resp.status_code, resp.reason))
+		if (resp.status_code != 200):
+			errorMsg = data['errorMessage']
+			if resp.status_code in errors:
+				errorMsg = errors[resp.status_code]
+			self.errorLabel['text'] = errorMsg
+			engine.log.info('Failed to login %s; %s' % (self.usernameEntry.get(), errorMsg))
+			return
+	
+		if (resp.status_code == 200):
+			self.callback(self.usernameEntry.get(), data['data']['SessionTicket'])
+
+	def exit(self, value = None):
+		sys.exit()
 
 	def delete(self):
 		self.active = False
