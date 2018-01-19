@@ -535,9 +535,9 @@ class UnitSelectorScreen(DirectObject):
 
 		self.container = DirectFrame(parent = aspect2d, frameColor = (0.0, 0.0, 0.0, 0.0), frameSize=(-1.15, 1.15, -0.85, 0.75), pos = (0, 0, 0), sortOrder = -1)
 		self.container.setBin("fixed", 0)
-		self.background = OnscreenImage(image = "menu/background.jpg", pos = (0, 0, -0.05), parent = self.container, scale = (1.15, 1, 0.8))
+		self.background = OnscreenImage(image = "menu/ui_background.png", pos = (0, 0, -0.05), parent = self.container, scale = (1.15, 1, 0.8))
 		self.background.setTransparency(TransparencyAttrib.MAlpha)
-		self.background.setColor(1, 1, 1, 0.6)
+		self.background.setColor(1, 1, 1, 0.5)
 
 		visitorFont = loader.loadFont("menu/visitor2.ttf")
 		self.balanceText = OnscreenText(parent = self.container, pos = Vec3(1.05, -0.55, 0), text = "$0", align = TextNode.ARight, scale = 0.1, fg = (1, 1, 1, 1), shadow = (0, 0, 0, 0.5), font = visitorFont, mayChange = True)
@@ -1083,9 +1083,9 @@ class HostList(DirectObject):
 		self.visible = False
 		visitorFont = loader.loadFont("menu/visitor2.ttf")
 		self.dialog = DirectFrame(frameColor = (0.0, 0.0, 0.0, 0.0), frameSize=(-.9, .9, -.9, .9), pos = (0, 0, 0))
-		self.background = OnscreenImage(image = "menu/background.jpg", pos = (0, 0, 0), parent = self.dialog, scale = (0.9, 1, 0.9))
+		self.background = OnscreenImage(image = "menu/ui_background.png", pos = (0, 0, 0), parent = self.dialog, scale = (0.9, 1, 0.9))
 		self.background.setTransparency(TransparencyAttrib.MAlpha)
-		self.background.setColor(1, 1, 1, 0.8)
+		self.background.setColor(1, 1, 1, 0.5)
 		self.label = OnscreenText(parent = self.dialog, text = "Choose server", pos = (0, .825), font = visitorFont, fg = (1, 1, 1, 1), scale = 0.1)
 		self.serverIpEntry = DirectEntry(parent = self.dialog, pos = (-0.55, 0, -0.7), scale = .08, entryFont = visitorFont, text_fg = Vec4(1, 1, 1, 1), frameColor = (0, 0, 0, 0.5), initialText = "Direct Connect", numLines = 1, rolloverSound = None, clickSound = None, focus = 0, focusInCommand = self.clearServerIp, command = self.go)
 		self.cancelButton = DirectButton(parent = self.dialog, text = "Cancel", pos = (-0.65, 0, -0.8), relief = DGG.FLAT, text_font = visitorFont, frameColor = (0, 0, 0, 0.5), frameSize = (-0.5, 0.5, -.15, .15), text_fg = (1, 1, 1, 1), text_scale = 0.3, text_pos = (0, -0.04), scale = 0.3, rolloverSound = None, clickSound = None, command = self.hide)
@@ -1188,9 +1188,9 @@ class LoginDialog(DirectObject):
 		dejavuFont = loader.loadFont("menu/DejaVuSans.ttf")
 		visitorFont = loader.loadFont("menu/visitor2.ttf")
 		self.dialog = DirectFrame(frameColor = (0.0, 0.0, 0.0, 0.0), frameSize=(-.7, .7, -.15, .15), pos = (0, 0, 0))
-		self.background = OnscreenImage(image = "menu/background.jpg", pos = (0, 0, 0), parent = self.dialog, scale = (1, 1, .15 / .7), )
+		self.background = OnscreenImage(image = "menu/ui_background.png", pos = (0, 0, 0), parent = self.dialog, scale = (1, 1, .15 / .7), )
 		self.background.setTransparency(TransparencyAttrib.MAlpha)
-		self.background.setColor(1, 1, 1, 0.8)
+		self.background.setColor(1, 1, 1, 0.5)
 		self.label = OnscreenText(parent = self.dialog, text = "Enter a username", pos = (0, .07), font = visitorFont, fg = (1, 1, 1, 1), scale = 0.1)
 		self.usernameEntry = DirectEntry(parent = self.dialog, pos = (-0.6, 0, -0.06), scale = .08, entryFont = dejavuFont, text_fg = Vec4(1, 1, 1, 1), frameColor = (0, 0, 0, 0.5), initialText = engine.savedUsername, numLines = 1, rolloverSound = None, clickSound = None, focus = 1, command = self.go)
 		self.loginButton = DirectButton(parent = self.dialog, text = "Login", pos = (0.4, 0, -.03), relief = DGG.FLAT, text_font = visitorFont, frameColor = (0, 0, 0, 0.5), frameSize = (-0.4, 0.4, -.14, .14), text_fg = (1, 1, 1, 1), text_scale = 0.3, text_pos = (0, -0.04), scale = 0.475, rolloverSound = None, clickSound = None, command = self.go)
@@ -1246,9 +1246,9 @@ class MapList(DirectObject):
 		self.visible = False
 		visitorFont = loader.loadFont("menu/visitor2.ttf")
 		self.dialog = DirectFrame(frameColor = (0.0, 0.0, 0.0, 0.0), frameSize=(-.9, .9, -.9, .9), pos = (0, 0, 0))
-		self.background = OnscreenImage(image = "menu/background.jpg", pos = (0, 0, 0), parent = self.dialog, scale = (0.9, 1, 0.9))
+		self.background = OnscreenImage(image = "menu/ui_background.png", pos = (0, 0, 0), parent = self.dialog, scale = (0.9, 1, 0.9))
 		self.background.setTransparency(TransparencyAttrib.MAlpha)
-		self.background.setColor(1, 1, 1, 0.8)
+		self.background.setColor(1, 1, 1, 0.5)
 		self.label = OnscreenText(parent = self.dialog, text = "Choose map", pos = (0, .825), font = visitorFont, fg = (1, 1, 1, 1), scale = 0.1)
 		self.cancelButton = DirectButton(parent = self.dialog, text = "Cancel", pos = (0, 0, -0.8), relief = DGG.FLAT, text_font = visitorFont,
 			frameColor = (0, 0, 0, 0.5), frameSize = (-0.5, 0.5, -.15, .15), text_fg = (1, 1, 1, 1), text_scale = 0.3, text_pos = (0, -0.04),
