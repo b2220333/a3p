@@ -599,16 +599,12 @@ class Map(DirectObject):
 				else:
 					parentNode = renderLit
 				if tokens[2] == "directional":
-					light = Spotlight(tokens[3])
-					lens = PerspectiveLens()
-					lens.setFov(45)
-					light.setExponent(0)
-					light.setLens(lens)
-					light.setColor(Vec4(float(tokens[4]), float(tokens[5]), float(tokens[6]), 1))
+					light = DirectionalLight(tokens[3])
+					light.setSpecularColor(Vec4(float(tokens[4]), float(tokens[5]), float(tokens[6]), 1))
+					light.setDirection(LVector3f(render.getRelativeVector(lightNode, Vec3(0, 1, 0)) * -self.worldSize * 2.25))
+					light.setPoint(Point3(float(tokens[7]), float(tokens[8]), float(tokens[9])))
 					lightNode = parentNode.attachNewNode(light)
 					lightNode.setTag("type", "directional") # We can look this up later when we go to save, to differentiate between spotlights and directionals
-					lightNode.setHpr(float(tokens[7]), float(tokens[8]), float(tokens[9]))
-					lightNode.setPos(render.getRelativeVector(lightNode, Vec3(0, 1, 0)) * -self.worldSize * 2.25)
 					if len(tokens) >= 11 and tokens[10] == "shadow" and hasattr(light, "setShadowCaster"):
 						lightNode.setTag("shadow", "true")
 						if enableShadows:
