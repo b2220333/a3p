@@ -885,10 +885,10 @@ class MainMenu(DirectObject):
 		self.skyBox.setColor(Vec4(1, 1, 1, 0))
 
 		cmbg = CardMaker("background")
-		size = 50
+		size = 10
 		cmbg.setFrame(-size * engine.aspectRatio, size * engine.aspectRatio, -size, size)
 		self.background = camera.attachNewNode(cmbg.generate())
-		self.background.setTexture(loader.loadTexture("menu/background.jpg"))
+		self.background.setTexture(loader.loadTexture("menu/background.jpg"), 1)
 		self.background.setPos(0, size * 1.25, 0)
 		self.background.setDepthWrite(False)
 
