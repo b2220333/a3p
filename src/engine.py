@@ -1009,6 +1009,7 @@ class Mouse:
 	def showCursor():
 		Mouse.enabled = False
 		props = WindowProperties()
+		props.setMouseMode(WindowProperties.MAbsolute)
 		props.setCursorHidden(False)
 		base.win.requestProperties(props)
 
@@ -1016,6 +1017,7 @@ class Mouse:
 	def hideCursor():
 		Mouse.enabled = True
 		props = WindowProperties()
+		props.setMouseMode(WindowProperties.MRelative)
 		props.setCursorHidden(True)
 		base.win.requestProperties(props)
 		base.win.movePointer(0, base.win.getProperties().getXSize() / 2, base.win.getProperties().getYSize() / 2)
