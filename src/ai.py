@@ -76,7 +76,7 @@ class World:
 		self.world.setSurfaceEntry(2, 2, 0.2, 0.3, 7, 0.9, 0.00001, 0.0, 0.01)
 		self.world.setSurfaceEntry(0, 0, 1.0, 0.3, 7, 0.9, 0.00001, 0.0, 0.01)
 
-		self.space = OdeSimpleSpace()
+		self.space = OdeHashSpace()
 		self.space.setAutoCollideWorld(self.world)
 		self.contactGroup = OdeJointGroup()
 		self.space.setAutoCollideJointGroup(self.contactGroup)
