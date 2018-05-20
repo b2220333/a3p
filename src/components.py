@@ -793,6 +793,7 @@ class GrenadeLauncher(Weapon):
         if self.firing:
             self.addCriticalPacket(p, packetUpdate)
             direction = self.actor.controller.targetPos - self.actor.getPosition()
+            direction.normalize()
             direction.setZ(direction.getZ() + 0.5)
             direction.normalize()
 
