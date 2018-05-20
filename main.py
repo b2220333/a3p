@@ -1,7 +1,18 @@
-from panda3d.core import loadPrcFile, loadPrcFileData
 import os
-import zlib
 import StringIO
+import sys
+import zlib
+
+import src.audio as audio
+import src.core as core
+import src.engine as engine
+import src.net as net
+import src.online as online
+import src.ui as ui
+
+from direct.showbase.DirectObject import DirectObject
+from direct.showbase.ShowBase import ShowBase
+from panda3d.core import *
 
 if __debug__:
     loadPrcFile("config/config.prc")
@@ -19,14 +30,10 @@ else:
 
     configData.close()
 
-from direct.showbase.ShowBase import ShowBase
-from direct.showbase.DirectObject import DirectObject
-from panda3d.core import *
-import sys
 
 try:
     __file__
-except:
+except BaseException:
     sys.argv = [sys.argv[0], "-w"]
 
 ShowBase()
@@ -35,26 +42,21 @@ base.makeDefaultPipe()
 winSize = ConfigVariableInt("win-size")
 fullscreen = ConfigVariableBool("fullscreen")
 
-import src.engine as engine
-import src.audio as audio
-import src.online as online
-import src.net as net
-import src.core as core
-import src.ui as ui
 
 def showHelpInfo():
-	print "Usage (bracketed parameters are optional):"
-	print "-w [width] [height]\tRun in windowed mode"
-	print "-a\t\t\tDisable audio"
-	print "-p portnumber\t\tUse the specified port (for both client and server)"
-	print "-d map\t\t\tRun in dedicated server mode on the specified map"
-	print "-v\t\t\t(Daemon only) Run the game in survival mode"
-	print "-h\t\t\tShow help information"
-	print "-m\t\t\tDeveloper mode"
-	engine.exit()
+    print "Usage (bracketed parameters are optional):"
+    print "-w [width] [height]\tRun in windowed mode"
+    print "-a\t\t\tDisable audio"
+    print "-p portnumber\t\tUse the specified port (for both client and server)"
+    print "-d map\t\t\tRun in dedicated server mode on the specified map"
+    print "-v\t\t\t(Daemon only) Run the game in survival mode"
+    print "-h\t\t\tShow help information"
+    print "-m\t\t\tDeveloper mode"
+    engine.exit()
+
 
 if "-h" in sys.argv or "/?" in sys.argv or "--help" in sys.argv:
-	showHelpInfo()
+    showHelpInfo()
 
 engine.loadConfigFile()
 
@@ -70,32 +72,32 @@ gametype = DEATHMATCH
 customWindowSize = False
 i = 1
 while i < len(sys.argv):
-	if sys.argv[i] == "-w":
-		customWindowSize = True
-		if len(sys.argv) > i + 1 and sys.argv[i + 1][0] != "-":
-			winSize.setWord(0, int(sys.argv[i + 1]))
-			winSize.setWord(1, int(sys.argv[i + 2]))
-			i += 2
-		else:
-			winSize.setWord(0, 800)
-			winSize.setWord(1, 600)
-	elif sys.argv[i] == "-d":
-		mode = MODE_DAEMON
-	elif sys.argv[i] == "-v":
-		gametype = SURVIVAL
-	i += 1
+    if sys.argv[i] == "-w":
+        customWindowSize = True
+        if len(sys.argv) > i + 1 and sys.argv[i + 1][0] != "-":
+            winSize.setWord(0, int(sys.argv[i + 1]))
+            winSize.setWord(1, int(sys.argv[i + 2]))
+            i += 2
+        else:
+            winSize.setWord(0, 800)
+            winSize.setWord(1, 600)
+    elif sys.argv[i] == "-d":
+        mode = MODE_DAEMON
+    elif sys.argv[i] == "-v":
+        gametype = SURVIVAL
+    i += 1
 
 if not customWindowSize:
-	winSize.setWord(0, base.pipe.getDisplayWidth())
-	winSize.setWord(1, base.pipe.getDisplayHeight())
+    winSize.setWord(0, base.pipe.getDisplayWidth())
+    winSize.setWord(1, base.pipe.getDisplayHeight())
 
 fullscreen.setValue(not customWindowSize)
 
 if mode != MODE_DAEMON:
-	base.openDefaultWindow()
-	engine.windowWidth = base.win.getProperties().getXSize()
-	engine.windowHeight = base.win.getProperties().getYSize()
-	engine.aspectRatio = float(engine.windowWidth) / float(engine.windowHeight)
+    base.openDefaultWindow()
+    engine.windowWidth = base.win.getProperties().getXSize()
+    engine.windowHeight = base.win.getProperties().getYSize()
+    engine.aspectRatio = float(engine.windowWidth) / float(engine.windowHeight)
 
 disableAudio = False
 defaultPort = 1337
@@ -107,111 +109,114 @@ skipIntro = False
 
 i = 1
 while i < len(sys.argv):
-	if sys.argv[i] == "-a":
-		disableAudio = True
-	elif sys.argv[i] == "-w":
-		if len(sys.argv) > i + 2 and sys.argv[i + 1][0] != "-":
-			# Skip the window size numbers. We already processed them.
-			i += 2
-	elif sys.argv[i] == "-p":
-		try:
-			defaultPort = int(sys.argv[i + 1])
-			i += 1
-		except:
-			showHelpInfo()
-	elif sys.argv[i] == "-d":
-		try:
-			defaultMap = sys.argv[i + 1]
-			i += 1
-		except:
-			showHelpInfo()
-	elif sys.argv[i] == "-u":
-		try:
-			username = sys.argv[i + 1]
-			i += 1
-		except:
-			showHelpInfo()
-	elif sys.argv[i] == "-m":
-		skipIntro = True
-		engine.enablePause = True
-	elif sys.argv[i] == "-v":
-		pass # Already been processed.
-	else:
-		showHelpInfo()
-	i += 1
+    if sys.argv[i] == "-a":
+        disableAudio = True
+    elif sys.argv[i] == "-w":
+        if len(sys.argv) > i + 2 and sys.argv[i + 1][0] != "-":
+            # Skip the window size numbers. We already processed them.
+            i += 2
+    elif sys.argv[i] == "-p":
+        try:
+            defaultPort = int(sys.argv[i + 1])
+            i += 1
+        except BaseException:
+            showHelpInfo()
+    elif sys.argv[i] == "-d":
+        try:
+            defaultMap = sys.argv[i + 1]
+            i += 1
+        except BaseException:
+            showHelpInfo()
+    elif sys.argv[i] == "-u":
+        try:
+            username = sys.argv[i + 1]
+            i += 1
+        except BaseException:
+            showHelpInfo()
+    elif sys.argv[i] == "-m":
+        skipIntro = True
+        engine.enablePause = True
+    elif sys.argv[i] == "-v":
+        pass  # Already been processed.
+    else:
+        showHelpInfo()
+    i += 1
 
 if disableAudio or mode == MODE_DAEMON:
-	audio.disable()
+    audio.disable()
+
 
 def goDaemon():
-	# Initialize engine settings
-	engine.init(showFrameRate = False, daemon = True)
-	engine.preloadModels()
+    # Initialize engine settings
+    engine.init(showFrameRate=False, daemon=True)
+    engine.preloadModels()
 
-	from direct.distributed.PyDatagram import PyDatagram
-	net.init(defaultPort, PyDatagram)
+    from direct.distributed.PyDatagram import PyDatagram
+    net.init(defaultPort, PyDatagram)
 
-	if gametype == DEATHMATCH:
-		gameBackend = core.PointControlBackend(True, username)
-	elif gametype == SURVIVAL:
-		gameBackend = core.SurvivalBackend(True, username)
-	gameBackend.loadMap(defaultMap)
+    if gametype == DEATHMATCH:
+        gameBackend = core.PointControlBackend(True, username)
+    elif gametype == SURVIVAL:
+        gameBackend = core.SurvivalBackend(True, username)
+    gameBackend.loadMap(defaultMap)
 
-	def gameLoop(task):
-		engine.update()
-		if gameBackend != None:
-			gameBackend.update()
-		engine.endUpdate()
-		return task.cont
+    def gameLoop(task):
+        engine.update()
+        if gameBackend is not None:
+            gameBackend.update()
+        engine.endUpdate()
+        return task.cont
 
-	taskMgr.add(gameLoop, "Game loop")
+    taskMgr.add(gameLoop, "Game loop")
+
 
 def goMenu():
-	global gameBackend, game, mode, gametype, mainMenu, skipIntro, menu
+    global gameBackend, game, mode, gametype, mainMenu, skipIntro, menu
 
-	# Initialize engine settings
-	engine.init(showFrameRate = False, daemon = (mode == MODE_DAEMON))
-	engine.preloadModels()
+    # Initialize engine settings
+    engine.init(showFrameRate=False, daemon=(mode == MODE_DAEMON))
+    engine.preloadModels()
 
-	from direct.distributed.PyDatagram import PyDatagram
-	net.init(defaultPort, PyDatagram)
+    from direct.distributed.PyDatagram import PyDatagram
+    net.init(defaultPort, PyDatagram)
 
-	gameBackend = None
-	game = None
+    gameBackend = None
+    game = None
 
-	mainMenu = core.MainMenu(skipIntro)
+    mainMenu = core.MainMenu(skipIntro)
 
-	menu = None
+    menu = None
 
-	def gameLoop(task):
-		global mainMenu, gameBackend, game, menu
-		engine.update()
-		if mainMenu != None and mainMenu.active:
-			gameBackend, game = mainMenu.update()
-		else:
-			mainMenu = None
-		if gameBackend != None:
-			gameBackend.update()
-		if game != None:
-			game.update()
-			if menu == None:
-				menu = ui.Menu()
-			if not menu.active or not gameBackend.connected:
-				game.delete()
-				gameBackend.delete()
-				game = None
-				gameBackend = None
-				mainMenu = core.MainMenu(skipIntro)
-				menu.delete()
-				menu = None
-		engine.endUpdate()
-		return task.cont
+    def gameLoop(task):
+        global mainMenu, gameBackend, game, menu
+        engine.update()
+        if mainMenu is not None and mainMenu.active:
+            gameBackend, game = mainMenu.update()
+        else:
+            mainMenu = None
+        if gameBackend is not None:
+            gameBackend.update()
+        if game is not None:
+            game.update()
+            if menu is None:
+                menu = ui.Menu()
+            if not menu.active or not gameBackend.connected:
+                game.delete()
+                gameBackend.delete()
+                game = None
+                gameBackend = None
+                mainMenu = core.MainMenu(skipIntro)
+                menu.delete()
+                menu = None
+        engine.endUpdate()
+        return task.cont
 
-	taskMgr.add(gameLoop, "Game loop")
+    taskMgr.add(gameLoop, "Game loop")
+
 
 if mode == MODE_DAEMON:
-	goDaemon()
+    goDaemon()
 elif mode == MODE_NORMAL:
-	goMenu()
+    goMenu()
 
 base.run()

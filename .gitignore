@@ -104,3 +104,6 @@ distributable/
 
 # Visual Studio Code
 .vscode/
+
+# mac os
+*.DS_Store
