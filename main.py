@@ -13,7 +13,6 @@ import src.ui as ui
 from direct.showbase.DirectObject import DirectObject
 from direct.showbase.ShowBase import ShowBase
 from panda3d.core import *
-from panda3d.core import loadPrcFile, loadPrcFileData
 
 if __debug__:
     loadPrcFile("config/config.prc")

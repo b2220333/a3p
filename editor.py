@@ -10,8 +10,9 @@ import src.entities as entities
 import src.net as net
 import src.net2 as net2
 import src.ui as ui
+
 from direct.directbase import DirectStart
-from pandac.PandaModules import *
+from panda3d.core import *
 
 engine.loadConfigFile()
 
