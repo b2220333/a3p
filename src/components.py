@@ -795,7 +795,6 @@ class GrenadeLauncher(Weapon):
             direction = self.actor.controller.targetPos - self.actor.getPosition()
             direction.normalize()
             direction.setZ(direction.getZ() + 0.5)
-            direction.normalize()
 
             origin = self.actor.getPosition() + (direction * (self.actor.radius + 0.1))
             grenade = entities.Grenade(aiWorld.world, aiWorld.space)
@@ -843,7 +842,6 @@ class MolotovThrower(Weapon):
             direction = self.actor.controller.targetPos - self.actor.getPosition()
             direction.normalize()
             direction.setZ(direction.getZ() + 0.5)
-            direction.normalize()
 
             origin = self.actor.getPosition() + (direction * (self.actor.radius + 0.1))
             grenade = entities.Molotov(aiWorld.world, aiWorld.space)
