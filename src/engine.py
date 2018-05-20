@@ -452,6 +452,13 @@ def readPhysicsEntityFile(file):
     physicsEntityFileCache[file] = data
     return data
 
+class MapFile:
+
+    def __init__(self):
+        self.data = ""
+
+    def write(self, line):
+        self.data += line
 
 class Map(DirectObject):
     """A Map loads all environment resources from a map file.
@@ -838,12 +845,6 @@ class Map(DirectObject):
 
     def save(self, aiWorld, entityGroup):
         "Saves a basic representation of the current game state (including environment resources) to a map file."
-        class MapFile:
-            def __init__(self):
-                self.data = ""
-
-            def write(self, line):
-                self.data += line
         mapFile = MapFile()
         mapFile.write("world " + str(self.worldSize) + "\n")
         if aiWorld.navMesh is not None:
