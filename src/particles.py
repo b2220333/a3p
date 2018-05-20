@@ -348,7 +348,7 @@ class EnemySelectorParticleGroup(ParticleGroup):
             ParticleGroup.generator.particle(
                 Vec3(pos),
                 ParticleGroup.frames[4],
-                radius * 2.0,
+                radius * 1.5,
                 EnemySelectorParticleGroup.color,
                 engine.clock.time * -30)
 
