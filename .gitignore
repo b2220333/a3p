@@ -101,3 +101,6 @@ distributable/
 # Screenshots:
 *.jpg
 *.jpeg
+
+# mac os
+*.DS_Store

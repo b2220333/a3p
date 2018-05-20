@@ -1,17 +1,17 @@
-from direct.directbase import DirectStart
-from random import randint, random, uniform
-from pandac.PandaModules import *
 import math
-import src.engine as engine
+import sys
+from random import randint, random, uniform
+
 import src.ai as ai
 import src.audio as audio
+import src.controllers as controllers
+import src.engine as engine
 import src.entities as entities
-import src.ui as ui
 import src.net as net
 import src.net2 as net2
-import src.controllers as controllers
-
-import sys
+import src.ui as ui
+from direct.directbase import DirectStart
+from pandac.PandaModules import *
 
 engine.loadConfigFile()
 
@@ -36,20 +36,22 @@ base.disableAllAudio()
 
 editor = controllers.EditController(aiWorld, entityGroup, map, ui)
 
+
 def gameTask(task):
-	global aiWorld
-	global entityGroup
-	global map
-	global ui
-	global editor
+    global aiWorld
+    global entityGroup
+    global map
+    global ui
+    global editor
 
-	engine.update()
-	ui.update()
-	editor.serverUpdate(aiWorld, entityGroup, None)
-	map.update()
-	engine.endUpdate()
+    engine.update()
+    ui.update()
+    editor.serverUpdate(aiWorld, entityGroup, None)
+    map.update()
+    engine.endUpdate()
 
-	return task.cont
+    return task.cont
+
 
 taskMgr.add(gameTask, "Game Task")
 
