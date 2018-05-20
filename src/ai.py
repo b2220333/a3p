@@ -1,4 +1,5 @@
 from direct.showbase.DirectObject import DirectObject
+from direct.stdpy import threading
 from pandac.PandaModules import *
 from random import randint, random, choice
 import math
@@ -9,7 +10,6 @@ import entities
 import net
 import components
 import controllers
-import threading
 import time
 
 ACCURACY = 0.7 # Relative probability of an AI droid hitting its target.
