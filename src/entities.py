@@ -194,7 +194,9 @@ class EntityGroup(DirectObject):
             pos = entity.getPosition()
             vector = pos - position
             distance = vector.length()
-            vector.normalize()
+
+            if distance > 0:
+                vector.normalize()
 
             if entity.active:
                 vector = engine.impulseToForce(
