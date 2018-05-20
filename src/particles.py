@@ -307,7 +307,7 @@ class SparkParticleGroup(ParticleGroup):
         self.lifeTime = lifeTime + uniform(lifeTime * -0.3, lifeTime * 0.3)
         self.positions = []
         self.velocities = []
-        self.color = Vec4(1, 0.8, 0.6, 1)
+        self.color = Vec4(1, 0.8, 0.6, 0.5)
         for _ in xrange(self.numParticles):
             self.positions.append(Vec3(self.position))
         for _ in xrange(self.numParticles):
