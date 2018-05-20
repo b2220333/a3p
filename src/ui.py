@@ -47,8 +47,7 @@ class GameUI(DirectObject):
         self.specialReadySound = audio.FlatSound("sounds/special-ready.ogg")
         self.lastSpecialReady = True
 
-        self.damageImage = OnscreenImage(
-            image="images/tunnel-vision.png", pos=(0, 0, 0),)
+        self.damageImage = OnscreenImage(image="images/tunnel-vision.png", pos=(0, 0, 0))
         self.damageImage.setTransparency(TransparencyAttrib.MAlpha)
         self.damageImage.hide()
         self.damageImage.setBin("transparent", 0)
