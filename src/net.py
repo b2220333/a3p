@@ -438,6 +438,9 @@ class CustomDatagram:
     def __init__(self, x=""):
         self.data = x
 
+    def __bytes__(self):
+        return b"%a" % self.data
+
     def addUint8(self, x):
         self.data += chr(x)
 
@@ -468,7 +471,7 @@ class CustomDatagram:
         return len(self.data)
 
     def getMessage(self):
-        return self.data
+        return bytes(self)
 
 
 def clamp(a, min, max):
