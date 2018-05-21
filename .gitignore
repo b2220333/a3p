@@ -104,3 +104,4 @@ distributable/
 
 # mac os
 *.DS_Store
+Library/
