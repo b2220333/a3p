@@ -456,7 +456,8 @@ class NavMesh:
             return (x.fScore > y.fScore) - (x.fScore < y.fScore)
         iterations = 0
         while len(openEdges) > 0:
-            openEdges.sort(compare)
+            # TODO FIXME: this is broken in panda!
+            #openEdges.sort(compare)
             currentEdge = openEdges.pop(0)
             if endNode in currentEdge.nodes:
                 c = currentEdge
