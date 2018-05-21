@@ -244,6 +244,7 @@ def init(showFrameRate=False, daemon=False):
 
     clock = Clock()
     base.disableMouse()  # Disable default mouse camera control
+    base.setFrameRateMeter(showFrameRate)
     if not daemon:
         base.camNode.setCameraMask(BitMask32.bit(1))
         base.camLens.setFov(defaultFov)
