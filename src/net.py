@@ -57,7 +57,7 @@ SPAWN_POD = 8
 MODE_SERVER = 0
 MODE_CLIENT = 1
 
-SERVER_TICK = 0.03  # Transfer update packets 20 times per second
+SERVER_TICK = 0.05  # Transfer update packets 20 times per second
 
 if sys.platform == "win32":
     timeFunction = time.clock
