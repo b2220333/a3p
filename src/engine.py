@@ -1298,7 +1298,7 @@ class Mouse:
         self._y = min(self._maxY, max(self._minY, self._y + self._dy))
         centerX = base.win.getProperties().getXSize() / 2
         centerY = base.win.getProperties().getYSize() / 2
-        if base.win.movePointer(0, centerX, centerY):
+        if base.win.movePointer(0, int(centerX), int(centerY)):
             self._lastX = centerX
             self._lastY = centerY
 
