@@ -213,7 +213,7 @@ class PythonNetContext(NetworkContext):
             self.activeConnections[client] = connection
 
     def resetConnectionStatuses(self):
-        for connection in self.activeConnections.values():
+        for connection in list(self.activeConnections.values()):
             connection.ready = False
 
     def writeTick(self):
@@ -222,10 +222,10 @@ class PythonNetContext(NetworkContext):
             # for broadcasting, the given connection is excluded, if one is given.
             # for sending, the given connection is the only one we send the
             # data to.
-            compressedData = zlib.compress(data[1].getMessage())
+            compressedData = zlib.compress(bytes(data[1]))
             if data[0] == 0:  # Broadcast
                 for c in (
-                        x for x in self.activeConnections.values() if x.ready):
+                        x for x in list(self.activeConnections.values()) if x.ready):
                     c.lastSentPacketTime = timeFunction()
                     try:
                         self.socket.sendto(compressedData, c.address)
@@ -243,7 +243,7 @@ class PythonNetContext(NetworkContext):
                     self.hostConnection.lastSentPacketTime = timeFunction()
             elif data[0] == 2:  # Broadcast, excluding one machine
                 for c in (
-                    x for x in self.activeConnections.values() if x.ready and not compareAddresses(
+                    x for x in list(self.activeConnections.values()) if x.ready and not compareAddresses(
                         x.address,
                         data[2])):
                     try:
@@ -256,7 +256,7 @@ class PythonNetContext(NetworkContext):
     def readTick(self):
         if self.mode == MODE_SERVER:
             loadingTimeout = self.connectionTimeout * 2
-            for client in self.activeConnections.values():
+            for client in list(self.activeConnections.values()):
                 if timeFunction() - client.lastPacketTime > (
                         self.connectionTimeout if client.ready else loadingTimeout):
                     del self.activeConnections[client.address]
@@ -296,7 +296,7 @@ class PythonNetContext(NetworkContext):
             if code == PACKET_HOSTLIST:
                 numHosts = Uint16.getFrom(iterator)
                 hosts = []
-                for _ in xrange(numHosts):
+                for _ in range(numHosts):
                     ip = String.getFrom(iterator)
                     port = Uint16.getFrom(iterator)
                     user = String.getFrom(iterator)

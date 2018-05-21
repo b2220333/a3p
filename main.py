@@ -1,5 +1,5 @@
 import os
-import StringIO
+import io
 import sys
 import zlib
 
@@ -20,7 +20,7 @@ else:
     if not os.path.exists('config.pre'):
         raise RuntimeError('Failed to file config file!')
 
-    configData = StringIO.StringIO(zlib.decompress(open('config.pre').read()))
+    configData = io.StringIO(zlib.decompress(open('config.pre').read()))
 
     for line in configData.readlines():
         if not line or line == '\n':
@@ -44,14 +44,14 @@ fullscreen = ConfigVariableBool("fullscreen")
 
 
 def showHelpInfo():
-    print "Usage (bracketed parameters are optional):"
-    print "-w [width] [height]\tRun in windowed mode"
-    print "-a\t\t\tDisable audio"
-    print "-p portnumber\t\tUse the specified port (for both client and server)"
-    print "-d map\t\t\tRun in dedicated server mode on the specified map"
-    print "-v\t\t\t(Daemon only) Run the game in survival mode"
-    print "-h\t\t\tShow help information"
-    print "-m\t\t\tDeveloper mode"
+    print("Usage (bracketed parameters are optional):")
+    print("-w [width] [height]\tRun in windowed mode")
+    print("-a\t\t\tDisable audio")
+    print("-p portnumber\t\tUse the specified port (for both client and server)")
+    print("-d map\t\t\tRun in dedicated server mode on the specified map")
+    print("-v\t\t\t(Daemon only) Run the game in survival mode")
+    print("-h\t\t\tShow help information")
+    print("-m\t\t\tDeveloper mode")
     engine.exit()
 
 

@@ -1,5 +1,5 @@
-import engine
-import net
+from . import engine
+from . import net
 
 from direct.distributed.PyDatagram import PyDatagram
 from panda3d.core import *

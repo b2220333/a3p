@@ -3,19 +3,19 @@ import math
 import sys
 from random import choice, uniform
 
-import ai
-import entities
-import ui
-import net
+from . import ai
+from . import entities
+from . import ui
+from . import net
 import math
-import controllers
-import components
-import engine
+from . import controllers
+from . import components
+from . import engine
 import sys
-import audio
-import online
-import net2
-import particles
+from . import audio
+from . import online
+from . import net2
+from . import particles
 
 from direct.distributed.PyDatagram import PyDatagram
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
@@ -85,9 +85,9 @@ class Backend(DirectObject):
         self.reset()
         if self.game is not None:
             self.game.reset()
-        engine.log.info("Loading map: " + mapFile)
+        engine.log.info("Loading map: %s" % str(mapFile))
         self.map.load(mapFile, self.aiWorld, self.entityGroup)
-        engine.log.info("Map loaded: " + self.map.filename)
+        engine.log.info("Map loaded: %s" % self.map.filename)
 
     def reset(self):
         self.gameOver = False
@@ -319,12 +319,12 @@ class ServerBackend(Backend):
         p = net.Packet()
         # Teams have to be spawned first, so other entities can link to them.
         for entity in (
-            x for x in self.entityGroup.entities.values() if isinstance(
+            x for x in list(self.entityGroup.entities.values()) if isinstance(
                 x,
                 entities.TeamEntity)):
             p.add(entity.controller.buildSpawnPacket())
         for entity in (
-            x for x in self.entityGroup.entities.values() if not isinstance(
+            x for x in list(self.entityGroup.entities.values()) if not isinstance(
                 x,
                 entities.TeamEntity)):
             p.add(entity.controller.buildSpawnPacket())
@@ -351,7 +351,7 @@ class PointControlBackend(ServerBackend):
         if engine.clock.time - self.lastPodSpawnCheck > 0.5:
             numPods = 1 if self.numClients <= 2 else 2
             self.lastPodSpawnCheck = engine.clock.time
-            if len([1 for x in self.entityGroup.entities.values() if isinstance(x, entities.DropPod)]) < numPods and len(
+            if len([1 for x in list(self.entityGroup.entities.values()) if isinstance(x, entities.DropPod)]) < numPods and len(
                     [1 for team in self.entityGroup.teams if team.getPlayer() is not None and team.getPlayer().active]) > 0:
                 self.spawnPod()
 
@@ -362,7 +362,7 @@ class PointControlBackend(ServerBackend):
             queue = self.aiWorld.getCollisionQueue(
                 Vec3(uniform(-size, size), uniform(-size, size), 100), Vec3(0, 0, -1))
             pos = None
-            for i in xrange(queue.getNumEntries()):
+            for i in range(queue.getNumEntries()):
                 entry = queue.getEntry(i)
                 if entry.getSurfaceNormal(render).getZ() >= 0:
                     pos = entry.getSurfacePoint(render)
@@ -452,7 +452,7 @@ class SurvivalBackend(ServerBackend):
         if self.numClients > 0:
             livePlayers, deadPlayers = self.getPlayerCounts()
             if not self.zombiesSpawned and livePlayers == self.numClients:
-                for i in xrange(self.zombieCounts[self.matchNumber]):
+                for i in range(self.zombieCounts[self.matchNumber]):
                     self.zombieTeam.respawn(
                         self.zombieLoadouts[self.matchNumber][0], self.zombieLoadouts[self.matchNumber][1])
                 self.zombiesSpawned = True
@@ -460,7 +460,7 @@ class SurvivalBackend(ServerBackend):
             elif self.zombiesSpawned and engine.clock.time - self.zombieSpawnTime > self.zombieTeam.controller.spawnDelay + 1.0:
                 if deadPlayers == self.numClients:
                     self.endMatch(self.zombieTeam)
-                elif len([x for x in self.entityGroup.entities.values() if isinstance(x, entities.Actor) and x.getTeam().isAlly(self.zombieTeam)]) == 0:
+                elif len([x for x in list(self.entityGroup.entities.values()) if isinstance(x, entities.Actor) and x.getTeam().isAlly(self.zombieTeam)]) == 0:
                     highestScore = -1
                     winningTeam = None
                     for team in self.entityGroup.teams:
@@ -506,7 +506,7 @@ class ClientBackend(Backend):
             self.gameOver = net.Boolean.getFrom(iterator)
             winningTeam = self.entityGroup.getEntity(
                 net.Uint8.getFrom(iterator))
-            for i in xrange(len(self.entityGroup.teams)):
+            for i in range(len(self.entityGroup.teams)):
                 id = net.Uint8.getFrom(iterator)
                 team = self.entityGroup.getEntity(id)
                 pos = net.Uint8.getFrom(iterator)
@@ -597,7 +597,7 @@ class Game(DirectObject):
         weaponSelections = self.unitSelector.getUnitWeapons()
         specialSelections = self.unitSelector.getUnitSpecials()
         self.localTeam.clearUnits()
-        for i in xrange(len(weaponSelections)):
+        for i in range(len(weaponSelections)):
             self.localTeam.purchaseUnit(
                 weaponSelections[i], specialSelections[i])
 
@@ -795,7 +795,7 @@ class Tutorial(Game):
                 -engine.aspectRatio + 0.05, 0.9), align=TextNode.ALeft, scale=0.07, fg=(
                 1, 1, 1, 1), shadow=(
                 0, 0, 0, 0.5), font=visitorFont, mayChange=True)
-        for i in xrange(4):
+        for i in range(4):
             image = OnscreenImage(image="images/part" + str(i + 1) +
                                   ".jpg", pos=(0, 0, 0), scale=(1680.0 / 1050.0, 1, 1))
             image.hide()
@@ -1281,7 +1281,7 @@ class JunkBelt:
             node.setRenderModeWireframe()
             self.models.append(node)
 
-        for _ in xrange(750):
+        for _ in range(750):
             instance = render.attachNewNode("junk")
             angle = uniform(0, 2 * math.pi)
             height = uniform(-0.5, 0.5)
@@ -1300,7 +1300,7 @@ class JunkBelt:
             self.instances.append(instance)
 
     def update(self):
-        for i in xrange(len(self.instances)):
+        for i in range(len(self.instances)):
             self.instances[i].setHpr(self.instances[i].getHpr(
             ) + (self.avels[i] * engine.clock.timeStep))
 

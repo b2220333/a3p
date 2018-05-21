@@ -1,6 +1,6 @@
 from random import random, uniform
 
-import engine
+from . import engine
 from panda3d.core import *
 
 particleGroups = []
@@ -173,7 +173,7 @@ class SmokeParticleGroup(ParticleGroup):
 
     def draw(self):
         if self.active and ParticleGroup.begun:
-            for i in xrange(len(self.positions)):
+            for i in range(len(self.positions)):
                 blend = (engine.clock.time -
                          self.spawnTimes[i]) / self.lifeTime
                 if blend <= 1.0:
@@ -230,7 +230,7 @@ class FireParticleGroup(ParticleGroup):
 
     def draw(self):
         if self.active and ParticleGroup.begun:
-            for i in xrange(len(self.positions)):
+            for i in range(len(self.positions)):
                 blend = (engine.clock.time -
                          self.spawnTimes[i]) / self.lifeTime
                 if blend <= 1.0:
@@ -308,9 +308,9 @@ class SparkParticleGroup(ParticleGroup):
         self.positions = []
         self.velocities = []
         self.color = Vec4(1, 0.8, 0.6, 0.5)
-        for _ in xrange(self.numParticles):
+        for _ in range(self.numParticles):
             self.positions.append(Vec3(self.position))
-        for _ in xrange(self.numParticles):
+        for _ in range(self.numParticles):
             self.velocities.append(
                 Vec3(uniform(-speed, speed), uniform(-speed, speed), uniform(-speed, speed)))
 
@@ -323,7 +323,7 @@ class SparkParticleGroup(ParticleGroup):
         if self.active and ParticleGroup.begun:
             self.color.setW(
                 1 - ((engine.clock.time - self.spawnTime) / self.lifeTime))
-            for i in xrange(self.numParticles):
+            for i in range(self.numParticles):
                 self.velocities[i].setZ(
                     self.velocities[i].getZ() - (engine.clock.timeStep * 40.0))
                 self.positions[i] += self.velocities[i] * engine.clock.timeStep
@@ -402,7 +402,7 @@ class ExplosionParticleGroup(ParticleGroup):
         self.positions = []
         self.initialAngles = []
         radius = 5
-        for _ in xrange(self.numParticles):
+        for _ in range(self.numParticles):
             self.positions.append(Vec3(self.position) + Vec3(
                 uniform(-radius, radius), uniform(-radius, radius), uniform(-radius, radius)))
             self.initialAngles.append(random() * 360)
@@ -420,7 +420,7 @@ class ExplosionParticleGroup(ParticleGroup):
             blend2 = (engine.clock.time - self.spawnTime) / self.lightLifeTime
             self.light.setColor(
                 Vec4(1.0 * (1.0 - blend2), 0.7 * (1.0 - blend2), 0.4 * (1.0 - blend2), 1))
-            for i in xrange(self.numParticles):
+            for i in range(self.numParticles):
                 ParticleGroup.generator.particle(self.positions[i], ParticleGroup.frames[0], 1.5 + (
                     blend * 5.0), Vec4(1, 1, 1, max(0, 0.5 - (blend * 0.5))), self.initialAngles[i] + (blend * 45))
 

@@ -1,9 +1,9 @@
-from Queue import Queue  # So we have the Empty exception
+from queue import Queue  # So we have the Empty exception
 from random import random
 
-import controllers
-import net
-import engine
+from . import controllers
+from . import net
+from . import engine
 
 from direct.distributed.PyDatagram import PyDatagram
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
@@ -235,7 +235,7 @@ class NetManager(DirectObject):
                             str(lastController))
                         # Only send a request once every two seconds
                         if sender is not None and (
-                            (id not in self.requestedEntitySpawns.keys()) or (
+                            (id not in list(self.requestedEntitySpawns.keys())) or (
                                 engine.clock.time - self.requestedEntitySpawns[id] > 2.0)):
                             p = net.Packet()
                             p.add(net.Uint8(net.PACKET_REQUESTSPAWNPACKET))
@@ -249,7 +249,7 @@ class NetManager(DirectObject):
                     controllerType = net.Uint8.getFrom(iterator)
                     entity = controllers.types[controllerType].readSpawnPacket(
                         backend.aiWorld, backend.entityGroup, iterator)
-                    if entity.getId() in self.requestedEntitySpawns.keys():
+                    if entity.getId() in list(self.requestedEntitySpawns.keys()):
                         del self.requestedEntitySpawns[entity.getId()]
                     if entity is not None and backend.entityGroup.getEntity(
                             entity.getId()) is None:
@@ -321,7 +321,7 @@ class NetManager(DirectObject):
                     # Number of active entities we're supposed to have
                     checksum = net.Uint8.getFrom(iterator)
                     if net.netMode == net.MODE_CLIENT and checksum != len(
-                            [x for x in backend.entityGroup.entities.values() if x.active and x.getId() < 256]):
+                            [x for x in list(backend.entityGroup.entities.values()) if x.active and x.getId() < 256]):
                         # We don't have the right number of entities
                         p = net.Packet()
                         p.add(net.Uint8(net.PACKET_REQUESTENTITYLIST))
@@ -332,8 +332,8 @@ class NetManager(DirectObject):
                 elif type == net.PACKET_REQUESTENTITYLIST:
                     p = net.Packet()
                     p.add(net.Uint8(net.PACKET_ENTITYLIST))
-                    entityList = [x for x in backend.entityGroup.entities.values(
-                    ) if x.active and x.getId() < 256]
+                    entityList = [x for x in list(backend.entityGroup.entities.values(
+                    )) if x.active and x.getId() < 256]
                     p.add(net.Uint8(len(entityList)))
                     for entity in entityList:
                         p.add(net.Uint8(entity.getId()))
@@ -345,15 +345,15 @@ class NetManager(DirectObject):
                     total = net.Uint8.getFrom(iterator)
                     entities = []
                     missingEntities = []
-                    for _ in xrange(total):
+                    for _ in range(total):
                         id = net.Uint8.getFrom(iterator)
-                        if id not in backend.entityGroup.entities.keys():
+                        if id not in list(backend.entityGroup.entities.keys()):
                             missingEntities.append(id)
                         entities.append(id)
                     # Delete any extra entities, assuming they aren't ones that
                     # we just spawned on our end.
                     for entity in (
-                            x for x in backend.entityGroup.entities.values() if x.active and x.getId() < 256):
+                            x for x in list(backend.entityGroup.entities.values()) if x.active and x.getId() < 256):
                         if entity.getId() not in entities and engine.clock.time - entity.spawnTime > 5.0:
                             entity.delete(backend.entityGroup, False, False)
                     if len(missingEntities) > 0:
@@ -392,7 +392,7 @@ class NetManager(DirectObject):
                 spawnPacket.add(p)
             del self.spawnPackets[:]
 
-        entityList = backend.entityGroup.entities.values()
+        entityList = list(backend.entityGroup.entities.values())
         updatedEntities = []
         controllerPacket = net.Packet()
         for entity in (x for x in entityList if x.active and x.isLocal):
@@ -480,7 +480,7 @@ class NetManager(DirectObject):
         emptyPacket = net.Packet()
         emptyPacket.add(net.Uint8(net.PACKET_EMPTY))
         for client in (
-                x for x in net.context.activeConnections.values() +
+                x for x in list(net.context.activeConnections.values()) +
                 clientAddress if net.timeFunction() -
                 x.lastSentPacketTime > 0.5 and x.ready):
             net.context.send(emptyPacket, client.address)

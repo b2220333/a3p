@@ -3,11 +3,11 @@ import sys
 import time
 from random import choice, randint, random
 
-import engine
-import entities
-import net
-import components
-import controllers
+from . import engine
+from . import entities
+from . import net
+from . import components
+from . import controllers
 import time
 
 from direct.showbase.DirectObject import DirectObject
@@ -120,7 +120,7 @@ class World:
     def getNearestDroid(self, entityGroup, pos):
         distance = -1
         droid = None
-        for entity in (x for x in entityGroup.entities.values()
+        for entity in (x for x in list(entityGroup.entities.values())
                        if isinstance(x, entities.BasicDroid)):
             vector = pos - entity.getPosition()
             if vector.length() < distance or distance == -1:
@@ -137,7 +137,7 @@ class World:
         distance = -1
         enemy = None
         for entity in (
-            x for x in entityGroup.entities.values() if isinstance(
+            x for x in list(entityGroup.entities.values()) if isinstance(
                 x, entities.BasicDroid) and (
                 (not x.cloaked) or includeCloakedUnits) and (
                 not team.isAlly(
@@ -151,7 +151,7 @@ class World:
     def getNearestDropPod(self, entityGroup, pos):
         distance = -1
         pod = None
-        for entity in (x for x in entityGroup.entities.values()
+        for entity in (x for x in list(entityGroup.entities.values())
                        if isinstance(x, entities.DropPod)):
             vector = pos - entity.getPosition()
             if vector.length() < distance or distance == -1:
@@ -185,7 +185,7 @@ class World:
         dockList = [team.dock] if team.dock is not None else []
         points = sorted(dockList + self.spawnPoints,
                         key=lambda x: (x.getPosition() - pos).length())
-        enemies = [x for x in entityGroup.entities.values() if isinstance(
+        enemies = [x for x in list(entityGroup.entities.values()) if isinstance(
             x, entities.Actor) and x.getTeam() != team]
         for point in points:
             p = point.getPosition()
@@ -220,7 +220,7 @@ class World:
         if team is not None and team.dock is not None:
             spawns.append(team.dock)
         goodSpawns = []
-        enemies = [x for x in entityGroup.entities.values() if isinstance(
+        enemies = [x for x in list(entityGroup.entities.values()) if isinstance(
             x, entities.Actor) and x.getTeam() != team]
         for point in spawns:
             p = point.getPosition()
@@ -348,14 +348,14 @@ class NavMesh:
                 edge.navigable = False
 
     def _processGeomNode(self, geomNode):
-        for i in xrange(geomNode.getNumGeoms()):
+        for i in range(geomNode.getNumGeoms()):
             geom = geomNode.getGeom(i)
             state = geomNode.getGeomState(i)
             self._processGeom(geom)
 
     def _processGeom(self, geom):
         vdata = geom.getVertexData()
-        for i in xrange(geom.getNumPrimitives()):
+        for i in range(geom.getNumPrimitives()):
             prim = geom.getPrimitive(i)
             self._processPrimitive(prim, vdata)
 
@@ -367,10 +367,10 @@ class NavMesh:
             vi = prim.getVertex(index)
             vertex.setRow(vi)
             return vertex.getData3f()
-        for p in xrange(prim.getNumPrimitives()):
+        for p in range(prim.getNumPrimitives()):
             s = prim.getPrimitiveStart(p)
             e = prim.getPrimitiveEnd(p)
-            for i in xrange(s, e):
+            for i in range(s, e):
                 v = getVertex(i)
                 if i + 1 >= e:
                     break
@@ -523,7 +523,7 @@ class NavNode:
         p2 = Vec3(p.getX(), p.getY(), 0)
         if p.getZ() > self.highest + radius + 1 or p.getZ() < self.lowest - radius - 1:
             return False
-        for i in xrange(len(self.edgeNormals)):
+        for i in range(len(self.edgeNormals)):
             vector = p2 - self.edges[i].flatCenter
             vector.normalize()
             if vector.dot(self.edgeNormals[i]) < 0:
@@ -659,7 +659,7 @@ class Path:
         else:
             return None
 
-    def next(self):
+    def __next__(self):
         if len(self.waypoints) > 0:
             self.waypoints.pop(0)
         return self.current()

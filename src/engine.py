@@ -5,13 +5,13 @@ import time
 import traceback
 from random import uniform
 
-import ai
-import audio
-import controllers
-import entities
-import net
-import particles
-import ui
+from . import ai
+from . import audio
+from . import controllers
+from . import entities
+from . import net
+from . import particles
+from . import ui
 
 from direct.actor.Actor import Actor
 from direct.directnotify.DirectNotify import DirectNotify
@@ -261,7 +261,7 @@ def init(showFrameRate=False, daemon=False):
     if enableShaders and not daemon:
         numMaxDynamicLights = 2
 
-    for i in xrange(numMaxDynamicLights):
+    for i in range(numMaxDynamicLights):
         light = PointLight("Light" + str(i))
         light.setColor(Vec4(0, 0, 0, 1))
         light.setAttenuation(Vec3(0, 0, 1))
@@ -383,7 +383,7 @@ def exceptHook(type, value, trace):
     sys.exc_info = lambda: (type, value, trace)
     exceptionData = traceback.format_exc()
     log.info(exceptionData)
-    print exceptionData
+    print(exceptionData)
 
 
 def clearLights():
@@ -434,12 +434,19 @@ class Clock:
 
 
 def readFile(file):
-    data = ""
-    if vfs.exists(file):
-        data = vfs.readFile(file, 1)
-    elif mf is not None:  # We're reading from a multifile
-        fileId = mf.findSubfile(file)
-        data = mf.readSubfile(fileId)
+    if not os.path.exists(file):
+        raise IOError("Failed to read file: %s!" % file)
+
+    with open(file, "r") as file:
+        data = file.read()
+        file.close()
+
+    # TODO: this is currently broken within panda!
+    #if vfs.exists(file):
+    #    data = vfs.readFile(file, 1)
+    #elif mf is not None:  # We're reading from a multifile
+    #    fileId = mf.findSubfile(file)
+    #    data = mf.readSubfile(fileId)
     return data
 
 
@@ -526,8 +533,8 @@ class Map(DirectObject):
         mapDirectory = "maps"
 
         data = readFile(self.filename)
+        lines = data.split("\n")
 
-        lines = data.split('\n')
         for line in lines:
             tokens = line.split()
             if len(tokens) == 0 or line[0] == "#":
@@ -551,7 +558,7 @@ class Map(DirectObject):
                                 0.0, 0.0, 0.5, 1), Vec4(
                                 0, 0.5, 0, 1), Vec4(
                                 0.5, 0.5, 0, 1)]
-                    for i in xrange(numTeams):
+                    for i in range(numTeams):
                         team = entities.TeamEntity()
                         team.color = colors[i]
                         docks = [x for x in aiWorld.docks if x.teamIndex == i]
@@ -584,7 +591,7 @@ class Map(DirectObject):
                             0.0, 0.0, 0.4, 1), Vec4(
                             0, 0.4, 0, 1), Vec4(
                             0.4, 0.4, 0, 1)]
-                    for i in xrange(4):
+                    for i in range(4):
                         team = entities.TeamEntity()
                         team.money = 300  # Starting money amount for survival
                         team.color = colors[i]
@@ -778,7 +785,7 @@ class Map(DirectObject):
                 normal = Vec3(0, 0, 1)
                 queue = aiWorld.getCollisionQueue(
                     Vec3(pos.getX(), pos.getY(), pos.getZ()), Vec3(0, 0, -1))
-                for i in xrange(queue.getNumEntries()):
+                for i in range(queue.getNumEntries()):
                     entry = queue.getEntry(i)
                     if entityGroup.getEntityFromEntry(entry) is not None:
                         continue
@@ -832,7 +839,7 @@ class Map(DirectObject):
         height = 15
         if entry is not None:
             height = entry.getSurfacePoint(render).getZ() + 10.0
-        for i in xrange(numTeams):
+        for i in range(numTeams):
             p = Platform(aiWorld.space)
             spacing = 7
             vspacing = 2
@@ -876,7 +883,7 @@ class Map(DirectObject):
                               "\n")
             else:
                 mapFile.write("teams " + str(len(entityGroup.teams)) + "\n")
-        for geom in self.staticGeometries.values():
+        for geom in list(self.staticGeometries.values()):
             pos = geom.getPosition()
             keyword = "geometry"
             if not geom.node.isHidden():
@@ -1004,12 +1011,12 @@ class Map(DirectObject):
                               " " +
                               str(atten.getZ()) +
                               "\n")
-        for sceneryFile in self.sceneries.keys():
+        for sceneryFile in list(self.sceneries.keys()):
             pos = self.sceneries[sceneryFile].getPos(render)
             mapFile.write("scenery " + sceneryFile + " " + str(pos.getX()) +
                           " " + str(pos.getY()) + " " + str(pos.getZ()) + "\n")
         for obj in (
-            entity for entity in entityGroup.entities.values() if isinstance(
+            entity for entity in list(entityGroup.entities.values()) if isinstance(
                 entity,
                 entities.PhysicsEntity)):
             pos = obj.getPosition()
@@ -1030,7 +1037,7 @@ class Map(DirectObject):
                           str(hpr.getZ()) +
                           "\n")
         for glass in (
-            entity for entity in entityGroup.entities.values() if isinstance(
+            entity for entity in list(entityGroup.entities.values()) if isinstance(
                 entity,
                 entities.Glass)):
             pos = glass.getPosition()
@@ -1090,10 +1097,10 @@ class Map(DirectObject):
         map = None
         if self.skyBox is not None:
             self.skyBox.removeNode()
-        for scenery in self.sceneries.values():
+        for scenery in list(self.sceneries.values()):
             scenery.removeNode()
         self.sceneries.clear()
-        for geom in self.staticGeometries.values():
+        for geom in list(self.staticGeometries.values()):
             self.deleteStaticGeometry(geom)
         self.staticGeometries.clear()
         for p in self.platforms:
@@ -1328,8 +1335,8 @@ class Mouse:
         props.setMouseMode(WindowProperties.MRelative)
         props.setCursorHidden(True)
         base.win.requestProperties(props)
-        base.win.movePointer(0, base.win.getProperties(
-        ).getXSize() / 2, base.win.getProperties().getYSize() / 2)
+        base.win.movePointer(0, int(base.win.getProperties().getXSize() / 2),
+            int(base.win.getProperties().getYSize() / 2))
 
 
 class Light:
@@ -1403,7 +1410,7 @@ def frange(start, end=None, inc=None):
     L = [None, ] * count
 
     L[0] = start
-    for i in xrange(1, count):
+    for i in range(1, count):
         L[i] = L[i - 1] + inc
     return L
 

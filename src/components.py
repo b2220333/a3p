@@ -1,13 +1,13 @@
 import math
 from random import random, uniform
 
-import engine
-import entities
-import audio
-import net
-import net2
-import particles
-import controllers
+from . import engine
+from . import entities
+from . import audio
+from . import net
+from . import net2
+from . import particles
+from . import controllers
 
 from direct.showbase.DirectObject import DirectObject
 from panda3d.core import *
@@ -207,7 +207,7 @@ class Gun(Weapon):
         """Low-level bullet ray test used by most guns.
         Returns the position of the bullet hit, and the ObjectEntity damaged, if any."""
         queue = aiWorld.getCollisionQueue(origin, direction)
-        for i in xrange(queue.getNumEntries()):
+        for i in range(queue.getNumEntries()):
             entry = queue.getEntry(i)
             pos = entry.getSurfacePoint(render)
             normal = entry.getSurfaceNormal(render)
@@ -487,7 +487,7 @@ class Shotgun(Gun):
                     hitPos = net2.StandardVec3.getFrom(iterator)
                     if self.active:
                         radius = (hitPos - self.getPosition()).length() / 5
-                        for _ in xrange(5):
+                        for _ in range(5):
                             particles.add(particles.SparkParticleGroup(
                                 hitPos + Vec3(uniform(-radius, radius), uniform(-radius, radius), uniform(-radius, radius))))
                         origin = self.getPosition() + (direction * random() * 4)
@@ -937,7 +937,7 @@ class Pistol(Gun):
 
                     pinned = False
                     if isinstance(entity, entities.BasicDroid):
-                        for i in xrange(queue.getNumEntries()):
+                        for i in range(queue.getNumEntries()):
                             entry = queue.getEntry(i)
                             pos = entry.getSurfacePoint(render)
                             testEntity = entityGroup.getEntityFromEntry(entry)

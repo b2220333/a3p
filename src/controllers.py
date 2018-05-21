@@ -2,15 +2,15 @@ import hashlib
 import math
 from random import randint, random, seed, uniform
 
-import engine
-import audio
-import entities
-import net
-import components
+from . import engine
+from . import audio
+from . import entities
+from . import net
+from . import components
 import hashlib
-import net2
-import particles
-import ai
+from . import net2
+from . import particles
+from . import ai
 
 from direct.showbase.DirectObject import DirectObject
 from panda3d.core import *
@@ -73,7 +73,7 @@ class Controller(DirectObject):
         p = net.Packet()
         p.add(net.Uint8(net.PACKET_SPAWN))
         controllerType = 0
-        for type in types.items():
+        for type in list(types.items()):
             if isinstance(self, type[1]):
                 controllerType = type[0]
                 break
@@ -178,7 +178,7 @@ class TeamEntityController(Controller):
             entity.dock = [
                 x for x in aiWorld.docks if x.teamIndex == dockIndex][0]
         numAllies = net.Uint8.getFrom(iterator)
-        for i in xrange(numAllies):
+        for i in range(numAllies):
             entity.addAlly(net.Uint8.getFrom(iterator))
         entity.score = net.Int16.getFrom(iterator)
         entity.matchScore = net.Int16.getFrom(iterator)
@@ -298,7 +298,7 @@ class TeamEntityController(Controller):
             if net.Boolean.getFrom(data):
                 self.entity.username = net.String.getFrom(data)
             numPurchases = net.Uint8.getFrom(data)
-            for i in xrange(numPurchases):
+            for i in range(numPurchases):
                 pos = net2.HighResVec3.getFrom(data)
                 self.spawnSound.play(position=pos)
                 self.light.setPos(pos)
@@ -465,7 +465,7 @@ class ObjectController(Controller):
                 a = 0
                 b = 0
                 numSnapshots = len(self.snapshots)
-                for i in xrange(numSnapshots):
+                for i in range(numSnapshots):
                     if self.snapshots[i].time > currentTime and numSnapshots > i + \
                             1 and self.snapshots[i + 1].time < currentTime:
                         a = i + 1
@@ -755,7 +755,7 @@ class GrenadeController(ObjectController):
                 vector.normalize()
                 queue = aiWorld.getCollisionQueue(
                     self.lastPosition, vector, engine.renderEnvironment)
-                for i in xrange(queue.getNumEntries()):
+                for i in range(queue.getNumEntries()):
                     entry = queue.getEntry(i)
                     collision = entry.getSurfacePoint(render)
                     v = collision - self.lastPosition
@@ -837,7 +837,7 @@ class MolotovController(ObjectController):
                 vector.normalize()
                 queue = aiWorld.getCollisionQueue(
                     self.lastPosition, vector, engine.renderEnvironment)
-                for i in xrange(queue.getNumEntries()):
+                for i in range(queue.getNumEntries()):
                     entry = queue.getEntry(i)
                     collision = entry.getSurfacePoint(render)
                     v = collision - self.lastPosition
@@ -867,7 +867,7 @@ class MolotovController(ObjectController):
             particles.add(self.particleGroup)
         self.particleGroup.setPosition(pos)
         for enemy in (
-            x for x in entityGroup.entities.values() if isinstance(
+            x for x in list(entityGroup.entities.values()) if isinstance(
                 x, entities.Actor) and not x.getTeam().isAlly(
                 self.entity.getTeam()) and (
                 x.getPosition() - self.entity.getPosition()).length() < 8.0):
@@ -950,7 +950,7 @@ class ActorController(ObjectController):
                     aiWorld, entityGroup, data)
                 updatedComponents.append(id)
                 id = net.Uint8.getFrom(data)
-            for id in (x for x in xrange(len(self.entity.components))
+            for id in (x for x in range(len(self.entity.components))
                        if x not in updatedComponents):
                 self.entity.components[id].clientUpdate(aiWorld, entityGroup)
 
@@ -1005,7 +1005,7 @@ class DroidController(ActorController):
             aiWorld, entityGroup, iterator, entity)
         numWeapons = net.Uint8.getFrom(iterator)
         weapons = []
-        for _ in xrange(numWeapons):
+        for _ in range(numWeapons):
             id = net.Uint8.getFrom(iterator)
             if id == 255:  # 255 = None
                 id = None
@@ -1076,7 +1076,7 @@ class DroidController(ActorController):
                     vector.normalize()
                     queue = aiWorld.getCollisionQueue(
                         self.lastPosition, vector, engine.renderEnvironment)
-                    for i in xrange(queue.getNumEntries()):
+                    for i in range(queue.getNumEntries()):
                         entry = queue.getEntry(i)
                         collision = entry.getSurfacePoint(render)
                         v = collision - self.lastPosition
@@ -1451,7 +1451,7 @@ class PlayerController(DroidController):
             queue = aiWorld.getRayCollisionQueue(self.pickRayNP)
             camDistance = (camera.getPos() - self.entity.getPosition()
                            ).length() + self.entity.radius
-            for i in xrange(queue.getNumEntries()):
+            for i in range(queue.getNumEntries()):
                 entry = queue.getEntry(i)
                 t = entry.getSurfacePoint(render)
                 targetVector = camera.getPos() - t
@@ -1470,7 +1470,7 @@ class PlayerController(DroidController):
         closestDot = 0.95
         self.targetedEnemy = None
         for enemy in (
-            x for x in entityGroup.entities.values() if isinstance(
+            x for x in list(entityGroup.entities.values()) if isinstance(
                 x, entities.DropPod) or (
                 (isinstance(
                 x, entities.Actor) and not x.getTeam().isAlly(
@@ -1525,7 +1525,7 @@ class PlayerController(DroidController):
         if iterator is not None:
             self.sprinting = net.Boolean.getFrom(iterator)
             cmds = net.Uint8.getFrom(iterator)
-            for i in xrange(cmds):
+            for i in range(cmds):
                 id = net.Uint8.getFrom(iterator)
                 entity = entityGroup.getEntity(id)
                 if entity is None:  # Do nothing
@@ -1672,7 +1672,7 @@ class AIController(DroidController):
                 self.moving = True
                 self.direction = self.path.current() - self.entity.getPosition()
                 if self.direction.length() < self.entity.radius + 2:
-                    self.path.next()
+                    next(self.path)
                 self.direction.normalize()
             elif self.path is not None and self.path.end is not None and (self.path.end - self.entity.getPosition()).length() > 4:
                 self.direction = self.path.end - self.entity.getPosition()
@@ -1816,7 +1816,7 @@ class Special(DirectObject):
     def clientUpdateStart(self, aiWorld, entityGroup, iterator=None):
         if iterator is not None:
             criticalPackets = net.Uint8.getFrom(iterator)
-            for _ in xrange(criticalPackets):
+            for _ in range(criticalPackets):
                 self.clientUpdate(aiWorld, entityGroup, iterator)
 
     def clientUpdate(self, aiWorld, entityGroup, iterator=None):
@@ -1850,7 +1850,7 @@ class KamikazeSpecial(Special):
             if not self.triggered:
                 self.specialSound.play(entity=self.actor)
             self.triggered = True
-            for entity in entityGroup.entities.values():
+            for entity in list(entityGroup.entities.values()):
                 if isinstance(
                     entity, entities.ObjectEntity) and not (
                     isinstance(
@@ -2180,7 +2180,7 @@ class EditController(Controller):
         except BaseException:
             import traceback
             exceptionData = traceback.format_exc()
-            print exceptionData
+            print(exceptionData)
             engine.log.info(exceptionData)
 
     def undo(self, aiWorld, entityGroup):

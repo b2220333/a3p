@@ -1,13 +1,13 @@
 import math
 from random import random, uniform
 
-import engine
-import components
-import controllers
-import audio
-import net
-import net2
-import particles
+from . import engine
+from . import components
+from . import controllers
+from . import audio
+from . import net
+from . import net2
+from . import particles
 
 from direct.showbase.DirectObject import DirectObject
 
@@ -119,7 +119,7 @@ class EntityGroup(DirectObject):
     def getNearestPhysicsEntity(self, pos):
         closest = None
         closestDist = 1000000
-        for entity in (x for x in self.entities.values()
+        for entity in (x for x in list(self.entities.values())
                        if isinstance(x, PhysicsEntity)):
             dist = (entity.getPosition() - pos).length()
             if dist < closestDist:
@@ -129,14 +129,14 @@ class EntityGroup(DirectObject):
 
     def resetMatch(self):
         for entity in (
-            x for x in self.entities.values() if isinstance(
+            x for x in list(self.entities.values()) if isinstance(
                 x,
                 Actor) or isinstance(
                 x,
                 Fragment)):
             entity.delete(self, killed=False, localDelete=False)
         self.clearDeletedEntities()
-        for entity in self.entities.values():
+        for entity in list(self.entities.values()):
             entity.controller.clearCriticalPackets()
         for object in self.graphicsObjects:
             object.delete(self)
@@ -182,8 +182,8 @@ class EntityGroup(DirectObject):
                 size=6.0))
         particles.add(particles.ExplosionParticleGroup(position))
 
-        for entity in (entity for entity in self.entities.values(
-        ) if entity != sourceEntity and isinstance(entity, ObjectEntity)):
+        for entity in (entity for entity in list(self.entities.values(
+        )) if entity != sourceEntity and isinstance(entity, ObjectEntity)):
             vector = entity.getPosition() - position
             distance = vector.length()
             if distance >= damageRadius or distance == 0:
@@ -220,7 +220,7 @@ class EntityGroup(DirectObject):
         for obj in self.graphicsObjects:
             obj.delete(self)
         del self.graphicsObjects[:]
-        for entity in self.entities.values():
+        for entity in list(self.entities.values()):
             entity.delete(self)
         self.clearDeletedEntities()
 
@@ -433,7 +433,7 @@ class DropPod(ObjectEntity):
             explosionSound = audio.SoundPlayer("large-explosion")
             explosionSound.play(position=position)
             # Add fragments
-            for _ in xrange(8):
+            for _ in range(8):
                 offset = Vec3(uniform(-1, 1), uniform(-1, 1), uniform(0, 1))
                 offset.normalize()
                 fragment = Fragment(aiWorld.world,
@@ -553,7 +553,7 @@ class Glass(ObjectEntity):
         pos = self.getPosition()
         shatterSound = audio.SoundPlayer("glass-shatter")
         shatterSound.play(position=pos)
-        for _ in xrange(40):
+        for _ in range(40):
             offset = Vec3(uniform(-self.glassWidth / 2.0, self.glassWidth / 2.0),
                           0, uniform(-self.glassHeight / 2.0, self.glassHeight / 2.0))
             fragment = GlassFragment(
