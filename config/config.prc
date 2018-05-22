@@ -4,7 +4,7 @@ window-type none
 win-size 1280 720
 win-origin -2 -2
 fullscreen #f
-sync-video #t
+sync-video #f
 show-frame-rate-meter #f
 icon-filename images/icon.ico
 
