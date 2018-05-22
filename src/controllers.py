@@ -1205,7 +1205,7 @@ class PlayerController(DroidController):
         self.fov = self.defaultFov
         self.desiredFov = self.defaultFov
         self.currentFov = self.defaultFov
-        self.defaultCameraOffset = Vec3(-2, -8, 2.25)
+        self.defaultCameraOffset = Vec3(-1.5, -8, 2.25)
         self.cameraOffset = Vec3(self.defaultCameraOffset)
         self.desiredCameraOffset = Vec3(self.defaultCameraOffset)
         self.currentCameraOffset = Vec3(self.defaultCameraOffset)
