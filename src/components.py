@@ -594,7 +594,6 @@ class SniperRifle(Gun):
                     self.sniperSound.play(entity=self.actor)
                     self.light.add()
 
-                entityGroup.shakeCamera(4 * random())
                 direction = net2.StandardVec3.getFrom(iterator)
 
                 if net.Boolean.getFrom(iterator):  # Bullet hit something
