@@ -16,8 +16,6 @@ from direct.stdpy import threading
 from panda3d.core import *
 from panda3d.ode import *
 
-ACCURACY = 0.7  # Relative probability of an AI droid hitting its target.
-
 currentWorld = None
 pathRequests = []
 pathFindThread = None
