@@ -26,9 +26,12 @@ audio-library-name p3fmod_audio
 audio-output-rate 44100
 audio-preload-threshold 1024
 
+# Performance:
+basic-shaders-only #f
+hardware-animated-vertices #t
+
 # Other:
 text-flatten #f
-basic-shaders-only #f
 default-directnotify-level info
 notify-level fatal
 
