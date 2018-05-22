@@ -177,19 +177,20 @@ def loadModel(filename):
     global modelFileSuffix
     if filename not in cache:
         return loader.loadModel(filename + modelFileSuffix)
-    else:
-        model = cache[filename]
-        node = hidden.attachNewNode(filename)
-        model.instanceTo(node)
-        return node
+
+    model = cache[filename]
+    node = hidden.attachNewNode(filename)
+    model.instanceTo(node)
+    return node
 
 
 def loadAnimation(filename, animations):
     global modelFileSuffix
     for anim in animations:
         animations[anim] += modelFileSuffix
-    a = Actor(filename + modelFileSuffix, animations)
-    a.setBlend(frameBlend=True)
+
+    a = Actor(filename + modelFileSuffix, animations, allowAsyncBind=True)
+    a.setBlend(animBlend=True, frameBlend=True)
     return a
 
 
@@ -239,7 +240,6 @@ def init(showFrameRate=False, daemon=False):
         base.setBackgroundColor(2.0 / 255.0, 28.0 / 255.0, 53.0 / 255.0)
 
     log = Logger()
-
     sys.excepthook = exceptHook
 
     clock = Clock()
@@ -252,9 +252,11 @@ def init(showFrameRate=False, daemon=False):
     renderLit = render.attachNewNode("renderLit")
     renderObjects = renderLit.attachNewNode("renderObjects")
     renderEnvironment = renderLit.attachNewNode("renderEnvironment")
+
     controllers.init()
     ai.init()
     audio.init(dropOffFactor=1.4, distanceFactor=14, dopplerFactor=0.0)
+
     base.accept('f1', base.screenshot)
     base.accept('f2', toggleGui)
 
@@ -346,11 +348,13 @@ def postProcessingChanged():
     if enablePostProcessing:
         if filters is None:
             filters = CommonFilters(base.win, base.cam)
+
         render.setAttrib(LightRampAttrib.makeHdr1())
         filters.setBloom(intensity=1, size=2)
     else:
         if filters is not None:
             filters.delBloom()
+
     saveConfigFile()
 
 
@@ -359,6 +363,7 @@ def shadersChanged():
         renderLit.setShaderAuto()
     else:
         renderLit.clearShader()
+
     saveConfigFile()
 
 
@@ -369,6 +374,7 @@ def shadowsChanged():
             map.enableShadows()
         else:
             map.disableShadows()
+
     saveConfigFile()
 
 
@@ -376,6 +382,7 @@ def distortionEffectsChanged():
     if reflectionCamera is not None:
         reflectionCamera.node().setActive(
             enableDistortionEffects and reflectionEffectsNeeded)
+
     saveConfigFile()
 
 
@@ -391,6 +398,7 @@ def clearLights():
     global lights
     for light in lights:
         light.remove()
+
     del lights[:]
 
 
@@ -400,6 +408,7 @@ def update():
         clock.update()
     else:
         clock.timeStep = 0
+
     particles.ParticleGroup.begin()
     particles.update(not paused)
 
