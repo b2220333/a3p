@@ -1,6 +1,3 @@
-from queue import Queue  # So we have the Empty exception
-from random import random
-
 from . import controllers
 from . import net
 from . import engine

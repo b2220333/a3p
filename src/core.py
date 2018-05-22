@@ -7,11 +7,9 @@ from . import ai
 from . import entities
 from . import ui
 from . import net
-import math
 from . import controllers
 from . import components
 from . import engine
-import sys
 from . import audio
 from . import online
 from . import net2
@@ -85,7 +83,7 @@ class Backend(DirectObject):
         self.reset()
         if self.game is not None:
             self.game.reset()
-        engine.log.info("Loading map: %s" % str(mapFile))
+        engine.log.info("Loading map: %s" % mapFile)
         self.map.load(mapFile, self.aiWorld, self.entityGroup)
         engine.log.info("Map loaded: %s" % self.map.filename)
 

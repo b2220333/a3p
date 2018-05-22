@@ -1,12 +1,10 @@
-import math
-import os
 import socket
 import sys
 import time
 import zlib
-from socket import *
-
 import ipgetter
+
+from socket import *
 
 netMode = 0
 

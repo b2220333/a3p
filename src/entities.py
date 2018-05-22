@@ -6,7 +6,6 @@ from . import components
 from . import controllers
 from . import audio
 from . import net
-from . import net2
 from . import particles
 
 from direct.showbase.DirectObject import DirectObject
