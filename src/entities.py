@@ -387,9 +387,9 @@ class DropPod(ObjectEntity):
         self.geometry.setCollideBits(BitMask32(0x00000001))
         self.geometry.setCategoryBits(BitMask32(0x00000001))
         self.body = OdeBody(world)
-        M = OdeMass()
-        M.setSphere(2, self.radius)
-        self.body.setMass(M)
+        mass = OdeMass()
+        mass.setSphere(2, self.radius)
+        self.body.setMass(mass)
         self.geometry.setBody(self.body)
         avel = 5
         self.setAngularVelocity(
@@ -445,15 +445,16 @@ class DropPod(ObjectEntity):
 
 
 class Fragment(ObjectEntity):
+
     def __init__(self, world, space, pos, velocity):
         ObjectEntity.__init__(self, "models/fragment/Fragment",
                               controllers.FragmentController(velocity), True)
         self.radius = 0.7
         size = self.radius * 2
         self.body = OdeBody(world)
-        M = OdeMass()
-        M.setBox(3, size, size, 0.4)
-        self.body.setMass(M)
+        mass = OdeMass()
+        mass.setBox(3, size, size, 0.4)
+        self.body.setMass(mass)
         self.geometry = OdeBoxGeom(space, size, size, 0.4)
         self.geometry.setCollideBits(BitMask32(0x00000001))
         self.geometry.setCategoryBits(BitMask32(0x00000001))
@@ -468,6 +469,7 @@ class Fragment(ObjectEntity):
 
 
 class GlassFragment(Fragment):
+
     def __init__(self, world, space, pos, velocity):
         ObjectEntity.__init__(self, "models/fragment/GlassFragment",
                               controllers.FragmentController(velocity), True)
@@ -476,9 +478,9 @@ class GlassFragment(Fragment):
         self.radius = 0.3
         size = self.radius * 2
         self.body = OdeBody(world)
-        M = OdeMass()
-        M.setBox(3, size, size, 0.05)
-        self.body.setMass(M)
+        mass = OdeMass()
+        mass.setBox(3, size, size, 0.05)
+        self.body.setMass(mass)
         self.geometry = OdeBoxGeom(space, size, size, 0.05)
         self.geometry.setCollideBits(BitMask32(0x00000001))
         self.geometry.setCategoryBits(BitMask32(0x00000001))
@@ -660,17 +662,17 @@ class PhysicsEntity(ObjectEntity):
                     self.geometries.append(geom)
             elif tokens[0] == "mass":
                 # Process the mass
-                m = OdeMass()
+                mass = OdeMass()
                 density = float(tokens[1])
                 if tokens[2] == "box":
-                    m.setBox(density, float(tokens[3]), float(
+                    mass.setBox(density, float(tokens[3]), float(
                         tokens[4]), float(tokens[5]))
                 elif tokens[2] == "sphere":
-                    m.setSphere(density, float(tokens[3]))
+                    mass.setSphere(density, float(tokens[3]))
                 elif tokens[2] == "cylinder":
-                    m.setCylinder(density, 3, float(tokens[3]), float(
+                    mass.setCylinder(density, 3, float(tokens[3]), float(
                         tokens[4]))  # 1 = X axis, 2 = Y axis, 3 = Z axis
-                self.body.setMass(m)
+                self.body.setMass(mass)
             i += 1
 
     def clear(self, entityGroup):
@@ -956,9 +958,9 @@ class BasicDroid(Actor):
         self.lowResNode.hide(BitMask32.bit(1))
         self.lowResNode.showThrough(BitMask32.bit(4))  # Low-res shadow caster
         self.body = OdeBody(world)
-        M = OdeMass()
-        M.setSphere(15, self.radius)
-        self.body.setMass(M)
+        mass = OdeMass()
+        mass.setSphere(15, self.radius)
+        self.body.setMass(mass)
         self.geometry = OdeSphereGeom(space, self.radius)
         self.geometry.setCollideBits(BitMask32(0x00000001))
         self.geometry.setCategoryBits(BitMask32(0x00000001))
@@ -1074,10 +1076,10 @@ class Grenade(ObjectEntity):
         self.collisionNodePath = self.node.attachNewNode(self.collisionNode)
         self.collisionNode.addSolid(CollisionSphere(0, 0, 0, 0.4))
         self.body = OdeBody(world)
-        M = OdeMass()
         self.radius = 0.2
-        M.setSphere(500, 0.2)
-        self.body.setMass(M)
+        mass = OdeMass()
+        mass.setSphere(500, 0.2)
+        self.body.setMass(mass)
         self.geometry = OdeSphereGeom(space, 0.2)
         self.geometry.setCollideBits(BitMask32(0x00000001))
         self.geometry.setCategoryBits(BitMask32(0x00000001))
@@ -1141,10 +1143,10 @@ class Molotov(ObjectEntity):
         self.collisionNodePath = self.node.attachNewNode(self.collisionNode)
         self.collisionNode.addSolid(CollisionSphere(0, 0, 0, 0.4))
         self.body = OdeBody(world)
-        M = OdeMass()
         self.radius = 0.2
-        M.setSphere(500, 0.2)
-        self.body.setMass(M)
+        mass = OdeMass()
+        mass.setSphere(500, 0.2)
+        self.body.setMass(mass)
         self.geometry = OdeSphereGeom(space, 0.2)
         self.geometry.setCollideBits(BitMask32(0x00000001))
         self.geometry.setCategoryBits(BitMask32(0x00000001))
