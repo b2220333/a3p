@@ -21,6 +21,7 @@ class EntityGroup(DirectObject):
 
     def __init__(self, netManager):
         self.entities = dict()
+        self.lastEntityId = 0
         self.graphicsObjects = []
         self.deletedEntities = []
         self.cameraShakeX = 0
@@ -94,10 +95,8 @@ class EntityGroup(DirectObject):
     # offset is used to ensure Fragments and other local-only entities don't interfere
     # with IDs from server-client synched entities.
     def generateEntityId(self, entity, offset=0):
-        id = offset + int(round(random() * 255))
-        while id in self.entities:
-            id = offset + int(round(random() * 255))
-        entity.setId(id)
+        self.lastEntityId += 1
+        entity.setId(self.lastEntityId)
 
     def clearDeletedEntities(self):
         for entity in self.deletedEntities:
@@ -221,6 +220,8 @@ class EntityGroup(DirectObject):
         del self.graphicsObjects[:]
         for entity in list(self.entities.values()):
             entity.delete(self)
+
+        self.lastEntityId = 0
         self.clearDeletedEntities()
 
 
