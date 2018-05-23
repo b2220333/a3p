@@ -94,7 +94,7 @@ class EntityGroup(DirectObject):
 
     # offset is used to ensure Fragments and other local-only entities don't interfere
     # with IDs from server-client synched entities.
-    def generateEntityId(self, entity, offset=0):
+    def generateEntityId(self, entity):
         self.lastEntityId += 1
         entity.setId(self.lastEntityId)
 
@@ -440,7 +440,7 @@ class DropPod(ObjectEntity):
                                     aiWorld.space,
                                     position + (offset * 1.5),
                                     offset * 30)
-                entityGroup.generateEntityId(fragment, 1024)
+                entityGroup.generateEntityId(fragment)
                 entityGroup.addEntity(fragment)
         ObjectEntity.kill(self, aiWorld, entityGroup, localDelete)
 
@@ -565,7 +565,7 @@ class Glass(ObjectEntity):
                     self.node,
                     offset),
                 Vec3())
-            entityGroup.generateEntityId(fragment, 1024)
+            entityGroup.generateEntityId(fragment)
             entityGroup.addEntity(fragment)
         ObjectEntity.kill(self, aiWorld, entityGroup, localDelete)
 
