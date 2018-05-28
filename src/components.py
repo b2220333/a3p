@@ -346,7 +346,7 @@ class ChainGun(Gun):
 
                 if entity is not None:
                     p.add(net.Boolean(True))
-                    p.add(net.Uint8(entity.getId()))
+                    p.add(net.Uint32(entity.getId()))
                     p.add(net.Uint16(self.damage * max(0,
                                                        1 - (vector.length() / 70)) * max(0,
                                                                                          normal.dot(-direction) + 0.1)))
@@ -378,7 +378,7 @@ class ChainGun(Gun):
                         self.tracer.draw(origin, pos)
 
                     if net.Boolean.getFrom(iterator):
-                        entityId = net.Uint8.getFrom(iterator)
+                        entityId = net.Uint32.getFrom(iterator)
                         entity = entityGroup.getEntity(entityId)
                         damage = net.Uint16.getFrom(iterator)
                         if entity is not None:
@@ -455,7 +455,7 @@ class Shotgun(Gun):
 
                 if entity is not None:
                     p.add(net.Boolean(True))
-                    p.add(net.Uint8(entity.getId()))
+                    p.add(net.Uint32(entity.getId()))
                     vector = entity.getPosition() - self.getPosition()
                     range = self.range
                     if self.zoomed:
@@ -495,7 +495,7 @@ class Shotgun(Gun):
                         self.tracer.draw(origin, pos)
 
                     if net.Boolean.getFrom(iterator):
-                        entityId = net.Uint8.getFrom(iterator)
+                        entityId = net.Uint32.getFrom(iterator)
                         entity = entityGroup.getEntity(entityId)
                         damage = net.Uint16.getFrom(iterator)
                         if entity is not None:
@@ -571,7 +571,7 @@ class SniperRifle(Gun):
 
                 if entity is not None:
                     p.add(net.Boolean(True))
-                    p.add(net.Uint8(entity.getId()))
+                    p.add(net.Uint32(entity.getId()))
                     dot = normal.dot(-direction)
                     if dot > 0.95:
                         p.add(net.Uint16(self.damage * 4))
@@ -603,7 +603,7 @@ class SniperRifle(Gun):
                         pos = hitPos - (direction * random() * 4)
                         self.tracer.draw(origin, pos)
                     if net.Boolean.getFrom(iterator):
-                        entityId = net.Uint8.getFrom(iterator)
+                        entityId = net.Uint32.getFrom(iterator)
                         entity = entityGroup.getEntity(entityId)
                         damage = net.Uint16.getFrom(iterator)
                         if entity is not None:
@@ -704,7 +704,7 @@ class MeleeClaw(Weapon):
             self.addCriticalPacket(p, packetUpdate)
             # At this point, the blade is actually in the target.
             p.add(net.Uint8(2))  # 2 = We're now actually damaging the entity
-            p.add(net.Uint8(self.impaleTarget.getId()))
+            p.add(net.Uint32(self.impaleTarget.getId()))
 
             # Stop the player from flying past the target.
             # Only add force if we don't kill the target. If the target dies,
@@ -802,7 +802,7 @@ class GrenadeLauncher(Weapon):
             grenade.setPosition(origin)
             grenade.setLinearVelocity(direction * 40)
             entityGroup.spawnEntity(grenade)
-            p.add(net.Uint8(grenade.getId()))
+            p.add(net.Uint32(grenade.getId()))
         self.firing = False
         return p
 
@@ -849,7 +849,7 @@ class MolotovThrower(Weapon):
             grenade.setPosition(origin)
             grenade.setLinearVelocity(direction * 40)
             entityGroup.spawnEntity(grenade)
-            p.add(net.Uint8(grenade.getId()))
+            p.add(net.Uint32(grenade.getId()))
         self.firing = False
         return p
 
@@ -928,7 +928,7 @@ class Pistol(Gun):
                 p.add(net2.StandardVec3(hitPos))
                 if entity is not None:
                     p.add(net.Boolean(True))
-                    p.add(net.Uint8(entity.getId()))
+                    p.add(net.Uint32(entity.getId()))
                     totalDamage = self.damage * \
                         max(0, 1 - (vector.length() / 200)) * \
                         max(0, normal.dot(-direction) + 0.1)
@@ -977,7 +977,7 @@ class Pistol(Gun):
                         self.tracer.draw(origin, pos)
 
                     if net.Boolean.getFrom(iterator):
-                        entityId = net.Uint8.getFrom(iterator)
+                        entityId = net.Uint32.getFrom(iterator)
                         entity = entityGroup.getEntity(entityId)
                         damage = net.Uint16.getFrom(iterator)
                         pin = False
