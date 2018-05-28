@@ -17,7 +17,7 @@ from panda3d.ode import *
 
 
 def init():
-    global pathRequests, currentWorld
+    global pathRequests, currentWorld, pathFindTask
     currentWorld = None
     pathRequests = []
     pathFindTask = taskMgr.add(pathWorker, 'ai-path-worker')
