@@ -154,7 +154,7 @@ class Gun(Weapon):
         self.showSound = audio.SoundPlayer("change-weapon")
         self.node = engine.loadModel(modelFile)
         self.modelFile = modelFile
-        self.node.reparentTo(engine.renderLit)
+        self.node.reparentTo(render)
         self.activeSound = 0  # Client side
         self.showTime = -1  # For the showing animation
         self.totalShowTime = 0.3
@@ -651,7 +651,7 @@ class MeleeClaw(Weapon):
         self.node = engine.loadAnimation("models/basicdroid/claw",
                                          {"Impale": "models/basicdroid/claw-Impale",
                                           "Retract": "models/basicdroid/claw-Retract"})
-        self.node.reparentTo(engine.renderLit)
+        self.node.reparentTo(render)
         self.clawSound = audio.SoundPlayer("claw")
         self.clawFailSound = audio.SoundPlayer("claw-fail")
         self.clawRetractSound = audio.SoundPlayer("claw-retract")

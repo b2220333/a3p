@@ -83,7 +83,7 @@ class EntityGroup(DirectObject):
         "Sets the ObjectEntity active and adds it to the list."
         entity.active = True
         if isinstance(entity, ObjectEntity):
-            entity.node.reparentTo(engine.renderObjects)
+            entity.node.reparentTo(render)
         self.entities[entity.getId()] = entity
 
     def removeEntity(self, entity):
@@ -344,8 +344,7 @@ class ObjectEntity(Entity):
 
     def commitChanges(self):
         "Updates the visual orientation and position of this ObjectEntity to reflect that of the ODE body."
-        self.node.setPosQuat(
-            engine.renderObjects, self.getPosition(), Quat(
+        self.node.setPosQuat(render, self.getPosition(), Quat(
                 self.body.getQuaternion()))
 
     def damage(self, entity, damage, ranged=True):
@@ -1198,7 +1197,7 @@ class Spike(GraphicsObject):
     def __init__(self, pos, direction):
         GraphicsObject.__init__(self)
         self.node = engine.loadModel("models/spike/spike")
-        self.node.reparentTo(engine.renderLit)
+        self.node.reparentTo(render)
         self.node.setPos(pos)
         self.node.lookAt(Point3(pos + direction))
         self.spawnTime = engine.clock.time

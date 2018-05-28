@@ -1,6 +1,5 @@
 # Window:
 window-title A3P
-window-type none
 win-size 1280 720
 win-origin -2 -2
 fullscreen #f
@@ -17,6 +16,9 @@ aux-display pandadx9
 aux-display pandagles2
 aux-display pandagles
 aux-display p3tinydisplay
+
+# Textures:
+textures-power-2 none
 
 # Resources:
 default-model-extension .egg

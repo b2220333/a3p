@@ -168,7 +168,6 @@ def saveConfigFile():
 def cacheModel(filename):
     global modelFileSuffix
     model = loader.loadModel(filename + modelFileSuffix)
-    model.reparentTo(renderLit)
     model.reparentTo(hidden)
     cache[filename] = model
 
@@ -268,9 +267,9 @@ def init(showFrameRate=False, daemon=False):
         light = PointLight("Light" + str(i))
         light.setColor(Vec4(0, 0, 0, 1))
         light.setAttenuation(Vec3(0, 0, 1))
-        lightNode = renderLit.attachNewNode(light)
+        lightNode = render.attachNewNode(light)
         lightNode.setPos(0, 0, 0)
-        renderLit.setLight(lightNode)
+        render.setLight(lightNode)
         lightNodes.append((light, lightNode))
 
     if enableShaders and not daemon:
@@ -841,7 +840,7 @@ class Map(DirectObject):
                 scenery = loadModel(mapDirectory + "/" + tokens[1])
                 scenery.setPos(float(tokens[2]), float(
                     tokens[3]), float(tokens[4]))
-                scenery.reparentTo(renderLit)
+                scenery.reparentTo(render)
                 self.sceneries[tokens[1]] = scenery
 
         # Create winnar platforms

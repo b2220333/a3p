@@ -36,8 +36,36 @@ try:
 except BaseException:
     sys.argv = [sys.argv[0], "-w"]
 
-ShowBase()
-base.makeDefaultPipe()
+class Main(ShowBase):
+
+    def __init__(self):
+        # ------ Begin of render pipeline code ------
+
+        # Insert the pipeline path to the system path, this is required to be
+        # able to import the pipeline classes
+        pipeline_path = "../"
+
+        # Just a special case for my development setup, so I don't accidentally
+        # commit a wrong path. You can remove this in your own programs.
+        if not os.path.isfile(os.path.join(pipeline_path, "setup.py")):
+            pipeline_path = "../RenderPipeline/"
+
+        sys.path.insert(0, pipeline_path)
+
+        # Use the utility script to import the render pipeline classes
+        from rpcore import RenderPipeline
+
+        self.render_pipeline = RenderPipeline()
+        self.render_pipeline.create(self)
+
+        # Set time of day
+        self.render_pipeline.daytime_mgr.time = "7:30"
+
+        # Use a special effect for rendering the scene, this is because the
+        # models have normals or no valid materials
+        self.render_pipeline.set_effect(render, "config/scene-effect.yaml", {}, sort=250)
+
+        # ------ End of render pipeline code, thats it! ------
 
 winSize = ConfigVariableInt("win-size")
 fullscreen = ConfigVariableBool("fullscreen")
@@ -93,7 +121,7 @@ if not customWindowSize:
 fullscreen.setValue(not customWindowSize)
 
 if mode != MODE_DAEMON:
-    base.openDefaultWindow()
+    base = Main()
     engine.windowWidth = base.win.getProperties().getXSize()
     engine.windowHeight = base.win.getProperties().getYSize()
     engine.aspectRatio = float(engine.windowWidth) / float(engine.windowHeight)
