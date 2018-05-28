@@ -1349,10 +1349,12 @@ class Mouse:
             int(base.win.getProperties().getYSize() / 2))
 
 
-class Light:
-    """At this time, only point lights are supported. Really though, what do you need a spotlight for?
+class Light(object):
+    """
+    At this time, only point lights are supported. Really though, what do you need a spotlight for?
     This class is necessary because every time a Panda3D light is added, all shaders must be regenerated.
-    This class keeps a constant number of lights active at all times, but sets the unnecessary extra lights to have no effect."""
+    This class keeps a constant number of lights active at all times, but sets the unnecessary extra lights to have no effect.
+    """
 
     def __init__(self, color, attenuation):
         self.color = Vec4(color)
@@ -1368,31 +1370,42 @@ class Light:
     def setColor(self, color):
         self.color = Vec4(color)
         if self.node is not None:
-            self.node[0].setColor(self.color)
+            self.node[1].setColor(self.color)
 
     def setAttenuation(self, attenuation):
-        "Attenuation is a 3D vector containing quadratic, linear, and constant attenuation coefficients."
+        """
+        Attenuation is a 3D vector containing quadratic, linear, and constant attenuation coefficients.
+        """
+
         self.attenuation = Vec3(attenuation)
         if self.node is not None:
             self.node[0].setAttenuation(self.attenuation)
 
     def add(self):
-        "Adds this light to the active light list, basically enabling it."
+        """
+        Adds this light to the active light list, basically enabling it.
+        """
+
         if self not in lights:
             lights.append(self)
             if len(lights) <= len(lightNodes) and self.node is None:
                 self.node = lightNodes[len(lights) - 1]
                 self.node[1].setPos(self.position)
-                self.node[0].setColor(self.color)
+                self.node[0].setSpecularColor(self.color)
                 self.node[0].setAttenuation(self.attenuation)
 
     def remove(self):
-        "Removes this light from the active light list, disabling it."
+        """
+        Removes this light from the active light list, disabling it.
+        """
+
         if self in lights:
             lights.remove(self)
+
         if self.node is not None:
-            self.node[0].setColor(Vec4(0, 0, 0, 1))
+            self.node[0].setSpecularColor(Vec4(0, 0, 0, 1))
             self.node[0].setAttenuation(Vec3(0, 0, 1))
+
         self.node = None
 
 
