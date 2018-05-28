@@ -6,6 +6,8 @@ import ipgetter
 
 from socket import *
 
+from direct.distributed.PyDatagram import PyDatagram
+
 netMode = 0
 
 connection = None
@@ -64,13 +66,9 @@ else:
 
 clientLimit = 0  # Number of clients we can accept
 
-# If we're using Panda3D, this should be set to PyDatagram.
-datagramType = None
 
-
-def init(localPort=None, newDatagramType=None):
-    global context, initialized, datagramType
-    datagramType = newDatagramType
+def init(localPort=None):
+    global context, initialized
     context = PythonNetContext(localPort)
     initialized = True
 
@@ -181,7 +179,7 @@ class PythonNetContext(NetworkContext):
         if self.clientConnected:
             return
 
-        data = CustomDatagram()
+        data = PyDatagram()
         p = Packet()
         p.add(Uint8(PACKET_NEWCLIENT))
         p.add(String(username))
@@ -193,7 +191,7 @@ class PythonNetContext(NetworkContext):
         if clientAddress in self.activeConnections:
             return
 
-        data = CustomDatagram()
+        data = PyDatagram()
         p = Packet()
         p.add(Uint8(PACKET_EMPTY))
         p.addTo(data)
@@ -287,7 +285,7 @@ class PythonNetContext(NetworkContext):
             if address in self.activeConnections:
                 self.activeConnections[address].lastPacketTime = timeFunction()
             message = zlib.decompress(message)
-            iterator = CustomDatagram(message)
+            iterator = PyDatagram(message)
             if iterator.getRemainingSize() < 1:
                 continue
             code = Uint8.getFrom(iterator)
@@ -343,24 +341,24 @@ class PythonNetContext(NetworkContext):
         self.writeQueue.append((1, datagram, client))
 
     def broadcast(self, packet):
-        d = datagramType()
+        d = PyDatagram()
         packet.addTo(d)
         self.broadcastDatagram(d)
 
     def broadcastExcept(self, packet, client):
-        d = datagramType()
+        d = PyDatagram()
         packet.addTo(d)
         self.broadcastDatagramExcept(d, client)
 
     def send(self, packet, client=None):
-        d = datagramType()
+        d = PyDatagram()
         packet.addTo(d)
         self.sendDatagram(d, client)
 
     def delete(self):
         p = Packet()
         p.add(Uint8(PACKET_DISCONNECT))
-        data = CustomDatagram()
+        data = PyDatagram()
         p.addTo(data)
         self.broadcastDatagram(data)
         self.writeTick()
@@ -429,47 +427,6 @@ class Packet:
     def addTo(self, datagram):
         for dataObject in self.dataObjects:
             dataObject.addTo(datagram)
-
-
-class CustomDatagram:
-
-    def __init__(self, x=""):
-        self.data = x
-
-    def __bytes__(self):
-        return b"%a" % self.data
-
-    def addUint8(self, x):
-        self.data += chr(x)
-
-    def getUint8(self):
-        value = ord(self.data[0])
-        self.data = self.data[1:]
-        return value
-
-    def addUint16(self, x):
-        self.data += chr(x % 256) + chr(int(x) / 256)
-
-    def getUint16(self):
-        value = ord(self.data[0]) + ord(self.data[1]) * 256
-        self.data = self.data[2:]
-        return value
-
-    def addString(self, x):
-        self.addUint16(len(x))
-        self.data += x
-
-    def getString(self):
-        length = self.getUint16()
-        value = self.data[:length]
-        self.data = self.data[length:]
-        return value
-
-    def getRemainingSize(self):
-        return len(self.data)
-
-    def getMessage(self):
-        return bytes(self)
 
 
 def clamp(a, min, max):
