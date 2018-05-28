@@ -77,13 +77,13 @@ class Controller(DirectObject):
                 controllerType = type[0]
                 break
         p.add(net.Uint8(controllerType))
-        p.add(net.Uint8(self.entity.getId()))
+        p.add(net.Uint32(self.entity.getId()))
         return p
 
     @staticmethod
     def readSpawnPacket(aiWorld, entityGroup, iterator, entity=None):
         "Static method called by descendants. Assumes entity has already been initialized by the descendant."
-        id = net.Uint8.getFrom(iterator)
+        id = net.Uint32.getFrom(iterator)
         entity.setLocal(net.netMode == net.MODE_SERVER)
         entity.setId(id)
         return entity
@@ -92,7 +92,7 @@ class Controller(DirectObject):
         """Builds a packet instructing clients to delete the Entity."""
         p = net.Packet()
         p.add(net.Uint8(net.PACKET_DELETE))
-        p.add(net.Uint8(self.entity.getId()))
+        p.add(net.Uint32(self.entity.getId()))
         p.add(net.Boolean(killed))
         return p
 
@@ -498,7 +498,7 @@ class FragmentController(ObjectController):
 
         if engine.clock.time > self.spawnTime + \
                 self.lifeTime or self.entity.getPosition().getZ() < -30:
-            self.entity.delete(entityGroup, localDelete=False)
+            self.entity.delete(entityGroup)
             return None
 
         if self.justSpawned:
@@ -549,7 +549,7 @@ class GlassController(Controller):
 
     def clientUpdate(self, aiWorld, entityGroup, data=None):
         if self.entity.shattered:
-            self.entity.kill(aiWorld, entityGroup, localDelete=False)
+            self.entity.kill(aiWorld, entityGroup)
             return
 
 

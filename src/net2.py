@@ -8,7 +8,7 @@ from direct.showbase.DirectObject import DirectObject
 from panda3d.core import *
 
 
-class HighResVec3(net.Object):
+class HighResVec3(net.NetObject):
 
     def addTo(self, datagram):
         x = net.HighResFloat(self.data.getX())
@@ -26,7 +26,7 @@ class HighResVec3(net.Object):
             net.HighResFloat.getFrom(iterator))
 
 
-class StandardVec3(net.Object):
+class StandardVec3(net.NetObject):
 
     def addTo(self, datagram):
         x = net.StandardFloat(self.data.getX())
@@ -44,7 +44,7 @@ class StandardVec3(net.Object):
             net.StandardFloat.getFrom(iterator))
 
 
-class StandardQuat(net.Object):
+class StandardQuat(net.NetObject):
 
     def addTo(self, datagram):
         x = net.StandardFloat(self.data.getX())
@@ -65,7 +65,7 @@ class StandardQuat(net.Object):
             net.StandardFloat.getFrom(iterator))
 
 
-class HighResVec4(net.Object):
+class HighResVec4(net.NetObject):
     def addTo(self, datagram):
         x = net.HighResFloat(self.data.getX())
         y = net.HighResFloat(self.data.getY())
@@ -85,7 +85,7 @@ class HighResVec4(net.Object):
             net.HighResFloat.getFrom(iterator))
 
 
-class LowResVec3(net.Object):
+class LowResVec3(net.NetObject):
 
     def addTo(self, datagram):
         x = net.LowResFloat(self.data.getX())
@@ -103,7 +103,7 @@ class LowResVec3(net.Object):
             net.LowResFloat.getFrom(iterator))
 
 
-class SmallVec3(net.Object):
+class SmallVec3(net.NetObject):
 
     def addTo(self, datagram):
         x = net.SmallFloat(self.data.getX())
@@ -121,7 +121,7 @@ class SmallVec3(net.Object):
             net.SmallFloat.getFrom(iterator))
 
 
-class EntitySnapshot(net.Object):
+class EntitySnapshot(net.NetObject):
 
     def __init__(self):
         self.pos = Vec3()

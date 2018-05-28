@@ -422,7 +422,7 @@ class Packet:
         return len(self.dataObjects)
 
     def add(self, dataObject):
-        assert isinstance(dataObject, Object) or isinstance(dataObject, Packet)
+        assert isinstance(dataObject, NetObject) or isinstance(dataObject, Packet)
         if dataObject is not None:
             self.dataObjects.append(dataObject)
 
@@ -482,7 +482,7 @@ def clamp(a, min, max):
     return max
 
 
-class Object:
+class NetObject:
     data = None
 
     def __init__(self, data):
@@ -496,7 +496,7 @@ class Object:
         pass
 
 
-class HighResFloat(Object):
+class HighResFloat(NetObject):
 
     def addTo(self, datagram):
         datagram.addFloat32(float(self.data))
@@ -506,7 +506,7 @@ class HighResFloat(Object):
         return iterator.getFloat32()
 
 
-class StandardFloat(Object):
+class StandardFloat(NetObject):
 
     def addTo(self, datagram):
         datagram.addInt16(clamp(int(self.data * 110.0), -32768, 32767))
@@ -516,7 +516,7 @@ class StandardFloat(Object):
         return float(iterator.getInt16()) / 110.0
 
 
-class LowResFloat(Object):
+class LowResFloat(NetObject):
 
     def addTo(self, datagram):
         datagram.addInt16(clamp(int(self.data * 50.0), -32768, 32767))
@@ -526,7 +526,7 @@ class LowResFloat(Object):
         return float(iterator.getInt16()) / 50.0
 
 
-class SmallFloat(Object):
+class SmallFloat(NetObject):
 
     def addTo(self, datagram):
         datagram.addInt8(clamp(int(self.data * (127.0 / 35.0)), -128, 127))
@@ -536,7 +536,7 @@ class SmallFloat(Object):
         return float(iterator.getInt8()) * (35.0 / 127.0)
 
 
-class Uint8(Object):
+class Uint8(NetObject):
 
     def addTo(self, datagram):
         datagram.addUint8(int(self.data))
@@ -546,7 +546,7 @@ class Uint8(Object):
         return iterator.getUint8()
 
 
-class Uint16(Object):
+class Uint16(NetObject):
 
     def addTo(self, datagram):
         datagram.addUint16(int(self.data))
@@ -556,7 +556,7 @@ class Uint16(Object):
         return iterator.getUint16()
 
 
-class Uint32(Object):
+class Uint32(NetObject):
 
     def addTo(self, datagram):
         datagram.addUint32(int(self.data))
@@ -566,7 +566,7 @@ class Uint32(Object):
         return iterator.getUint32()
 
 
-class Int16(Object):
+class Int16(NetObject):
 
     def addTo(self, datagram):
         datagram.addInt16(int(self.data))
@@ -576,7 +576,7 @@ class Int16(Object):
         return iterator.getInt16()
 
 
-class String(Object):
+class String(NetObject):
 
     def addTo(self, datagram):
         datagram.addString(str(self.data))
@@ -586,7 +586,7 @@ class String(Object):
         return iterator.getString()
 
 
-class Boolean(Object):
+class Boolean(NetObject):
 
     def addTo(self, datagram):
         datagram.addBool(bool(self.data))
