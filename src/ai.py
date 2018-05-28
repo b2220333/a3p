@@ -10,7 +10,6 @@ from . import components
 from . import controllers
 
 from direct.showbase.DirectObject import DirectObject
-from direct.stdpy import threading
 
 from panda3d.core import *
 from panda3d.ode import *
