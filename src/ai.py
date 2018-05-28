@@ -8,7 +8,6 @@ from . import entities
 from . import net
 from . import components
 from . import controllers
-import time
 
 from direct.showbase.DirectObject import DirectObject
 from direct.stdpy import threading
