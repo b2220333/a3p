@@ -15,9 +15,12 @@ from direct.stdpy import threading
 from panda3d.core import *
 from panda3d.ode import *
 
-currentWorld = None
-pathRequests = []
-pathFindThread = None
+
+def init():
+    global pathRequests, currentWorld
+    currentWorld = None
+    pathRequests = []
+    pathFindTask = taskMgr.add(pathWorker, 'ai-path-worker')
 
 
 class PathRequest:
@@ -36,30 +39,23 @@ class PathRequest:
         self.targetPosition = targetPosition
         self.radius = radius
 
+def pathWorker(task):
+    if len(pathRequests) > 0:
+        req = pathRequests.pop(0)
+        req.callback(
+            currentWorld.navMesh.findPathFromNodes(
+                req.aiNode,
+                req.targetAiNode,
+                req.position,
+                req.targetPosition,
+                req.radius))
 
-def init():
-    global pathFindThread
-    pathFindThread = threading.Thread(target=pathWorker)
-    pathFindThread.setDaemon(True)
-    pathFindThread.start()
+        del req
 
+    if len(pathRequests) > 5:
+        del pathRequests[:]
 
-def pathWorker():
-    global pathRequests, currentWorld
-    while True:
-        if len(pathRequests) > 0:
-            req = pathRequests.pop(0)
-            req.callback(
-                currentWorld.navMesh.findPathFromNodes(
-                    req.aiNode,
-                    req.targetAiNode,
-                    req.position,
-                    req.targetPosition,
-                    req.radius))
-            del req
-        if len(pathRequests) > 5:
-            del pathRequests[:]
-        time.sleep(0.01)
+    return task.cont
 
 
 def requestPath(
