@@ -801,8 +801,8 @@ class Tutorial(Game):
         render.hide()
         self.tutorialScreens[self.tutorialIndex].show()
         self.messageText.hide()
-        self.enemyAiUnits = [(components.CHAINGUN, None),
-                             (components.SNIPER, None), (components.PISTOL, None)]
+        self.enemyAiUnits = [(constants.CHAINGUN, None),
+                             (constants.SNIPER, None), (constants.PISTOL, None)]
         self.enemyTeam = None
         self.matchStartTime = -1
 
@@ -836,42 +836,42 @@ class Tutorial(Game):
         if not self.matchInProgress:
             self.matchStartTime = engine.clock.time
             if self.tutorialIndex == 0:
-                self.localTeam.setPrimaryWeapon(components.CHAINGUN)
-                self.localTeam.setSecondaryWeapon(components.SNIPER)
+                self.localTeam.setPrimaryWeapon(constants.CHAINGUN)
+                self.localTeam.setSecondaryWeapon(constants.SNIPER)
                 self.localTeam.setSpecial(None)
-                self.enemyAiUnits = [(components.SHOTGUN, None)]
+                self.enemyAiUnits = [(constants.SHOTGUN, None)]
                 self.backend.scoreLimit = 400
             elif self.tutorialIndex == 1:
-                self.localTeam.setPrimaryWeapon(components.SHOTGUN)
-                self.localTeam.setSecondaryWeapon(components.GRENADE_LAUNCHER)
+                self.localTeam.setPrimaryWeapon(constants.SHOTGUN)
+                self.localTeam.setSecondaryWeapon(constants.GRENADE_LAUNCHER)
                 self.localTeam.setSpecial(None)
-                self.localTeam.purchaseUnit(components.PISTOL, None)
-                self.localTeam.purchaseUnit(components.MOLOTOV_THROWER, None)
+                self.localTeam.purchaseUnit(constants.PISTOL, None)
+                self.localTeam.purchaseUnit(constants.MOLOTOV_THROWER, None)
                 self.enemyAiUnits = choice(
                     [
                         [
-                            (components.GRENADE_LAUNCHER, None), (components.SNIPER, None), (None, None)], [
-                            (components.CHAINGUN, None), (components.SHOTGUN, None), (None, None)], [
-                            (components.PISTOL, None), (components.SNIPER, None), (None, None)]])
+                            (constants.GRENADE_LAUNCHER, None), (constants.SNIPER, None), (None, None)], [
+                            (constants.CHAINGUN, None), (constants.SHOTGUN, None), (None, None)], [
+                            (constants.PISTOL, None), (constants.SNIPER, None), (None, None)]])
                 self.backend.scoreLimit = 800
             elif self.tutorialIndex == 2:
-                self.enemyAiUnits = choice([[(components.SHOTGUN,
-                                              controllers.CLOAK_SPECIAL),
-                                             (components.SNIPER,
+                self.enemyAiUnits = choice([[(constants.SHOTGUN,
+                                              constants.CLOAK_SPECIAL),
+                                             (constants.SNIPER,
                                               None),
-                                             (components.PISTOL,
+                                             (constants.PISTOL,
                                               None)],
-                                            [(components.GRENADE_LAUNCHER,
-                                              controllers.CLOAK_SPECIAL),
-                                             (components.CHAINGUN,
-                                                controllers.SHIELD_SPECIAL),
+                                            [(constants.GRENADE_LAUNCHER,
+                                              constants.CLOAK_SPECIAL),
+                                             (constants.CHAINGUN,
+                                                constants.SHIELD_SPECIAL),
                                              (None,
                                                 None)],
-                                            [(components.PISTOL,
+                                            [(constants.PISTOL,
                                               None),
-                                             (components.MOLOTOV_THROWER,
-                                                controllers.SHIELD_SPECIAL),
-                                             (components.SHOTGUN,
+                                             (constants.MOLOTOV_THROWER,
+                                                constants.SHIELD_SPECIAL),
+                                             (constants.SHOTGUN,
                                                 None)]])
                 self.backend.scoreLimit = 1200
             if self.tutorialIndex <= 2:

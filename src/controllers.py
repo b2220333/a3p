@@ -86,7 +86,7 @@ class Controller(DirectObject):
     def readSpawnPacket(aiWorld, entityGroup, iterator, entity=None):
         "Static method called by descendants. Assumes entity has already been initialized by the descendant."
         id = net.Uint32.getFrom(iterator)
-        entity.setLocal(net.netMode == net.MODE_SERVER)
+        entity.setLocal(net.netMode == constants.MODE_SERVER)
         entity.setId(id)
         return entity
 
@@ -276,7 +276,7 @@ class TeamEntityController(Controller):
                     aiWorld.world,
                     aiWorld.space,
                     controller=AIController(),
-                    local=net.netMode == net.MODE_SERVER)
+                    local=net.netMode == constants.MODE_SERVER)
                 u.setWeapons([type])
                 u.setSpecial(special)
                 u.teamIndex = purchase[3]
