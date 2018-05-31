@@ -1,10 +1,9 @@
 import socket
-import sys
 import time
 import zlib
 import ipgetter
 
-from socket import *
+from . import constants
 
 from direct.distributed.PyDatagram import PyDatagram
 
@@ -13,58 +12,6 @@ netMode = 0
 connection = None
 initialized = False
 context = None
-
-# In-game packets
-PACKET_SETUP = 0  # Load a new map
-PACKET_CONTROLLER = 1  # Controller update
-PACKET_SPAWN = 2  # Spawn an entity
-PACKET_DELETE = 3  # Delete an entity
-PACKET_ENDMATCH = 4  # Sent by the backend
-PACKET_NEWCLIENT = 5  # New client is connecting
-PACKET_REQUESTSPAWNPACKET = 6  # Client missed a spawn packet
-PACKET_DISCONNECT = 7  # Server or client disconnect
-PACKET_SERVERFULL = 8  # Server can't take any more clients
-PACKET_CHAT = 9  # Chat data
-PACKET_EMPTY = 10  # No data. Used for establishing and maintaining connections
-PACKET_CLIENTREADY = 11  # Client is done loading
-PACKET_ENTITYCHECKSUM = 12  # Packet contains the number of currently active entities
-# Client has the wrong number of active entities, so it needs a full list
-# of IDs
-PACKET_REQUESTENTITYLIST = 13
-PACKET_ENTITYLIST = 14  # Packet contains a list of active entity IDs
-
-# For communication with lobby server
-PACKET_REQUESTHOSTLIST = 15  # Client requesting the host list from the lobby server
-PACKET_HOSTLIST = 16  # Packet contains host list
-PACKET_REGISTERHOST = 17  # A host is notifying the lobby server of its existence
-# Lobby server notifying the server that a new client wishes to connect
-PACKET_NEWCLIENTNOTIFICATION = 18
-# Client notifying lobby server of its intention to connect to a host
-PACKET_CLIENTCONNECTNOTIFICATION = 19
-PACKET_CONFIRMREGISTER = 20  # Lobby server confirms host registration
-
-# Spawn types
-SPAWN_PLAYER = 0
-SPAWN_BOT = 1
-SPAWN_PHYSICSENTITY = 2
-SPAWN_GRENADE = 3
-SPAWN_SPRINGBOARD = 4
-SPAWN_GLASS = 5
-SPAWN_TEAMENTITY = 6
-SPAWN_MOLOTOV = 7
-SPAWN_POD = 8
-
-MODE_SERVER = 0
-MODE_CLIENT = 1
-
-SERVER_TICK = 0.05  # Transfer update packets 20 times per second
-
-if sys.platform == "win32":
-    timeFunction = time.clock
-else:
-    timeFunction = time.time
-
-clientLimit = 0  # Number of clients we can accept
 
 
 def init(localPort=None):
@@ -103,7 +50,7 @@ class Connection:
 
     def __init__(self):
         self.address = ("", 0)
-        self.lastPacketTime = timeFunction()
+        self.lastPacketTime = time.time()
         self.lastSentPacketTime = 0
         self.ready = False
 
@@ -112,14 +59,15 @@ class PythonNetContext(NetworkContext):
 
     def __init__(self, localPort=None):
         global netMode
-        netMode = MODE_SERVER
-        self.mode = MODE_SERVER
+        netMode = constants.MODE_SERVER
+        self.mode = constants.MODE_SERVER
         if localPort is None:
             localPort = 1337
 
         self.port = localPort
         self.publicAddress = ipgetter.myip()
-        self.socket = socket(AF_INET, SOCK_DGRAM)
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
         self.socket.setblocking(False)
         self.bindSocket(localPort)
         self.clientConnected = False
@@ -128,7 +76,7 @@ class PythonNetContext(NetworkContext):
         self.writeQueue = []
         self.hostListCallback = None
         self.disconnectCallback = None
-        self.connectionTimeout = 10.0 if netMode == MODE_SERVER else 15.0
+        self.connectionTimeout = 10.0 if netMode == constants.MODE_SERVER else 15.0
         self.clientUsername = "Unnamed"
         self.lastConnectionAttempt = 0
         self.connectionAttempts = 0
@@ -144,20 +92,20 @@ class PythonNetContext(NetworkContext):
             port = int(args[1])
 
         self.hostConnection.address = (str(ip), port)
-        self.hostConnection.lastSentPacketTime = timeFunction()
+        self.hostConnection.lastSentPacketTime = time.time()
         self.hostConnection.ready = True
         self.clientConnected = False
         self.clientUsername = username
 
     def listen(self):
         global netMode
-        netMode = MODE_SERVER
-        self.mode = MODE_SERVER
+        netMode = constants.MODE_SERVER
+        self.mode = constants.MODE_SERVER
 
     def reset(self):
         global netMode
-        netMode = MODE_SERVER  # Default MODE_SERVER
-        self.mode = MODE_SERVER
+        netMode = constants.MODE_SERVER
+        self.mode = constants.MODE_SERVER
         self.clientConnected = False
         self.activeConnections.clear()
         self.hostConnection = Connection()
@@ -181,11 +129,11 @@ class PythonNetContext(NetworkContext):
 
         data = PyDatagram()
         p = Packet()
-        p.add(Uint8(PACKET_NEWCLIENT))
+        p.add(Uint8(constants.PACKET_NEWCLIENT))
         p.add(String(username))
         p.addTo(data)
         self.sendDatagram(data, self.hostConnection.address)
-        self.hostConnection.lastSentPacketTime = timeFunction()
+        self.hostConnection.lastSentPacketTime = time.time()
 
     def serverConnect(self, clientAddress):
         if clientAddress in self.activeConnections:
@@ -193,7 +141,7 @@ class PythonNetContext(NetworkContext):
 
         data = PyDatagram()
         p = Packet()
-        p.add(Uint8(PACKET_EMPTY))
+        p.add(Uint8(constants.PACKET_EMPTY))
         p.addTo(data)
         self.sendDatagram(data, clientAddress)
 
@@ -205,7 +153,7 @@ class PythonNetContext(NetworkContext):
         if client not in self.activeConnections:
             connection = Connection()
             connection.address = client
-            connection.lastSentPacketTime = timeFunction()
+            connection.lastSentPacketTime = time.time()
             self.activeConnections[client] = connection
 
     def resetConnectionStatuses(self):
@@ -222,21 +170,21 @@ class PythonNetContext(NetworkContext):
             if data[0] == 0:  # Broadcast
                 for c in (
                         x for x in list(self.activeConnections.values()) if x.ready):
-                    c.lastSentPacketTime = timeFunction()
+                    c.lastSentPacketTime = time.time()
                     try:
                         self.socket.sendto(compressedData, c.address)
-                    except error:
+                    except socket.error:
                         pass
             elif data[0] == 1:  # Send to specific machine
                 try:
                     self.socket.sendto(compressedData, data[2])
-                except error:
+                except socket.error:
                     pass
                 if data[2] in self.activeConnections:
                     self.activeConnections[data[2]
-                                           ].lastSentPacketTime = timeFunction()
+                                           ].lastSentPacketTime = time.time()
                 elif compareAddresses(data[2], self.hostConnection.address):
-                    self.hostConnection.lastSentPacketTime = timeFunction()
+                    self.hostConnection.lastSentPacketTime = time.time()
             elif data[0] == 2:  # Broadcast, excluding one machine
                 for c in (
                     x for x in list(self.activeConnections.values()) if x.ready and not compareAddresses(
@@ -244,32 +192,32 @@ class PythonNetContext(NetworkContext):
                         data[2])):
                     try:
                         self.socket.sendto(compressedData, c.address)
-                    except error:
+                    except socket.error:
                         pass
-                    c.lastSentPacketTime = timeFunction()
+                    c.lastSentPacketTime = time.time()
         del self.writeQueue[:]
 
     def readTick(self):
-        if self.mode == MODE_SERVER:
+        if self.mode == constants.MODE_SERVER:
             loadingTimeout = self.connectionTimeout * 2
             for client in list(self.activeConnections.values()):
-                if timeFunction() - client.lastPacketTime > (
+                if time.time() - client.lastPacketTime > (
                         self.connectionTimeout if client.ready else loadingTimeout):
                     del self.activeConnections[client.address]
                     if self.disconnectCallback is not None:
                         self.disconnectCallback(client.address)
         elif self.mode == MODE_CLIENT:
             if self.clientConnected:
-                if self.disconnectCallback is not None and timeFunction(
+                if self.disconnectCallback is not None and time.time(
                 ) - self.hostConnection.lastPacketTime > self.connectionTimeout:
                     self.disconnectCallback(self.hostConnection.address)
                     self.clientConnected = False
             else:
                 if self.connectionAttempts < 10:
-                    if timeFunction() - self.lastConnectionAttempt > 0.5:
+                    if time.time() - self.lastConnectionAttempt > 0.5:
                         self.clientConnect(self.clientUsername)
                         self.connectionAttempts += 1
-                        self.lastConnectionAttempt = timeFunction()
+                        self.lastConnectionAttempt = time.time()
                 else:
                     self.connectionAttempts = 0
                     self.disconnectCallback(self.hostConnection.address)
@@ -278,18 +226,18 @@ class PythonNetContext(NetworkContext):
         while True:
             try:
                 message, address = self.socket.recvfrom(1024)
-            except error:
+            except socket.error:
                 return readQueue
             if len(message) == 0:
                 continue
             if address in self.activeConnections:
-                self.activeConnections[address].lastPacketTime = timeFunction()
+                self.activeConnections[address].lastPacketTime = time.time()
             message = zlib.decompress(message)
             iterator = PyDatagram(message)
             if iterator.getRemainingSize() < 1:
                 continue
             code = Uint8.getFrom(iterator)
-            if code == PACKET_HOSTLIST:
+            if code == constants.PACKET_HOSTLIST:
                 numHosts = Uint16.getFrom(iterator)
                 hosts = []
                 for _ in range(numHosts):
@@ -304,29 +252,29 @@ class PythonNetContext(NetworkContext):
                 #engine.log.debug("Received " + str(numHosts) + " hosts from lobby server.")
                 if self.hostListCallback is not None:
                     self.hostListCallback(hosts)
-            if self.mode == MODE_SERVER:
-                if code == PACKET_NEWCLIENTNOTIFICATION:
+            if self.mode == constants.MODE_SERVER:
+                if code == constants.PACKET_NEWCLIENTNOTIFICATION:
                     ip = String.getFrom(iterator)
                     port = Uint16.getFrom(iterator)
                     clientAddress = (ip, port)
                     self.connectionAttempts = 0
                     #engine.log.info("Received notification from lobby server of new client " + ip + ":" + str(port))
                     self.serverConnect(clientAddress)
-                elif code == PACKET_DISCONNECT:
+                elif code == constants.PACKET_DISCONNECT:
                     if address in self.activeConnections:
                         del self.activeConnections[address]
-                elif code == PACKET_CLIENTREADY:
+                elif code == constants.PACKET_CLIENTREADY:
                     if address in self.activeConnections:
                         self.activeConnections[address].ready = True
             elif self.mode == MODE_CLIENT and address == self.hostConnection.address:
-                self.hostConnection.lastPacketTime = timeFunction()
+                self.hostConnection.lastPacketTime = time.time()
             readQueue.append((message, address))
         return readQueue
 
     def broadcastDatagram(self, datagram):
         """For the server, broadcasts the given data packet to all connected clients.
         For clients, sends the datagram to the server."""
-        if netMode == MODE_SERVER:
+        if netMode == constants.MODE_SERVER:
             self.writeQueue.append((0, datagram, None))  # Send to all clients
         else:
             self.writeQueue.append(
@@ -357,7 +305,7 @@ class PythonNetContext(NetworkContext):
 
     def delete(self):
         p = Packet()
-        p.add(Uint8(PACKET_DISCONNECT))
+        p.add(Uint8(constants.PACKET_DISCONNECT))
         data = PyDatagram()
         p.addTo(data)
         self.broadcastDatagram(data)

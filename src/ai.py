@@ -5,14 +5,11 @@ from random import choice, randint, random
 
 from . import engine
 from . import entities
-from . import net
-from . import components
-from . import controllers
-
-from direct.showbase.DirectObject import DirectObject
 
 from panda3d.core import *
 from panda3d.ode import *
+
+from direct.showbase.DirectObject import DirectObject
 
 
 def init():

@@ -10,9 +10,11 @@ from . import components
 from . import net2
 from . import particles
 from . import ai
+from . import constants
+
+from panda3d.core import *
 
 from direct.showbase.DirectObject import DirectObject
-from panda3d.core import *
 
 types = None
 specialTypes = None
@@ -24,21 +26,21 @@ def init():
     # When determining the controller's type, readSpawnPacket stops at the
     # first match.
     types = {
-        net.SPAWN_BOT: AIController,
-        net.SPAWN_PLAYER: PlayerController,
-        net.SPAWN_TEAMENTITY: TeamEntityController,
-        net.SPAWN_PHYSICSENTITY: PhysicsEntityController,
-        net.SPAWN_GRENADE: GrenadeController,
-        net.SPAWN_GLASS: GlassController,
-        net.SPAWN_MOLOTOV: MolotovController,
-        net.SPAWN_POD: DropPodController}
+        constants.SPAWN_BOT: AIController,
+        constants.SPAWN_PLAYER: PlayerController,
+        constants.SPAWN_TEAMENTITY: TeamEntityController,
+        constants.SPAWN_PHYSICSENTITY: PhysicsEntityController,
+        constants.SPAWN_GRENADE: GrenadeController,
+        constants.SPAWN_GLASS: GlassController,
+        constants.SPAWN_MOLOTOV: MolotovController,
+        constants.SPAWN_POD: DropPodController}
 
     specialTypes = {
-        KAMIKAZE_SPECIAL: KamikazeSpecial,
-        SHIELD_SPECIAL: ShieldSpecial,
-        CLOAK_SPECIAL: CloakSpecial,
-        AWESOME_SPECIAL: AwesomeSpecial,
-        ROCKET_SPECIAL: RocketSpecial}
+        constants.KAMIKAZE_SPECIAL: KamikazeSpecial,
+        constants.SHIELD_SPECIAL: ShieldSpecial,
+        constants.CLOAK_SPECIAL: CloakSpecial,
+        constants.AWESOME_SPECIAL: AwesomeSpecial,
+        constants.ROCKET_SPECIAL: RocketSpecial}
 
 
 class Controller(DirectObject):
@@ -70,7 +72,7 @@ class Controller(DirectObject):
     def buildSpawnPacket(self):
         """Builds a packet instructing client(s) to spawn the correct ObjectEntity with the correct ID."""
         p = net.Packet()
-        p.add(net.Uint8(net.PACKET_SPAWN))
+        p.add(net.Uint8(constants.PACKET_SPAWN))
         controllerType = 0
         for type in list(types.items()):
             if isinstance(self, type[1]):
@@ -91,7 +93,7 @@ class Controller(DirectObject):
     def buildDeletePacket(self, killed=False):
         """Builds a packet instructing clients to delete the Entity."""
         p = net.Packet()
-        p.add(net.Uint8(net.PACKET_DELETE))
+        p.add(net.Uint8(constants.PACKET_DELETE))
         p.add(net.Uint32(self.entity.getId()))
         p.add(net.Boolean(killed))
         return p
@@ -111,7 +113,7 @@ class Controller(DirectObject):
                 del self.criticalPackets[:]
             else:
                 self.criticalUpdate = False
-            p.add(net.Uint8(net.PACKET_CONTROLLER))
+            p.add(net.Uint8(constants.PACKET_CONTROLLER))
             p.add(net.Uint8(self.entity.getId()))
         return p
 
@@ -1831,9 +1833,6 @@ class Special(DirectObject):
         pass
 
 
-KAMIKAZE_SPECIAL = 128
-
-
 class KamikazeSpecial(Special):
     def __init__(self, actor):
         Special.__init__(self, actor)
@@ -1872,9 +1871,6 @@ class KamikazeSpecial(Special):
 
     def delete(self):
         self.specialSound.delete()
-
-
-SHIELD_SPECIAL = 129
 
 
 class ShieldSpecial(Special):
@@ -1916,9 +1912,6 @@ class ShieldSpecial(Special):
                     player.special, ShieldSpecial))
 
 
-CLOAK_SPECIAL = 130
-
-
 class CloakSpecial(Special):
     def __init__(self, actor):
         Special.__init__(self, actor)
@@ -1951,9 +1944,6 @@ class CloakSpecial(Special):
         if self.actor.getTeam().getPlayer() is not None:
             self.actor.getTeam().getPlayer().setCloaked(False or isinstance(
                 self.actor.getTeam().getPlayer().special, CloakSpecial))
-
-
-AWESOME_SPECIAL = 131
 
 
 class AwesomeSpecial(Special):
@@ -1990,9 +1980,6 @@ class AwesomeSpecial(Special):
         weapon.fireTime = self.originalFireTimes[weapon][0] / multiplier
         if isinstance(weapon, components.Gun):
             weapon.reloadTime = self.originalFireTimes[weapon][1] / multiplier
-
-
-ROCKET_SPECIAL = 132
 
 
 class RocketSpecial(Special):

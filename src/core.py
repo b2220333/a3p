@@ -14,37 +14,35 @@ from . import audio
 from . import online
 from . import net2
 from . import particles
+from . import constants
+
+from panda3d.core import *
 
 from direct.distributed.PyDatagram import PyDatagram
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
+from direct.showbase.DirectObject import DirectObject
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.gui.OnscreenText import OnscreenText
-from direct.showbase.DirectObject import DirectObject
-from panda3d.core import *
 
-# Game type constants
-DEATHMATCH = 0
-SURVIVAL = 1
 
 firstBoot = True
 
 
-class GameInfo(
-        DirectObject):  # Data structure containing game setup information
+class GameInfo(DirectObject):
 
     def __init__(self):
         self.mapFile = ""
         self.teamId = 0
         self.scoreLimit = 0
         self.enableRespawn = True
-        self.type = DEATHMATCH
+        self.type = constants.DEATHMATCH
 
 
 class Backend(DirectObject):
 
     def __init__(self, username):
         engine.log.info("Initializing game.")
-        self.type = DEATHMATCH
+        self.type = constants.DEATHMATCH
         self.active = True
         self.map = engine.Map()
         self.aiWorld = ai.World()
@@ -135,7 +133,7 @@ class ServerBackend(Backend):
 
     def __init__(self, registerHost=True, username="Unnamed"):
         Backend.__init__(self, username)
-        self.type = DEATHMATCH
+        self.type = constants.DEATHMATCH
         net.context.listen()
         engine.log.info("Listening on port " + str(net.context.port))
         self.lastRegister = -60
@@ -331,7 +329,7 @@ class ServerBackend(Backend):
     def delete(self):
         engine.log.info("Sending disconnect notifications...")
         p = net.Packet()
-        p.add(net.Uint8(net.PACKET_DISCONNECT))
+        p.add(net.Uint8(constants.PACKET_DISCONNECT))
         net.context.broadcast(p)
         Backend.delete(self)
 
@@ -379,7 +377,7 @@ class SurvivalBackend(ServerBackend):
         ServerBackend.__init__(self, registerHost, username)
         # List of all valid maps for this gametype
         self.maps = [x[1] for x in engine.maps if x[0] == "zs"]
-        self.type = SURVIVAL
+        self.type = constants.SURVIVAL
         self.enableRespawn = False
         self.zombiesSpawned = False
         self.roundNumber = 0
@@ -472,7 +470,7 @@ class ClientBackend(Backend):
 
     def __init__(self, serverAddress, username="Unnamed"):
         Backend.__init__(self, username)
-        self.type = DEATHMATCH
+        self.type = constants.DEATHMATCH
         engine.log.info("Connecting to " + serverAddress)
         net.context.connectToServer(serverAddress, username)
         self.connected = True
@@ -522,7 +520,7 @@ class ClientBackend(Backend):
         if self.connected:
             engine.log.info("Disconnecting...")
             p = net.Packet()
-            p.add(net.Uint8(net.PACKET_DISCONNECT))
+            p.add(net.Uint8(constants.PACKET_DISCONNECT))
             net.context.broadcast(p)
             self.connected = False
         Backend.delete(self)
@@ -619,8 +617,9 @@ class Game(DirectObject):
         self.backend.scoreLimit = info.scoreLimit
         self.backend.enableRespawn = info.enableRespawn
         self.backend.type = info.type
-        if self.backend.type == SURVIVAL:
+        if self.backend.type == constants.SURVIVAL:
             self.unitSelector.disableUnits()
+
         self.unitSelector.show()
         net.context.clientConnected = True
 
@@ -1308,24 +1307,3 @@ class JunkBelt:
 
         for model in self.models:
             model.removeNode()
-
-
-def _urlEncode(s):
-    """I don't want to depend on urllib."""
-    HexCharacters = "0123456789abcdef"
-    r = ""
-    for c in s:
-        if c in HexCharacters:
-            o = ord(c)
-            r += "%" + _cleanCharHex(c)
-        else:
-            r += c
-    return r
-
-
-def _cleanCharHex(c):
-    HexCharacters = "0123456789abcdef"
-    o = ord(c)
-    r = HexCharacters[o / 16]
-    r += HexCharacters[o % 16]
-    return r

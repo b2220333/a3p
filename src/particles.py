@@ -1,6 +1,7 @@
 from random import random, uniform
 
 from . import engine
+
 from panda3d.core import *
 
 particleGroups = []

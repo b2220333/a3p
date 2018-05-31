@@ -6,12 +6,14 @@ from . import entities
 from . import audio
 from . import net
 from . import online
+from . import constants
 
+from panda3d.core import *
+
+from direct.showbase.DirectObject import DirectObject
 from direct.gui.DirectGui import *
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.gui.OnscreenText import OnscreenText
-from direct.showbase.DirectObject import DirectObject
-from panda3d.core import *
 
 
 class GameUI(DirectObject):
@@ -139,7 +141,7 @@ class GameUI(DirectObject):
         self.lastMoneyChange = 0
 
         self.specialBar = StatusBar(
-            range=entities.SPECIAL_DELAY, pos=(
+            range=constants.SPECIAL_DELAY, pos=(
                 engine.aspectRatio - 0.02, 0, self.verticalOffset + 0.05), hpr=(
                 0, 0, -90), width=0.05, height=0.25)
         color = Vec3(0.6, 0.6, 0.6)
@@ -647,47 +649,47 @@ class ChatLog(DirectObject):
 
 class UnitSelectorScreen(DirectObject):
     types = {
-        components.MOLOTOV_THROWER: (
+        constants.MOLOTOV_THROWER: (
             "images/molotov-icon.png",
             "Molotov",
             "Very slow rate of fire. Catches nearby enemies on fire, causing lethal damage over time. Good for weakening enemies before switching weapons."),
-        components.GRENADE_LAUNCHER: (
+        constants.GRENADE_LAUNCHER: (
             "images/grenade-icon.png",
             "Grenade",
             "Very slow rate of fire. Blasts surrounding units and objects away upon detonation. Good area damage."),
-        components.SNIPER: (
+        constants.SNIPER: (
             "images/sniper-icon.png",
             "Sniper",
             "Medium rate of fire. 2X zoom. Infinite range. Capable of one-shot kills. Holds four bullets."),
-        components.PISTOL: (
+        constants.PISTOL: (
             "images/pistol-icon.png",
             "Pistol",
             "High rate of fire. Medium range. Holds twelve bullets. Capable of pinning enemies to walls."),
-        components.SHOTGUN: (
+        constants.SHOTGUN: (
             "images/shotgun-icon.png",
             "Shotgun",
             "Slow rate of fire. Effective at close range. Holds eight shells."),
-        components.CHAINGUN: (
+        constants.CHAINGUN: (
             "images/chaingun-icon.png",
             "Chaingun",
             "High rate of fire. Inaccurate and weak at long ranges. Cheap but less effective than most weapons."),
-        controllers.ROCKET_SPECIAL: (
+        constants.ROCKET_SPECIAL: (
             "images/rocket-icon.png",
             "Rocket",
             "Upon activation, launches one unit toward the targeted enemy, causing a devastating explosion upon impact."),
-        controllers.AWESOME_SPECIAL: (
+        constants.AWESOME_SPECIAL: (
             "images/awesome-icon.png",
             "Awesome",
             "Renders one unit invincible for ten seconds upon activation. Also drastically increases movement, firing, and reload speed."),
-        controllers.CLOAK_SPECIAL: (
+        constants.CLOAK_SPECIAL: (
             "images/cloak-icon.png",
             "Cloak",
             "Permanently cloaks one unit from enemy AI units. When activated, cloaks the whole squad from AI units for ten seconds."),
-        controllers.SHIELD_SPECIAL: (
+        constants.SHIELD_SPECIAL: (
             "images/shield-icon.png",
             "Shield",
             "Permanently decreases ranged damage for one unit by 50%. When activated, shields the whole squad for ten seconds. Useless against fire, grenades, and melee weapons."),
-        controllers.KAMIKAZE_SPECIAL: (
+        constants.KAMIKAZE_SPECIAL: (
             "images/kamikaze-icon.png",
             "Kamikaze",
             "Unleashes a powerful suicidal explosion after a three second delay upon activation."),
@@ -695,18 +697,19 @@ class UnitSelectorScreen(DirectObject):
             "images/special-slot.png",
             "None",
             "")}
+
     codes = [
-        components.MOLOTOV_THROWER,
-        components.GRENADE_LAUNCHER,
-        components.SNIPER,
-        components.PISTOL,
-        components.SHOTGUN,
-        components.CHAINGUN,
-        controllers.AWESOME_SPECIAL,
-        controllers.ROCKET_SPECIAL,
-        controllers.CLOAK_SPECIAL,
-        controllers.SHIELD_SPECIAL,
-        controllers.KAMIKAZE_SPECIAL]
+        constants.MOLOTOV_THROWER,
+        constants.GRENADE_LAUNCHER,
+        constants.SNIPER,
+        constants.PISTOL,
+        constants.SHOTGUN,
+        constants.CHAINGUN,
+        constants.AWESOME_SPECIAL,
+        constants.ROCKET_SPECIAL,
+        constants.CLOAK_SPECIAL,
+        constants.SHIELD_SPECIAL,
+        constants.KAMIKAZE_SPECIAL]
 
     def __init__(self, startCallback):
         self.startCallback = startCallback

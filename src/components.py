@@ -7,10 +7,11 @@ from . import audio
 from . import net
 from . import net2
 from . import particles
-from . import controllers
+from . import constants
+
+from panda3d.core import *
 
 from direct.showbase.DirectObject import DirectObject
-from panda3d.core import *
 
 
 class Component(DirectObject):
@@ -286,9 +287,6 @@ class Gun(Weapon):
         Weapon.delete(self)
 
 
-CHAINGUN = 254
-
-
 class ChainGun(Gun):
     def __init__(self, actor, id):
         Gun.__init__(self, actor, 10, "models/basicdroid/chaingun", id)
@@ -409,9 +407,6 @@ class ChainGun(Gun):
         Gun.delete(self)
 
 
-SHOTGUN = 253
-
-
 class Shotgun(Gun):
     def __init__(self, actor, id):
         Gun.__init__(self, actor, 150, "models/basicdroid/shotgun", id)
@@ -520,9 +515,6 @@ class Shotgun(Gun):
         self.tracer.delete()
         self.light.remove()
         Gun.delete(self)
-
-
-SNIPER = 252
 
 
 class SniperRifle(Gun):
@@ -638,9 +630,6 @@ class SniperRifle(Gun):
         self.tracer.delete()
         self.light.remove()
         Gun.delete(self)
-
-
-MELEE_CLAW = 251
 
 
 class MeleeClaw(Weapon):
@@ -774,9 +763,6 @@ class MeleeClaw(Weapon):
         Weapon.hide(self)
 
 
-GRENADE_LAUNCHER = 249
-
-
 class GrenadeLauncher(Weapon):
 
     def __init__(self, actor, id):
@@ -823,9 +809,6 @@ class GrenadeLauncher(Weapon):
         Component.delete(self)
 
 
-MOLOTOV_THROWER = 247
-
-
 class MolotovThrower(Weapon):
     def __init__(self, actor, id):
         Weapon.__init__(self, actor, id)
@@ -868,9 +851,6 @@ class MolotovThrower(Weapon):
     def delete(self):
         self.grenadeLaunchSound.delete()
         Component.delete(self)
-
-
-PISTOL = 248
 
 
 class Pistol(Gun):
@@ -1025,10 +1005,10 @@ class Pistol(Gun):
 
 
 types = {
-    CHAINGUN: ChainGun,
-    PISTOL: Pistol,
-    SHOTGUN: Shotgun,
-    SNIPER: SniperRifle,
-    MELEE_CLAW: MeleeClaw,
-    GRENADE_LAUNCHER: GrenadeLauncher,
-    MOLOTOV_THROWER: MolotovThrower}
+    constants.CHAINGUN: ChainGun,
+    constants.PISTOL: Pistol,
+    constants.SHOTGUN: Shotgun,
+    constants.SNIPER: SniperRifle,
+    constants.MELEE_CLAW: MeleeClaw,
+    constants.GRENADE_LAUNCHER: GrenadeLauncher,
+    constants.MOLOTOV_THROWER: MolotovThrower}

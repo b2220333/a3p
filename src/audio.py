@@ -3,6 +3,7 @@ from random import choice, randint, random, uniform
 from . import engine
 
 from panda3d.core import *
+
 from direct.showbase.DirectObject import DirectObject
 from direct.showbase.Audio3DManager import Audio3DManager
 

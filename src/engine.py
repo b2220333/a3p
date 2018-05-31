@@ -12,15 +12,16 @@ from . import entities
 from . import net
 from . import particles
 from . import ui
+from . import constants
+
+from panda3d.core import *
+from panda3d.ode import *
 
 from direct.actor.Actor import Actor
 from direct.directnotify.DirectNotify import DirectNotify
 from direct.filter.CommonFilters import CommonFilters
 from direct.showbase.DirectObject import DirectObject
 from direct.stdpy.file import *
-
-from panda3d.core import *
-from panda3d.ode import *
 
 clock = None  # Global clock
 renderLit = None  # Parent nodepath for all objects that are affected by lights
@@ -553,7 +554,7 @@ class Map(DirectObject):
                 self.worldSize = float(tokens[1])
             elif tokens[0] == "teams":
                 numTeams = sum([int(token) for token in tokens[1:]])
-                if net.netMode == net.MODE_SERVER:
+                if net.netMode == constants.MODE_SERVER:
                     if len(tokens) > 2:  # 2v2
                         colors = [
                             Vec4(
@@ -594,7 +595,7 @@ class Map(DirectObject):
             elif tokens[0] == "survival":
                 self.isSurvival = True
                 numTeams = 4
-                if net.netMode == net.MODE_SERVER:
+                if net.netMode == constants.MODE_SERVER:
                     colors = [
                         Vec4(
                             0.4, 0.0, 0.0, 1), Vec4(
@@ -612,7 +613,7 @@ class Map(DirectObject):
                         for team2 in entityGroup.teams:
                             team.addAlly(team2.getId())
             elif tokens[0] == "glass":
-                if net.netMode == net.MODE_SERVER:
+                if net.netMode == constants.MODE_SERVER:
                     # Glass pane
                     glass = entities.Glass(aiWorld.world, aiWorld.space)
                     glass.initGlass(aiWorld.world, aiWorld.space,
@@ -808,7 +809,7 @@ class Map(DirectObject):
                                                               normal.getZ()))))
                 aiWorld.docks.append(dock)
             elif tokens[0] == "physicsentity":
-                if net.netMode == net.MODE_SERVER:
+                if net.netMode == constants.MODE_SERVER:
                     file = tokens[1] + ".txt"
                     data = readPhysicsEntityFile(file)
                     parts = tokens[1].rpartition("/")

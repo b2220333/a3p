@@ -7,11 +7,12 @@ from . import controllers
 from . import audio
 from . import net
 from . import particles
-
-from direct.showbase.DirectObject import DirectObject
+from . import constants
 
 from panda3d.core import *
 from panda3d.ode import *
+
+from direct.showbase.DirectObject import DirectObject
 
 
 class EntityGroup(DirectObject):
@@ -228,7 +229,7 @@ class EntityGroup(DirectObject):
 class Entity(DirectObject):
     """Entity is a generic data object that has a controller."""
 
-    def __init__(self, controller, local=net.netMode == net.MODE_SERVER):
+    def __init__(self, controller, local=net.netMode == constants.MODE_SERVER):
         self.active = True
         self.id = -1
         self.isLocal = local
@@ -280,7 +281,7 @@ class ObjectEntity(Entity):
             self,
             filename,
             controller,
-            local=net.netMode == net.MODE_SERVER):
+            local=net.netMode == constants.MODE_SERVER):
         Entity.__init__(self, controller, local)
         self.node = None
         self.filename = ""
@@ -367,7 +368,7 @@ class ObjectEntity(Entity):
 
 
 class DropPod(ObjectEntity):
-    def __init__(self, world, space, local=net.netMode == net.MODE_SERVER):
+    def __init__(self, world, space, local=net.netMode == constants.MODE_SERVER):
         ObjectEntity.__init__(self, "models/pod/pod",
                               controllers.DropPodController(), True)
         self.collisionNode = CollisionNode("cnode")
@@ -683,25 +684,23 @@ class PhysicsEntity(ObjectEntity):
         del self.geometries[:]
 
 
-SPECIAL_DELAY = 18
-
-
 class TeamEntity(Entity):
     """A team is used to purchase new units. Each team has a controller and a color associated with it.
     The team also tracks which actors are on the team."""
     costs = {
         None: 0,
-        components.SHOTGUN: 250,
-        components.CHAINGUN: 150,
-        components.SNIPER: 400,
-        components.GRENADE_LAUNCHER: 500,
-        components.PISTOL: 300,
-        components.MOLOTOV_THROWER: 550,
-        controllers.CLOAK_SPECIAL: 450,
-        controllers.SHIELD_SPECIAL: 300,
-        controllers.AWESOME_SPECIAL: 500,
-        controllers.KAMIKAZE_SPECIAL: 250,
-        controllers.ROCKET_SPECIAL: 600}
+        constants.SHOTGUN: 250,
+        constants.CHAINGUN: 150,
+        constants.SNIPER: 400,
+        constants.GRENADE_LAUNCHER: 500,
+        constants.PISTOL: 300,
+        constants.MOLOTOV_THROWER: 550,
+        constants.CLOAK_SPECIAL: 450,
+        constants.SHIELD_SPECIAL: 300,
+        constants.AWESOME_SPECIAL: 500,
+        constants.KAMIKAZE_SPECIAL: 250,
+        constants.ROCKET_SPECIAL: 600}
+
     defaultTeam = None
 
     def __init__(self):
@@ -714,7 +713,7 @@ class TeamEntity(Entity):
         self.player = None
         self.matchScore = 0
         self.purchasedTypes = []
-        self.lastSpecialActivated = -SPECIAL_DELAY
+        self.lastSpecialActivated = -constants.SPECIAL_DELAY
         self.allies = []
         self.primaryWeapon = 6
         self.secondaryWeapon = 1
@@ -749,7 +748,7 @@ class TeamEntity(Entity):
         if self.isSurvivors:
             self.money += 200
         self.clearUnits()
-        self.lastSpecialActivated = -SPECIAL_DELAY
+        self.lastSpecialActivated = -constants.SPECIAL_DELAY
         self.score = 0
         self.player = None
         del self.actors[:]
@@ -773,7 +772,7 @@ class TeamEntity(Entity):
         return self.username
 
     def specialAvailable(self):
-        return engine.clock.time - self.lastSpecialActivated >= SPECIAL_DELAY
+        return engine.clock.time - self.lastSpecialActivated >= constants.SPECIAL_DELAY
 
     def enableSpecial(self):
         self.lastSpecialActivated = engine.clock.time
@@ -847,7 +846,7 @@ class Actor(ObjectEntity):
     Actors can contain components, such as guns, engines, shields, etc."""
 
     def __init__(self, world, space, filename, controller,
-                 local=net.netMode == net.MODE_SERVER):
+                 local=net.netMode == constants.MODE_SERVER):
         self.team = None
         self.teamId = 0
         self.health = 100
@@ -942,7 +941,7 @@ class BasicDroid(Actor):
     "BasicDroid is the base for basically all the units in the game. Basically."
 
     def __init__(self, world, space, controller,
-                 local=net.netMode == net.MODE_SERVER):
+                 local=net.netMode == constants.MODE_SERVER):
         Actor.__init__(self, world, space,
                        "models/basicdroid/BasicDroid", controller, local)
         self.radius = 1
@@ -1048,7 +1047,7 @@ class BasicDroid(Actor):
 
 class PlayerDroid(BasicDroid):
     def __init__(self, world, space, controller,
-                 local=net.netMode == net.MODE_SERVER):
+                 local=net.netMode == constants.MODE_SERVER):
         BasicDroid.__init__(self, world, space, controller, local)
         self.username = "Unnamed"
         self.scoreMultiplier = 2.0

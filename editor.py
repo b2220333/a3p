@@ -38,7 +38,7 @@ base.disableAllAudio()
 editor = controllers.EditController(aiWorld, entityGroup, map, ui)
 
 
-def gameTask(task):
+def mainloop(task):
     global aiWorld
     global entityGroup
     global map
@@ -54,6 +54,6 @@ def gameTask(task):
     return task.cont
 
 
-taskMgr.add(gameTask, "Game Task")
-
-run()
+if __name__ == '__main__':
+    taskMgr.add(mainloop, "mainloop")
+    base.run()
