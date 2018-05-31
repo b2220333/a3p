@@ -22,7 +22,7 @@ aux-display p3tinydisplay
 default-model-extension .egg
 
 # Audio:
-audio-library-name none
+audio-library-name p3fmod_audio
 audio-output-rate 44100
 audio-preload-threshold 1024
 
