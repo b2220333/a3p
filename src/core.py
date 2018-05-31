@@ -217,7 +217,7 @@ class ServerBackend(Backend):
             self.gameOver = True
             self.gameOverTime = engine.clock.time
         p = net.Packet()
-        p.add(net.Uint8(net.PACKET_ENDMATCH))
+        p.add(net.Uint8(constants.PACKET_ENDMATCH))
         p.add(net.Boolean(self.gameOver))
         p.add(net.Uint8(winningTeam.getId()))
         engine.log.info("Broadcasted match end packet.")
@@ -284,7 +284,7 @@ class ServerBackend(Backend):
                     net.addressToString(client) +
                     ") refused. Server full.")
                 p = net.Packet()
-                p.add(net.Uint8(net.PACKET_SERVERFULL))
+                p.add(net.Uint8(constants.PACKET_SERVERFULL))
                 net.context.send(p, client)
         else:
             self.sendSetupPackets(client)
@@ -297,7 +297,7 @@ class ServerBackend(Backend):
 
     def makeSetupPacket(self, client):
         p = net.Packet()
-        p.add(net.Uint8(net.PACKET_SETUP))
+        p.add(net.Uint8(constants.PACKET_SETUP))
         p.add(net.Uint8(
             self.entityGroup.teams[self.clients.index(client)].getId()))
         p.add(net.String(self.map.name))
@@ -382,32 +382,32 @@ class SurvivalBackend(ServerBackend):
         self.zombiesSpawned = False
         self.roundNumber = 0
         self.zombieLoadouts = [
-            (components.SHOTGUN,
+            (constants.SHOTGUN,
              None),
-            (components.CHAINGUN,
+            (constants.CHAINGUN,
              None),
-            (components.PISTOL,
+            (constants.PISTOL,
              None),
-            (components.GRENADE_LAUNCHER,
+            (constants.GRENADE_LAUNCHER,
              None),
-            (components.CHAINGUN,
-             controllers.SHIELD_SPECIAL),
-            (components.SNIPER,
+            (constants.CHAINGUN,
+             constants.SHIELD_SPECIAL),
+            (constants.SNIPER,
              None),
-            (components.SHOTGUN,
-             controllers.CLOAK_SPECIAL),
-            (components.PISTOL,
-             controllers.SHIELD_SPECIAL),
-            (components.GRENADE_LAUNCHER,
-             controllers.SHIELD_SPECIAL),
-            (components.SNIPER,
-             controllers.CLOAK_SPECIAL),
-            (components.MOLOTOV_THROWER,
-             controllers.CLOAK_SPECIAL),
-            (components.GRENADE_LAUNCHER,
-             controllers.SHIELD_SPECIAL),
-            (components.SNIPER,
-             controllers.SHIELD_SPECIAL)]
+            (constants.SHOTGUN,
+             constants.CLOAK_SPECIAL),
+            (constants.PISTOL,
+             constants.SHIELD_SPECIAL),
+            (constants.GRENADE_LAUNCHER,
+             constants.SHIELD_SPECIAL),
+            (constants.SNIPER,
+             constants.CLOAK_SPECIAL),
+            (constants.MOLOTOV_THROWER,
+             constants.CLOAK_SPECIAL),
+            (constants.GRENADE_LAUNCHER,
+             constants.SHIELD_SPECIAL),
+            (constants.SNIPER,
+             constants.SHIELD_SPECIAL)]
         self.zombieCounts = [4, 5, 5, 6, 6, 6, 7, 9, 9, 9, 9, 9, 9]
         self.matchLimit = 100000
         self.zombieSpawnTime = 0
@@ -492,7 +492,7 @@ class ClientBackend(Backend):
     def loadMap(self, mapFile):
         Backend.loadMap(self, mapFile)
         p = net.Packet()
-        p.add(net.Uint8(net.PACKET_CLIENTREADY))
+        p.add(net.Uint8(constants.PACKET_CLIENTREADY))
         net.context.broadcast(p)
 
     def endMatchCallback(self, iterator):
