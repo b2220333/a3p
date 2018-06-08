@@ -1,7 +1,4 @@
-import os
-import io
 import sys
-import zlib
 
 import src.audio as audio
 import src.core as core
