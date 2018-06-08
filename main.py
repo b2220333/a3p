@@ -23,9 +23,7 @@ try:
 except BaseException:
     sys.argv = [sys.argv[0], "-w"]
 
-ShowBase()
-base.makeDefaultPipe()
-
+base = ShowBase()
 winSize = ConfigVariableInt("win-size")
 fullscreen = ConfigVariableBool("fullscreen")
 
