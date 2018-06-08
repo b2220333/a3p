@@ -17,19 +17,6 @@ from panda3d.core import *
 
 if __debug__:
     loadPrcFile("config/config.prc")
-else:
-    if not os.path.exists('config.pre'):
-        raise RuntimeError('Failed to file config file!')
-
-    configData = io.StringIO(zlib.decompress(open('config.pre').read()))
-
-    for line in configData.readlines():
-        if not line or line == '\n':
-            continue
-
-        loadPrcFileData('config', line)
-
-    configData.close()
 
 try:
     __file__
