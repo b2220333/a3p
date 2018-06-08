@@ -1,6 +1,4 @@
-import math
 import sys
-from random import randint, random, uniform
 
 import src.ai as ai
 import src.audio as audio
@@ -10,6 +8,7 @@ import src.entities as entities
 import src.net as net
 import src.net2 as net2
 import src.ui as ui
+import src.constants as constants
 
 from direct.directbase import DirectStart
 from panda3d.core import *
@@ -26,7 +25,7 @@ base.setBackgroundColor(0, 0, 0)
 filename = sys.argv[1]
 
 engine.init()
-net.init(net.MODE_SERVER)
+net.init(constants.MODE_SERVER)
 aiWorld = ai.World()
 netManager = net2.NetManager()
 entityGroup = entities.EntityGroup(netManager)
