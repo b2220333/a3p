@@ -228,14 +228,22 @@ class PythonNetContext(NetworkContext):
                 message, address = self.socket.recvfrom(1024)
             except socket.error:
                 return readQueue
-            if len(message) == 0:
+            
+            if not message:
                 continue
+            
             if address in self.activeConnections:
                 self.activeConnections[address].lastPacketTime = time.time()
-            message = zlib.decompress(message)
-            iterator = PyDatagram(message)
-            if iterator.getRemainingSize() < 1:
+            
+            try:
+                message = zlib.decompress(message)
+            except zlib.error:
                 continue
+            
+            iterator = PyDatagram(message)
+            if not iterator.getRemainingSize():
+                continue
+            
             code = Uint8.getFrom(iterator)
             if code == constants.PACKET_HOSTLIST:
                 numHosts = Uint16.getFrom(iterator)
